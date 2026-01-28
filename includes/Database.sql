@@ -24,11 +24,9 @@ CREATE TABLE students (
     course VARCHAR(150) NOT NULL,
     year_of_study INT NOT NULL,
     learning_preference ENUM(
-        'visual',
-        'auditory',
-        'reading_writing',
-        'kinaesthetic',
-        'mixed'
+        'Videos',
+        'In person sessions',
+        'Quizzes',
     ) NOT NULL,
     bio TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
