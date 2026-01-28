@@ -1,5 +1,5 @@
-CREATE DATABASE mentor_match;
-USE mentor_match;
+CREATE DATABASE mentormatch;
+USE mentormatch;
 
 -- =======================
 -- USERS
@@ -26,7 +26,7 @@ CREATE TABLE students (
     learning_preference ENUM(
         'Videos',
         'In person sessions',
-        'Quizzes',
+        'Quizzes'
     ) NOT NULL,
     bio TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
