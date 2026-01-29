@@ -1,0 +1,24 @@
+:root{ --accent:#3b82f6; --muted:#6b7280; --bg:#f8fafc; --card:#ffffff; }
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial; background:var(--bg); color:#111827}
+.container{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:100%;max-width:480px;background:var(--card);border-radius:14px;padding:20px 18px;box-shadow:0 6px 18px rgba(15,23,42,0.08);}
+.logo{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.logo .brand{font-weight:700;font-size:1.1rem}
+h1{font-size:1.25rem;margin:6px 0 14px}
+p.lead{color:var(--muted);margin:0 0 18px;font-size:0.95rem}
+form{display:grid;gap:12px}
+label{font-size:0.85rem;color:var(--muted);display:block;margin-bottom:6px}
+.input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid #e6e9ef;font-size:1rem}
+.row{display:flex;gap:8px}
+.row .input{flex:1}
+.roles{display:flex;gap:10px}
+.role{flex:1;padding:10px;border-radius:10px;border:1px solid #e6e9ef;text-align:center;font-weight:600;background:#fff;cursor:pointer}
+.role input{display:none}
+.role.selected{border-color:var(--accent);box-shadow:0 4px 14px rgba(59,130,246,0.12);}
+.btn{width:100%;padding:12px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:700;font-size:1rem;cursor:pointer}
+.secondary{background:transparent;border:1px solid #e6e9ef;color:var(--muted)}
+.small{font-size:0.85rem;color:var(--muted);text-align:center}
+.link{color:var(--accent);text-decoration:none;font-weight:600}
+.errors{background:#fee2e2;color:#991b1b;padding:10px;border-radius:8px;font-size:0.9rem}
+@media (min-width:520px){ .card{padding:28px} h1{font-size:1.4rem} }
