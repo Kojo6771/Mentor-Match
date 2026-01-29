@@ -32,8 +32,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['phone'] = $phone;
         $_SESSION['role'] = $role;
 
-        header("Location: ./profile.php");
-        exit;
+        if ($role === 'mentor') {
+            header("Location: ./mentor_profile_setup.php");
+            exit;
+        }
+        
+        if ($role === 'student') {
+            header("Location: ./student_profile_setup.php");
+            exit;
+        }
+
     } catch (PDOException $e) {
         echo "An error occurred, please try again later: " . $e->getMessage();
         exit;
