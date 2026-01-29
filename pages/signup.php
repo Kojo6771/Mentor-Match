@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
+    $role = $_POST['role'] === 'mentor' ? 'mentor' : 'student';
 
     if ($password !== $confirm_password) {
         $errors[] = "The passwords do not match, please try again.";
@@ -18,9 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
     try {
-        $sql = "INSERT INTO users (first_name, last_name, email, phone, password_hash) VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO users (first_name, last_name, email, phone, password, role) VALUES (?, ?, ?, ?, ?,?)";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$first_name, $last_name, $email, $phone, $password_hash]);
+        $stmt->execute([$first_name, $last_name, $email, $phone, $password_hash, $role]);
 
         $user_id = $pdo->lastInsertId();
 
@@ -49,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sign Up — Mentor Match</title>
-    <meta name="description" content="Sign up for Mentor Match — mobile friendly mentor/mentee matching.">
+    <meta name="description" content="Sign up for Mentor Match — mobile friendly mentor/Students matching.">
     <link rel="stylesheet" href="../assets/css/signup.css">
 </head>
 <body>
@@ -60,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="brand">Mentor Match</div>
             </div>
             <h1 id="signup-heading">Create your account</h1>
-            <p class="lead">Quick and easy sign up to find mentors or mentees. Designed for mobile devices.</p>
+            <p class="lead">Quick and easy sign up to find mentors or Studentss. Designed for mobile devices.</p>
 
             <?php if (!empty($errors)): ?>
                 <div class="errors" role="alert">
@@ -84,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div>
                     <label for="phone">Phone</label>
-                    <input class="input" id="phone" name="phone" type="tel" inputmode="tel" pattern="[0-9+\- ()]*" value="<?php echo htmlspecialchars($phone ?? ''); ?>" placeholder="(555) 555-0123">
+                    <input class="input" id="phone" name="phone" type="tel" inputmode="tel" pattern="[0-9+\- ()]*" value="<?php echo htmlspecialchars($phone ?? ''); ?>" placeholder="(+44) 7123 456 789">
                 </div>
 
                 <div>
@@ -107,12 +108,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <legend class="small">I am a</legend>
                     <div class="roles" role="radiogroup" aria-label="Account type">
                         <label class="role" id="role-mentor">
-                            <input type="radio" name="role" value="mentor">
+                            <input type="radio" name="role" value="mentor" required>
                             Mentor
                         </label>
-                        <label class="role" id="role-mentee">
-                            <input type="radio" name="role" value="mentee" checked>
-                            Mentee
+                        <label class="role" id="role-student">
+                            <input type="radio" name="role" value="student" required checked>
+                            Student
                         </label>
                     </div>
                 </fieldset>
