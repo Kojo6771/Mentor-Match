@@ -37,8 +37,8 @@ CREATE TABLE students (
 -- INTERESTS
 -- =======================
 CREATE TABLE interests (
-    interests_id INT AUTO_INCREMENT PRIMARY KEY,
-    interests_name VARCHAR(100) NOT NULL UNIQUE
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- =======================
@@ -68,8 +68,8 @@ CREATE TABLE mentor_profiles (
 -- SUBJECTS
 -- =======================
 CREATE TABLE subjects (
-    subject_id INT AUTO_INCREMENT PRIMARY KEY,
-    subject_name VARCHAR(100) NOT NULL UNIQUE
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- =======================
