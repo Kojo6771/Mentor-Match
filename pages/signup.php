@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['last_name'] = $last_name;
         $_SESSION['email'] = $email;
         $_SESSION['phone'] = $phone;
+        $_SESSION['role'] = $role;
 
         header("Location: ./profile.php");
         exit;

@@ -11,7 +11,7 @@ CREATE TABLE users (
     phone VARCHAR(20), 
     email VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role ENUM('student','tutor','admin') NOT NULL,
+    role ENUM('student','mentor','admin') NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -53,15 +53,15 @@ CREATE TABLE student_interests (
 );
 
 -- =======================
--- TUTOR PROFILES
+-- mentor PROFILES
 -- =======================
-CREATE TABLE tutor_profiles (
-    tutor_id INT PRIMARY KEY,
+CREATE TABLE mentor_profiles (
+    mentor_id INT PRIMARY KEY,
     bio TEXT,
     experience_years INT,
     hourly_rate DECIMAL(6,2),
     verified BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (tutor_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- =======================
@@ -73,13 +73,13 @@ CREATE TABLE subjects (
 );
 
 -- =======================
--- TUTOR SUBJECTS (M:N)
+-- mentor SUBJECTS (M:N)
 -- =======================
-CREATE TABLE tutor_subjects (
-    tutor_id INT NOT NULL,
+CREATE TABLE mentor_subjects (
+    mentor_id INT NOT NULL,
     subject_id INT NOT NULL,
-    PRIMARY KEY (tutor_id, subject_id),
-    FOREIGN KEY (tutor_id) REFERENCES users(id) ON DELETE CASCADE,
+    PRIMARY KEY (mentor_id, subject_id),
+    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
 );
 
@@ -88,11 +88,11 @@ CREATE TABLE tutor_subjects (
 -- =======================
 CREATE TABLE availability (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    tutor_id INT NOT NULL,
+    mentor_id INT NOT NULL,
     available_date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    FOREIGN KEY (tutor_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 -- =======================
@@ -101,7 +101,7 @@ CREATE TABLE availability (
 CREATE TABLE sessions (
     id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
-    tutor_id INT NOT NULL,
+    mentor_id INT NOT NULL,
     subject_id INT NOT NULL,
     session_date DATE NOT NULL,
     start_time TIME NOT NULL,
@@ -113,7 +113,7 @@ CREATE TABLE sessions (
     ) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (tutor_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
 );
 
@@ -137,11 +137,11 @@ CREATE TABLE reviews (
     id INT AUTO_INCREMENT PRIMARY KEY,
     session_id INT UNIQUE NOT NULL,
     student_id INT NOT NULL,
-    tutor_id INT NOT NULL,
+    mentor_id INT NOT NULL,
     rating INT CHECK (rating BETWEEN 1 AND 5),
     comment TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (tutor_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE
 );
