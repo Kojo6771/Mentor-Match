@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:4px">
                     <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="remember"> <span class="small">Remember me</span></label>
-                    <a class="link small" href="#">Forgot password?</a>
+                    <a class="link small" href="./forgot_password.php">Forgot password?</a>
                 </div>
 
                 <button class="btn" type="submit">Sign in</button>
