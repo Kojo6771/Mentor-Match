@@ -42,7 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 ?>
 
-
+  
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
