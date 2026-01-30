@@ -26,9 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['role'] = $user['role'];
 
                 if ($user['role'] === 'mentor') {
-                    header("Location: ./mentor_dashboard.php");
+                    header("Location: ../mentor/mentor_dashboard.php");
                 } else {
-                    header("Location: ./student_dashboard.php");
+                    header("Location: ../student/student_dashboard.php");
                 }
                 exit;
             } else {
