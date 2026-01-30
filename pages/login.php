@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <button class="btn" type="submit">Sign in</button>
-                <button type="button" class="btn secondary" onclick="location.href='./signup.php'">Create account</button>
+                
 
                 <p class="small">Don't have an account? <a class="link" href="./signup.php">Create one</a></p>
             </form>
