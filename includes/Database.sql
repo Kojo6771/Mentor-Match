@@ -1,147 +1,396 @@
-CREATE DATABASE mentormatch;
-USE mentormatch;
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Feb 05, 2026 at 12:14 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
--- =======================
--- USERS
--- =======================
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    phone VARCHAR(20), 
-    email VARCHAR(150) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    role ENUM('student','mentor','admin') NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
--- =======================
--- STUDENTS
--- =======================
-CREATE TABLE students (
-    student_id INT PRIMARY KEY,
-    profile_picture VARCHAR(255),
-    course VARCHAR(150) NOT NULL,
-    year_of_study INT NOT NULL,
-    learning_preference ENUM(
-        'Videos',
-        'In person sessions',
-        'Quizzes'
-    ) NOT NULL,
-    bio TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
-);
 
--- =======================
--- INTERESTS
--- =======================
-CREATE TABLE interests (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE
-);
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
--- =======================
--- STUDENT INTERESTS (M:N)
--- =======================
-CREATE TABLE student_interests (
-    student_id INT NOT NULL,
-    interest_id INT NOT NULL,
-    PRIMARY KEY (student_id, interest_id),
-    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (interest_id) REFERENCES interests(id) ON DELETE CASCADE
-);
+--
+-- Database: `mentormatch`
+--
 
--- =======================
--- mentor PROFILES
--- =======================
-CREATE TABLE mentor_profiles (
-    mentor_id INT PRIMARY KEY,
-    bio TEXT,
-    experience_years INT,
-    hourly_rate DECIMAL(6,2),
-    verified BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE
-);
+-- --------------------------------------------------------
 
--- =======================
--- SUBJECTS
--- =======================
-CREATE TABLE subjects (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL UNIQUE
-);
+--
+-- Table structure for table `availability`
+--
 
--- =======================
--- mentor SUBJECTS (M:N)
--- =======================
-CREATE TABLE mentor_subjects (
-    mentor_id INT NOT NULL,
-    subject_id INT NOT NULL,
-    PRIMARY KEY (mentor_id, subject_id),
-    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
-);
+CREATE TABLE `availability` (
+  `id` int(11) NOT NULL,
+  `mentor_id` int(11) NOT NULL,
+  `available_date` date NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- =======================
--- AVAILABILITY
--- =======================
-CREATE TABLE availability (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    mentor_id INT NOT NULL,
-    available_date DATE NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
-    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE
-);
+-- --------------------------------------------------------
 
--- =======================
--- SESSIONS (BOOKINGS)
--- =======================
-CREATE TABLE sessions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    student_id INT NOT NULL,
-    mentor_id INT NOT NULL,
-    subject_id INT NOT NULL,
-    session_date DATE NOT NULL,
-    start_time TIME NOT NULL,
-    status ENUM(
-        'pending',
-        'confirmed',
-        'completed',
-        'cancelled'
-    ) DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
-);
+--
+-- Table structure for table `interests`
+--
 
--- =======================
--- MESSAGES
--- =======================
-CREATE TABLE messages (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    sender_id INT NOT NULL,
-    receiver_id INT NOT NULL,
-    message TEXT NOT NULL,
-    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
-);
+CREATE TABLE `interests` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
--- =======================
--- REVIEWS
--- =======================
-CREATE TABLE reviews (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    session_id INT UNIQUE NOT NULL,
-    student_id INT NOT NULL,
-    mentor_id INT NOT NULL,
-    rating INT CHECK (rating BETWEEN 1 AND 5),
-    comment TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE,
-    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
-    FOREIGN KEY (mentor_id) REFERENCES users(id) ON DELETE CASCADE
-);
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mentor_profiles`
+--
+
+CREATE TABLE `mentor_profiles` (
+  `mentor_id` int(11) NOT NULL,
+  `bio` text DEFAULT NULL,
+  `experience_years` int(11) DEFAULT NULL,
+  `verified` tinyint(1) DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mentor_subjects`
+--
+
+CREATE TABLE `mentor_subjects` (
+  `mentor_id` int(11) NOT NULL,
+  `subject_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `messages`
+--
+
+CREATE TABLE `messages` (
+  `id` int(11) NOT NULL,
+  `sender_id` int(11) NOT NULL,
+  `receiver_id` int(11) NOT NULL,
+  `message` text NOT NULL,
+  `sent_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `reviews`
+--
+
+CREATE TABLE `reviews` (
+  `id` int(11) NOT NULL,
+  `session_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `mentor_id` int(11) NOT NULL,
+  `rating` int(11) DEFAULT NULL CHECK (`rating` between 1 and 5),
+  `comment` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sessions`
+--
+
+CREATE TABLE `sessions` (
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `mentor_id` int(11) NOT NULL,
+  `subject_id` int(11) NOT NULL,
+  `session_date` date NOT NULL,
+  `start_time` time NOT NULL,
+  `status` enum('pending','confirmed','completed','cancelled') DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `students`
+--
+
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL,
+  `profile_picture` varchar(255) DEFAULT NULL,
+  `course` varchar(150) NOT NULL,
+  `year_of_study` int(11) NOT NULL,
+  `learning_preference` enum('Videos','In person sessions','Quizzes') NOT NULL,
+  `bio` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `student_interests`
+--
+
+CREATE TABLE `student_interests` (
+  `student_id` int(11) NOT NULL,
+  `interest_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `subjects`
+--
+
+CREATE TABLE `subjects` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `subjects`
+--
+
+INSERT INTO `subjects` (`id`, `name`) VALUES
+(8, 'Accounting'),
+(4, 'Biology'),
+(9, 'Business Studies'),
+(3, 'Chemistry'),
+(5, 'Computer Science'),
+(7, 'Economics'),
+(13, 'Engineering'),
+(15, 'English'),
+(14, 'History'),
+(12, 'Law'),
+(1, 'Mathematics'),
+(2, 'Physics'),
+(10, 'Psychology'),
+(11, 'Sociology'),
+(6, 'Statistics');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(150) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('student','mentor','admin') NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `first_name`, `last_name`, `phone`, `email`, `password`, `role`, `created_at`) VALUES
+(1, 'Alistair', 'Ridley', '078456621323', 'mrdownbad@gmail.com', '$2y$10$.UTYGKQKYJRsJ4Wmz3rCfeI7hFz/ZEV4Ggfjwd.ZK4R31fWkJsq8q', 'student', '2026-01-29 22:09:09'),
+(2, 'Jacob', 'Harvey', '078456621324', 'nyashdying@gmail.com', '$2y$10$uacEOSm.0eU9nB9rltmCLulDzMVXp5Xy8Lz7eYSAkesr1cb/hgnyW', 'mentor', '2026-01-29 22:09:57');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `availability`
+--
+ALTER TABLE `availability`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `mentor_id` (`mentor_id`);
+
+--
+-- Indexes for table `interests`
+--
+ALTER TABLE `interests`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `mentor_profiles`
+--
+ALTER TABLE `mentor_profiles`
+  ADD PRIMARY KEY (`mentor_id`);
+
+--
+-- Indexes for table `mentor_subjects`
+--
+ALTER TABLE `mentor_subjects`
+  ADD PRIMARY KEY (`mentor_id`,`subject_id`),
+  ADD KEY `subject_id` (`subject_id`);
+
+--
+-- Indexes for table `messages`
+--
+ALTER TABLE `messages`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sender_id` (`sender_id`),
+  ADD KEY `receiver_id` (`receiver_id`);
+
+--
+-- Indexes for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `session_id` (`session_id`),
+  ADD KEY `student_id` (`student_id`),
+  ADD KEY `mentor_id` (`mentor_id`);
+
+--
+-- Indexes for table `sessions`
+--
+ALTER TABLE `sessions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `student_id` (`student_id`),
+  ADD KEY `mentor_id` (`mentor_id`),
+  ADD KEY `subject_id` (`subject_id`);
+
+--
+-- Indexes for table `students`
+--
+ALTER TABLE `students`
+  ADD PRIMARY KEY (`student_id`);
+
+--
+-- Indexes for table `student_interests`
+--
+ALTER TABLE `student_interests`
+  ADD PRIMARY KEY (`student_id`,`interest_id`),
+  ADD KEY `interest_id` (`interest_id`);
+
+--
+-- Indexes for table `subjects`
+--
+ALTER TABLE `subjects`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `availability`
+--
+ALTER TABLE `availability`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `interests`
+--
+ALTER TABLE `interests`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `messages`
+--
+ALTER TABLE `messages`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `reviews`
+--
+ALTER TABLE `reviews`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `sessions`
+--
+ALTER TABLE `sessions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `subjects`
+--
+ALTER TABLE `subjects`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `availability`
+--
+ALTER TABLE `availability`
+  ADD CONSTRAINT `availability_ibfk_1` FOREIGN KEY (`mentor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `mentor_profiles`
+--
+ALTER TABLE `mentor_profiles`
+  ADD CONSTRAINT `mentor_profiles_ibfk_1` FOREIGN KEY (`mentor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `mentor_subjects`
+--
+ALTER TABLE `mentor_subjects`
+  ADD CONSTRAINT `mentor_subjects_ibfk_1` FOREIGN KEY (`mentor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `mentor_subjects_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `messages`
+--
+ALTER TABLE `messages`
+  ADD CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `reviews_ibfk_3` FOREIGN KEY (`mentor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `sessions`
+--
+ALTER TABLE `sessions`
+  ADD CONSTRAINT `sessions_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `sessions_ibfk_2` FOREIGN KEY (`mentor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `sessions_ibfk_3` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `students`
+--
+ALTER TABLE `students`
+  ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `student_interests`
+--
+ALTER TABLE `student_interests`
+  ADD CONSTRAINT `student_interests_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `student_interests_ibfk_2` FOREIGN KEY (`interest_id`) REFERENCES `interests` (`id`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
