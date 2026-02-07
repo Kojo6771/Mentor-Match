@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 05, 2026 at 12:14 AM
+-- Generation Time: Feb 07, 2026 at 04:46 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -44,6 +44,23 @@ CREATE TABLE `availability` (
 CREATE TABLE `interests` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mentor_applications`
+--
+
+CREATE TABLE `mentor_applications` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `motivation` text NOT NULL,
+  `experience_years` int(11) DEFAULT NULL,
+  `status` enum('pending','approved','rejected') DEFAULT 'pending',
+  `admin_notes` text DEFAULT NULL,
+  `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `reviewed_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -220,6 +237,13 @@ ALTER TABLE `interests`
   ADD UNIQUE KEY `name` (`name`);
 
 --
+-- Indexes for table `mentor_applications`
+--
+ALTER TABLE `mentor_applications`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
+
+--
 -- Indexes for table `mentor_profiles`
 --
 ALTER TABLE `mentor_profiles`
@@ -302,6 +326,12 @@ ALTER TABLE `interests`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `mentor_applications`
+--
+ALTER TABLE `mentor_applications`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
@@ -340,6 +370,12 @@ ALTER TABLE `users`
 --
 ALTER TABLE `availability`
   ADD CONSTRAINT `availability_ibfk_1` FOREIGN KEY (`mentor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `mentor_applications`
+--
+ALTER TABLE `mentor_applications`
+  ADD CONSTRAINT `mentor_applications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `mentor_profiles`
