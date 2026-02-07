@@ -149,6 +149,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .secondary {
             margin-top: 6px;
+            display: block;
+            text-align: center;
+            text-decoration: none;
         }
     </style>
 
