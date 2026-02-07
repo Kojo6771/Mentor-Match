@@ -10,11 +10,20 @@ if (!isset($_SESSION['user_id'])) {
 
 $errors = [];
 $success = false;
+// Load available subjects for the dropdown
+$subjects = [];
+try {
+    $stmt = $pdo->query("SELECT id, name FROM subjects ORDER BY name");
+    $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // ignore - form will show without subjects
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_SESSION['user_id'];
     $motivation = trim($_POST['motivation']);
     $experience_years = trim($_POST['experience_years']);
+    $subject_id = $_POST['subject_id'] ?? null;
 
     // Validation
     if (empty($motivation)) {
@@ -29,6 +38,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Please enter your years of experience.";
     } elseif (!is_numeric($experience_years) || $experience_years < 0 || $experience_years > 70) {
         $errors[] = "Please enter a valid number of years (0-70).";
+    }
+
+    // Subject validation
+    if (empty($subject_id) || !is_numeric($subject_id)) {
+        $errors[] = "Please select a subject.";
+    } else {
+        // ensure subject exists
+        try {
+            $checkSub = $pdo->prepare("SELECT id FROM subjects WHERE id = ?");
+            $checkSub->execute([(int)$subject_id]);
+            if ($checkSub->rowCount() === 0) {
+                $errors[] = "Selected subject is invalid.";
+            }
+        } catch (PDOException $e) {
+            $errors[] = "An error occurred while validating the subject.";
+        }
     }
 
     // Check if user already has a pending or approved application
@@ -46,16 +71,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Insert into database if no errors
+    // Insert into database if no errors (application + subject mapping)
     if (empty($errors)) {
         try {
+            $pdo->beginTransaction();
+
             $sql = "INSERT INTO mentor_applications (user_id, motivation, experience_years, status) VALUES (?, ?, ?, 'pending')";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$user_id, $motivation, (int)$experience_years]);
 
+            $application_id = $pdo->lastInsertId();
+
+            $sub_sql = "INSERT INTO mentor_application_subjects (application_id, subject_id) VALUES (?, ?)";
+            $sub_stmt = $pdo->prepare($sub_sql);
+            $sub_stmt->execute([$application_id, (int)$subject_id]);
+
+            $pdo->commit();
+
             $success = true;
             $_POST = [];
         } catch (PDOException $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             $errors[] = "An error occurred while submitting your application. Please try again.";
         }
     }
@@ -101,6 +139,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="motivation">Why do you want to become a mentor?</label>
                     <textarea class="input textarea" id="motivation" name="motivation" required placeholder="Tell us about your passion for mentoring and teaching others..." maxlength="2000"><?php echo htmlspecialchars($_POST['motivation'] ?? ''); ?></textarea>
                     <small class="char-count"><span id="char-count">0</span>/2000</small>
+                </div>
+
+                <div>
+                    <label for="subject_id">Subject</label>
+                    <select class="input" id="subject_id" name="subject_id" required>
+                        <option value="">Select a subject</option>
+                        <?php foreach ($subjects as $s): ?>
+                            <option value="<?php echo $s['id']; ?>" <?php echo (isset($_POST['subject_id']) && $_POST['subject_id'] == $s['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($s['name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
 
                 <div>
