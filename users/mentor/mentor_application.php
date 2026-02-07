@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Apply as Mentor — Mentor Match</title>
     <meta name="description" content="Apply to become a mentor on Mentor Match — share your expertise and help students grow.">
-    <link rel="stylesheet" href="../../assets/css/signup.css">
+    <link rel="stylesheet" href="../../assets/css/styles.css">
 </head>
 <body>
     <main class="container">
