@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Sign In — Mentor Match</title>
     <meta name="description" content="Sign in to Mentor Match — find mentors or Students.">
-    <link rel="stylesheet" href="../assets/css/signup.css">
+    <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body>
     <main class="container">
