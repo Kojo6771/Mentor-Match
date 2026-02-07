@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 07, 2026 at 04:46 PM
+-- Generation Time: Feb 07, 2026 at 06:14 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -61,6 +61,17 @@ CREATE TABLE `mentor_applications` (
   `admin_notes` text DEFAULT NULL,
   `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `reviewed_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mentor_application_subjects`
+--
+
+CREATE TABLE `mentor_application_subjects` (
+  `application_id` int(11) NOT NULL,
+  `subject_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -216,7 +227,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `phone`, `email`, `password`, `role`, `created_at`) VALUES
 (1, 'Alistair', 'Ridley', '078456621323', 'mrdownbad@gmail.com', '$2y$10$.UTYGKQKYJRsJ4Wmz3rCfeI7hFz/ZEV4Ggfjwd.ZK4R31fWkJsq8q', 'student', '2026-01-29 22:09:09'),
-(2, 'Jacob', 'Harvey', '078456621324', 'nyashdying@gmail.com', '$2y$10$uacEOSm.0eU9nB9rltmCLulDzMVXp5Xy8Lz7eYSAkesr1cb/hgnyW', 'mentor', '2026-01-29 22:09:57');
+(7, 'Jacob', 'Harvey', '074620512351512', 'nyashdying@gmail.com', '$2y$10$5O2d5So1sWTyuaZsgBM2AusFlh6CZZ5M8Ku3vCcMmq9HGQ9Y6vjTG', 'mentor', '2026-02-07 15:56:14');
 
 --
 -- Indexes for dumped tables
@@ -242,6 +253,13 @@ ALTER TABLE `interests`
 ALTER TABLE `mentor_applications`
   ADD PRIMARY KEY (`id`),
   ADD KEY `user_id` (`user_id`);
+
+--
+-- Indexes for table `mentor_application_subjects`
+--
+ALTER TABLE `mentor_application_subjects`
+  ADD PRIMARY KEY (`application_id`,`subject_id`),
+  ADD KEY `subject_id` (`subject_id`);
 
 --
 -- Indexes for table `mentor_profiles`
@@ -359,7 +377,7 @@ ALTER TABLE `subjects`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
@@ -376,6 +394,13 @@ ALTER TABLE `availability`
 --
 ALTER TABLE `mentor_applications`
   ADD CONSTRAINT `mentor_applications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `mentor_application_subjects`
+--
+ALTER TABLE `mentor_application_subjects`
+  ADD CONSTRAINT `mentor_application_subjects_ibfk_1` FOREIGN KEY (`application_id`) REFERENCES `mentor_applications` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `mentor_application_subjects_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `mentor_profiles`
