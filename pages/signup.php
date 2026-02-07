@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['role'] = $role;
 
         if ($role === 'mentor') {
-            header("Location: ./mentor_profile_setup.php");
+            header("Location: ../users/mentor/mentor_application.php");
             exit;
         }
         
