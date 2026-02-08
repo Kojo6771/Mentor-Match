@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 07, 2026 at 06:14 PM
+-- Generation Time: Feb 08, 2026 at 04:06 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -60,8 +60,16 @@ CREATE TABLE `mentor_applications` (
   `status` enum('pending','approved','rejected') DEFAULT 'pending',
   `admin_notes` text DEFAULT NULL,
   `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `reviewed_at` timestamp NULL DEFAULT NULL
+  `reviewed_at` timestamp NULL DEFAULT NULL,
+  `profile_picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `mentor_applications`
+--
+
+INSERT INTO `mentor_applications` (`id`, `user_id`, `motivation`, `experience_years`, `status`, `admin_notes`, `submitted_at`, `reviewed_at`, `profile_picture`) VALUES
+(1, 7, 'I would like to be a mentor as I\'ve started my own digital management busines', 2, 'pending', NULL, '2026-02-07 17:55:22', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -74,6 +82,13 @@ CREATE TABLE `mentor_application_subjects` (
   `subject_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `mentor_application_subjects`
+--
+
+INSERT INTO `mentor_application_subjects` (`application_id`, `subject_id`) VALUES
+(1, 9);
+
 -- --------------------------------------------------------
 
 --
@@ -84,7 +99,8 @@ CREATE TABLE `mentor_profiles` (
   `mentor_id` int(11) NOT NULL,
   `bio` text DEFAULT NULL,
   `experience_years` int(11) DEFAULT NULL,
-  `verified` tinyint(1) DEFAULT 0
+  `verified` tinyint(1) DEFAULT 0,
+  `profile_picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -218,16 +234,17 @@ CREATE TABLE `users` (
   `email` varchar(150) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('student','mentor','admin') NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `profile_picture` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `first_name`, `last_name`, `phone`, `email`, `password`, `role`, `created_at`) VALUES
-(1, 'Alistair', 'Ridley', '078456621323', 'mrdownbad@gmail.com', '$2y$10$.UTYGKQKYJRsJ4Wmz3rCfeI7hFz/ZEV4Ggfjwd.ZK4R31fWkJsq8q', 'student', '2026-01-29 22:09:09'),
-(7, 'Jacob', 'Harvey', '074620512351512', 'nyashdying@gmail.com', '$2y$10$5O2d5So1sWTyuaZsgBM2AusFlh6CZZ5M8Ku3vCcMmq9HGQ9Y6vjTG', 'mentor', '2026-02-07 15:56:14');
+INSERT INTO `users` (`id`, `first_name`, `last_name`, `phone`, `email`, `password`, `role`, `created_at`, `profile_picture`) VALUES
+(1, 'Alistair', 'Ridley', '078456621323', 'mrdownbad@gmail.com', '$2y$10$.UTYGKQKYJRsJ4Wmz3rCfeI7hFz/ZEV4Ggfjwd.ZK4R31fWkJsq8q', 'student', '2026-01-29 22:09:09', NULL),
+(7, 'Jacob', 'Harvey', '074620512351512', 'nyashdying@gmail.com', '$2y$10$5O2d5So1sWTyuaZsgBM2AusFlh6CZZ5M8Ku3vCcMmq9HGQ9Y6vjTG', 'mentor', '2026-02-07 15:56:14', NULL);
 
 --
 -- Indexes for dumped tables
@@ -347,7 +364,7 @@ ALTER TABLE `interests`
 -- AUTO_INCREMENT for table `mentor_applications`
 --
 ALTER TABLE `mentor_applications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `messages`
