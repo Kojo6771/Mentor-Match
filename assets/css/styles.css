@@ -21,4 +21,7 @@ label{font-size:0.85rem;color:var(--muted);display:block;margin-bottom:6px}
 .small{font-size:0.85rem;color:var(--muted);text-align:center}
 .link{color:var(--accent);text-decoration:none;font-weight:600}
 .errors{background:#fee2e2;color:#991b1b;padding:10px;border-radius:8px;font-size:0.9rem}
+.help-text{display:block;font-size:0.8rem;color:var(--muted);margin-top:4px}
+input[type="file"]{cursor:pointer}
+input[type="file"]::file-selector-button{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.9rem}
 @media (min-width:520px){ .card{padding:28px} h1{font-size:1.4rem} }

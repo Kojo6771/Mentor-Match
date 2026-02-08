@@ -1,7 +1,14 @@
 <?php 
 session_start();
 require_once '..\includes\db.php';
-$errors = [];   
+$errors = [];
+$profile_picture_path = null;
+
+// Ensure uploads directory exists
+$uploads_dir = '../uploads/profile_pictures/';
+if (!is_dir($uploads_dir)) {
+    mkdir($uploads_dir, 0755, true);
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $first_name = trim($_POST['first_name']);
@@ -16,35 +23,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "The passwords do not match, please try again.";
     }
 
+    // Profile picture validation and upload
+    if (!isset($_FILES['profile_picture']) || $_FILES['profile_picture']['error'] !== UPLOAD_ERR_OK) {
+        $errors[] = "Please upload a profile picture.";
+    } else {
+        $file = $_FILES['profile_picture'];
+        $allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+        $max_size = 5 * 1024 * 1024; // 5MB
+        
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        
+        if (!in_array($mime_type, $allowed_types)) {
+            $errors[] = "Please upload a valid image file (JPEG, PNG, GIF, or WebP).";
+        } elseif ($file['size'] > $max_size) {
+            $errors[] = "Profile picture must be smaller than 5MB.";
+        } else {
+            // Generate unique filename
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = uniqid('profile_') . '_' . time() . '.' . $ext;
+            $file_path = $uploads_dir . $filename;
+            
+            if (move_uploaded_file($file['tmp_name'], $file_path)) {
+                $profile_picture_path = 'uploads/profile_pictures/' . $filename;
+            } else {
+                $errors[] = "Failed to upload profile picture. Please try again.";
+            }
+        }
+    }
+
     $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
     try {
-        $sql = "INSERT INTO users (first_name, last_name, email, phone, password, role) VALUES (?, ?, ?, ?, ?,?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$first_name, $last_name, $email, $phone, $password_hash, $role]);
+        if (empty($errors)) {
+            $sql = "INSERT INTO users (first_name, last_name, email, phone, password, role, profile_picture) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$first_name, $last_name, $email, $phone, $password_hash, $role, $profile_picture_path]);
 
-        $user_id = $pdo->lastInsertId();
+            $user_id = $pdo->lastInsertId();
 
-        $_SESSION['user_id'] = $user_id;
-        $_SESSION['first_name'] = $first_name;
-        $_SESSION['last_name'] = $last_name;
-        $_SESSION['email'] = $email;
-        $_SESSION['phone'] = $phone;
-        $_SESSION['role'] = $role;
+            $_SESSION['user_id'] = $user_id;
+            $_SESSION['first_name'] = $first_name;
+            $_SESSION['last_name'] = $last_name;
+            $_SESSION['email'] = $email;
+            $_SESSION['phone'] = $phone;
+            $_SESSION['role'] = $role;
 
-        if ($role === 'mentor') {
-            header("Location: ../users/mentor/mentor_application.php");
-            exit;
+            if ($role === 'mentor') {
+                header("Location: ../users/mentor/mentor_application.php");
+                exit;
+            }
+            
+            if ($role === 'student') {
+                header("Location: ./student_profile_setup.php");
+                exit;
+            }
         }
-        
-        if ($role === 'student') {
-            header("Location: ./student_profile_setup.php");
-            exit;
-        }
-
     } catch (PDOException $e) {
-        echo "An error occurred, please try again later: " . $e->getMessage();
-        exit;
+        // Clean up uploaded file if database operation fails
+        if ($profile_picture_path && file_exists($uploads_dir . basename($profile_picture_path))) {
+            unlink($uploads_dir . basename($profile_picture_path));
+        }
+        $errors[] = "An error occurred, please try again later.";
     }
 }
 
@@ -80,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             <?php endif; ?>
 
-            <form method="POST" novalidate>
+            <form method="POST" enctype="multipart/form-data" novalidate>
                 <div class="row">
                     <div>
                         <label for="first_name">First name</label>
@@ -100,6 +141,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div>
                     <label for="email">Email</label>
                     <input class="input" id="email" name="email" type="email" required value="<?php echo htmlspecialchars($email ?? ''); ?>" placeholder="you@example.com">
+                </div>
+
+                <div>
+                    <label for="profile_picture">Profile Picture</label>
+                    <input class="input" id="profile_picture" name="profile_picture" type="file" accept="image/jpeg,image/png,image/gif,image/webp" required>
+                    <small class="help-text">Upload a JPG, PNG, GIF, or WebP image (max 5MB)</small>
                 </div>
 
                 <div class="row">
