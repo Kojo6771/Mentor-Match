@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 08, 2026 at 05:03 PM
+-- Generation Time: Feb 10, 2026 at 12:00 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -84,7 +84,8 @@ CREATE TABLE `mentor_profiles` (
   `mentor_id` int(11) NOT NULL,
   `bio` text DEFAULT NULL,
   `experience_years` int(11) DEFAULT NULL,
-  `verified` tinyint(1) DEFAULT 0
+  `verified` tinyint(1) DEFAULT 0,
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -157,7 +158,8 @@ CREATE TABLE `students` (
   `year_of_study` int(11) NOT NULL,
   `learning_preference` enum('Videos','In person sessions','Quizzes') NOT NULL,
   `bio` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -264,7 +266,8 @@ ALTER TABLE `mentor_application_subjects`
 -- Indexes for table `mentor_profiles`
 --
 ALTER TABLE `mentor_profiles`
-  ADD PRIMARY KEY (`mentor_id`);
+  ADD PRIMARY KEY (`mentor_id`),
+  ADD KEY `mentor_profiles_user_fk` (`user_id`);
 
 --
 -- Indexes for table `mentor_subjects`
@@ -303,7 +306,8 @@ ALTER TABLE `sessions`
 -- Indexes for table `students`
 --
 ALTER TABLE `students`
-  ADD PRIMARY KEY (`student_id`);
+  ADD PRIMARY KEY (`student_id`),
+  ADD KEY `students_user_fk` (`user_id`);
 
 --
 -- Indexes for table `student_interests`
@@ -405,7 +409,8 @@ ALTER TABLE `mentor_application_subjects`
 -- Constraints for table `mentor_profiles`
 --
 ALTER TABLE `mentor_profiles`
-  ADD CONSTRAINT `mentor_profiles_ibfk_1` FOREIGN KEY (`mentor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `mentor_profiles_ibfk_1` FOREIGN KEY (`mentor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `mentor_profiles_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `mentor_subjects`
@@ -441,7 +446,8 @@ ALTER TABLE `sessions`
 -- Constraints for table `students`
 --
 ALTER TABLE `students`
-  ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `students_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `student_interests`
