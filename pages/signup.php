@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             if ($role === 'student') {
-                header("Location: ./student_profile_setup.php");
+                header("Location: ../users/student/student_profile_setup.php");
                 exit;
             }
         }
