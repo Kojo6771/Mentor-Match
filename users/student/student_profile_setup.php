@@ -45,11 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         try {
-            $stmt = $pdo->prepare('INSERT INTO students ( course, year_of_study, learning_preference, bio, created_at, user_id) VALUES (?, ?, ?, ?, NOW(), ?)');
-            $stmt->execute([$course, (int)$year_of_study, $learning_preference, $bio, $_SESSION['user_id']]);
+            $stmt = $pdo->prepare('INSERT INTO students (student_id, course, year_of_study, learning_preference, bio, created_at, user_id) VALUES (?, ?, ?, ?, ?, NOW(), ?)');
+            $stmt->execute([$_SESSION['user_id'], $course, (int)$year_of_study, $learning_preference, $bio, $_SESSION['user_id']]);
             $success = true;
         } catch (PDOException $e) {
-            $errors[] = 'An error occurred while saving your profile.';
+            $errors[] = 'An error occurred while saving your profile: ' . $e->getMessage();
         }
     }
 }
