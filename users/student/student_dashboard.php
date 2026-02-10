@@ -11,6 +11,16 @@ $user_id = $_SESSION['user_id'];
 $first_name = htmlspecialchars($_SESSION['first_name'] ?? 'there');
 $avatar_url = '';
 
+// Fetch user's profile picture directly from database
+$profile_picture = null;
+try {
+	$stmt = $pdo->prepare('SELECT profile_picture FROM users WHERE id = ?');
+	$stmt->execute([$user_id]);
+	$profile_picture = $stmt->fetchColumn();
+} catch (PDOException $e) {
+	$profile_picture = null;
+}
+
 // Fetch student profile
 $profile = null;
 try {
@@ -46,8 +56,8 @@ if ($profile) {
 }
 
 // Fetch avatar if available
-if (!empty($_SESSION['profile_picture'])) {
-	$avatar_url = '../../uploads/profile_pictures/' . htmlspecialchars($_SESSION['profile_picture']);
+if (!empty($profile_picture)) {
+	$avatar_url = '../../' . htmlspecialchars($profile_picture);
 } else {
 	// fallback avatar
 	$avatar_url = 'https://ui-avatars.com/api/?name=' . urlencode($first_name) . '&background=3b82f6&color=fff&size=128';
