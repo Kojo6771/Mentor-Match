@@ -6,8 +6,6 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: ../../pages/login.php');
     exit;
 }
-
-$pdo = $GLOBALS['pdo'] ?? $pdo;
 $errors = [];
 $success = false;
 
@@ -20,10 +18,10 @@ try {
         exit;
     }
 } catch (PDOException $e) {
-    // continue - form will show and error on save if necessary
+    
 }
 
-// Setup uploads directory (absolute path)
+
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -47,8 +45,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         try {
-            $stmt = $pdo->prepare('INSERT INTO students (student_id, course, year_of_study, learning_preference, bio) VALUES (?, ?, ?, ?, ?)');
-            $stmt->execute([$_SESSION['user_id'], $course, (int)$year_of_study, $learning_preference, $bio]);
+            $stmt = $pdo->prepare('INSERT INTO students ( course, year_of_study, learning_preference, bio, created_at, user_id) VALUES (?, ?, ?, ?, NOW(), ?)');
+            $stmt->execute([$course, (int)$year_of_study, $learning_preference, $bio, $_SESSION['user_id']]);
             $success = true;
         } catch (PDOException $e) {
             $errors[] = 'An error occurred while saving your profile.';
