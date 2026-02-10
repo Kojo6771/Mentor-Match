@@ -127,5 +127,7 @@ if (!empty($_SESSION['profile_picture'])) {
             <a href="../../pages/login.php?logout=1" class="logout-link">Log out</a>
         </section>
     </main>
+
+    
 </body>
 </html>
