@@ -61,8 +61,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Student Profile Setup — Mentor Match</title>
-    <meta name="description" content="Set up your student profile.">
     <link rel="stylesheet" href="../../assets/css/styles.css">
+    <link rel="stylesheet" href="../../assets/css/student_profile_setup.css">
+    <meta name="description" content="Set up your student profile.">
 </head>
 <body>
     <main class="container">
@@ -76,7 +77,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php if ($success): ?>
                 <div class="success" role="status">Profile saved — you can now access your dashboard.</div>
-                <p><a class="btn" href="../student/student_dashboard.php">Go to dashboard</a></p>
+                <p><a class="btn" href="../../pages/dashboard.php">Go to dashboard</a></p>
             <?php else: ?>
                 <?php if (!empty($errors)): ?>
                     <div class="errors" role="alert">
@@ -120,9 +121,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </section>
     </main>
 
-    <style>
-        .textarea{min-height:120px;resize:vertical}
-        .success{background:#dcfce7;color:#166534;padding:10px;border-radius:8px;margin-bottom:12px}
-    </style>
+
 </body>
 </html>
