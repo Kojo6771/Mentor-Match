@@ -21,8 +21,14 @@ try {
     
 }
 
-
-
+// Fetch subjects from database
+$subjects = [];
+try {
+    $stmt = $pdo->query('SELECT id, name FROM subjects ORDER BY name');
+    $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $errors[] = 'Unable to load subjects.';
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $course = trim($_POST['course'] ?? '');
@@ -91,7 +97,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div>
                         <label for="course">Course</label>
-                        <input class="input" id="course" name="course" type="text" required value="<?php echo htmlspecialchars($_POST['course'] ?? ''); ?>" placeholder="e.g. BSc Computer Science">
+                        <select class="input" id="course" name="course" required>
+                            <option value="">Choose a course</option>
+                            <?php foreach ($subjects as $subject): ?>
+                                <option value="<?php echo htmlspecialchars($subject['name']); ?>" <?php echo (isset($_POST['course']) && $_POST['course'] === $subject['name']) ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($subject['name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
 
                     <div>
@@ -115,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <button type="submit" class="btn">Save profile</button>
-                    <a class="btn secondary" href="../../index.php">Skip for now</a>
+                    <a class="btn secondary" href="../../index.php" style="text-align: center;">Skip for now</a>
                 </form>
             <?php endif; ?>
         </section>
