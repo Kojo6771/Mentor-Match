@@ -139,6 +139,7 @@ if (!empty($profile_picture)) {
         </section>
     </main>
 
+    <?php include '../../includes/nav.php'; ?>
     
 </body>
 </html>
