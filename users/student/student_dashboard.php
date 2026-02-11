@@ -10,6 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id = $_SESSION['user_id'];
 $first_name = htmlspecialchars($_SESSION['first_name'] ?? 'there');
 $avatar_url = '';
+$fallback_avatar = 'https://ui-avatars.com/api/?name=' . urlencode($first_name) . '&background=3b82f6&color=fff&size=128';
 
 // Fetch user's profile picture directly from database
 $profile_picture = null;
@@ -57,10 +58,10 @@ if ($profile) {
 
 // Fetch avatar if available
 if (!empty($profile_picture)) {
-	$avatar_url = '../../' . htmlspecialchars($profile_picture);
+    $avatar_url = '../../' . htmlspecialchars($profile_picture);
 } else {
-	// fallback avatar
-	$avatar_url = 'https://ui-avatars.com/api/?name=' . urlencode($first_name) . '&background=3b82f6&color=fff&size=128';
+    // fallback avatar
+    $avatar_url = $fallback_avatar;
 }
 
 ?>
@@ -82,7 +83,7 @@ if (!empty($profile_picture)) {
                     <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" fill="var(--accent)"/><path d="M3 20c0-3.866 3.582-7 9-7s9 3.134 9 7" stroke="#111827" stroke-opacity=".06" stroke-width="1.5"/></svg>
                     <div class="brand">Mentor Match</div>
                 </div>
-                <img src="<?php echo $avatar_url; ?>" alt="Profile" class="avatar" />
+                <img src="<?php echo $avatar_url; ?>" alt="Profile" class="avatar" data-fallback="<?php echo $fallback_avatar; ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;" />
             </div>
             <h1>Welcome back, <?php echo $first_name; ?>!</h1>
             <p class="lead">Discover amazing mentors</p>
