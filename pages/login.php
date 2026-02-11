@@ -24,12 +24,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['phone'] = $user['phone'];
                 $_SESSION['role'] = $user['role'];
+               
 
-                if ($user['role'] === 'mentor') {
-                    header("Location: ../users/mentor/mentor_dashboard.php");
-                } else {
-                    header("Location: ../users/student/student_dashboard.php");
-                }
+                header("Location: dashboard.php");
                 exit;
             } else {
                 $errors[] = "Invalid email or password.";

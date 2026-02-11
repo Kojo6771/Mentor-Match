@@ -16,7 +16,7 @@ $userRole = $_SESSION['role'] ?? 'student';
 // Define nav items based on role
 if ($userRole === 'mentor') {
     $navItems = [
-        ['name' => 'mentor_dashboard', 'label' => 'Home', 'path' => $navBasePath . 'users/mentor/mentor_dashboard.php', 'icon' => 'home'],
+        ['name' => 'dashboard', 'label' => 'Home', 'path' => $navBasePath . 'pages/dashboard.php', 'icon' => 'home'],
         ['name' => 'calendar', 'label' => 'Calendar', 'path' => $navBasePath . 'pages/calendar.php', 'icon' => 'calendar'],
         ['name' => 'requests', 'label' => 'Requests', 'path' => $navBasePath . 'pages/requests.php', 'icon' => 'requests'],
         ['name' => 'chat', 'label' => 'Chats', 'path' => $navBasePath . 'pages/chat.php', 'icon' => 'chat'],
@@ -24,7 +24,7 @@ if ($userRole === 'mentor') {
     ];
 } else {
     $navItems = [
-        ['name' => 'student_dashboard', 'label' => 'Home', 'path' => $navBasePath . 'users/student/student_dashboard.php', 'icon' => 'home'],
+        ['name' => 'dashboard', 'label' => 'Home', 'path' => $navBasePath . 'pages/dashboard.php', 'icon' => 'home'],
         ['name' => 'calendar', 'label' => 'Calendar', 'path' => $navBasePath . 'pages/calendar.php', 'icon' => 'calendar'],
         ['name' => 'mentor_swipe', 'label' => 'Mentors', 'path' => $navBasePath . 'pages/mentor_swipe.php', 'icon' => 'mentors'],
         ['name' => 'chatbot', 'label' => 'Chatbot', 'path' => $navBasePath . 'pages/chatbot.php', 'icon' => 'chat'],

@@ -23,3 +23,32 @@ h1{font-size:1.25rem;margin:0 0 4px;}
     .stat-card{padding:10px 6px;}
     .stat-value{font-size:1.25rem;}
 }
+        .status-card {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .status-card.pending {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+        }
+        .status-card.rejected {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+        }
+        .status-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+        .status-card h2 {
+            font-size: 1.1rem;
+            margin: 0 0 8px;
+            color: #111827;
+        }
+        .status-card p {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin: 0;
+        }
