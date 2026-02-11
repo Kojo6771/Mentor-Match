@@ -108,6 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Apply as Mentor — Mentor Match</title>
     <meta name="description" content="Apply to become a mentor on Mentor Match — share your expertise and help students grow.">
+    <link rel="stylesheet" href="../../assets/css/mentor_application.css">
     <link rel="stylesheet" href="../../assets/css/styles.css">
 </head>
 <body>
@@ -163,45 +164,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </section>
     </main>
 
-    <style>
-        .textarea {
-            min-height: 140px;
-            padding: 12px 14px;
-            resize: vertical;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-            font-size: 1rem;
-        }
-
-        .char-count {
-            display: block;
-            font-size: 0.8rem;
-            color: var(--muted);
-            margin-top: 4px;
-        }
-
-        .help-text {
-            display: block;
-            font-size: 0.8rem;
-            color: var(--muted);
-            margin-top: 4px;
-        }
-
-        .success {
-            background: #dcfce7;
-            color: #166534;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            margin-bottom: 12px;
-        }
-
-        .secondary {
-            margin-top: 6px;
-            display: block;
-            text-align: center;
-            text-decoration: none;
-        }
-    </style>
 
     <script>
         const textarea = document.getElementById('motivation');
