@@ -14,7 +14,7 @@ try {
     $check = $pdo->prepare('SELECT student_id FROM students WHERE student_id = ?');
     $check->execute([$_SESSION['user_id']]);
     if ($check->rowCount() > 0) {
-        header('Location: ../student/student_dashboard.php');
+        header('Location: ../../pages/dashboard.php');
         exit;
     }
 } catch (PDOException $e) {
