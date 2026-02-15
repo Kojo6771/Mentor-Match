@@ -121,6 +121,63 @@ if ($user_role === 'mentor') {
     $avg_rating = $avg_rating ? number_format((float)$avg_rating, 1) : 'N/A';
 }
 
+// ============ ADMIN DATA ============
+if ($user_role === 'admin') {
+    // Count pending mentor applications
+    $pending_applications = 0;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM mentor_applications WHERE status = 'pending'");
+        $pending_applications = (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $pending_applications = 0;
+    }
+
+    // Count total users
+    $total_users = 0;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM users");
+        $total_users = (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $total_users = 0;
+    }
+
+    // Count total mentors
+    $total_mentors = 0;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'mentor'");
+        $total_mentors = (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $total_mentors = 0;
+    }
+
+    // Count total students
+    $total_students = 0;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'student'");
+        $total_students = (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $total_students = 0;
+    }
+
+    // Count total sessions
+    $total_sessions = 0;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM sessions");
+        $total_sessions = (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $total_sessions = 0;
+    }
+
+    // Count active sessions (confirmed)
+    $active_sessions = 0;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM sessions WHERE status = 'confirmed'");
+        $active_sessions = (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $active_sessions = 0;
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -194,6 +251,57 @@ if ($user_role === 'mentor') {
                         <div>
                             <div class="action-title">My Profile</div>
                             <div class="action-desc">Update your info and preferences</div>
+                        </div>
+                    </a>
+                </div>
+
+            <?php elseif($user_role === 'admin'): ?>
+                <!-- ============ ADMIN VIEW ============ -->
+                <p class="lead">Platform administration</p>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value"><?php echo $pending_applications; ?></div>
+                        <div class="stat-label">Pending Apps</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><?php echo $total_mentors; ?></div>
+                        <div class="stat-label">Mentors</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><?php echo $total_students; ?></div>
+                        <div class="stat-label">Students</div>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Quick Actions</h2>
+                <div class="actions-grid">
+                    <a href="../users/admin/admin_dashboard.php" class="action-card">
+                        <div class="action-icon">📋</div>
+                        <div>
+                            <div class="action-title">Mentor Applications</div>
+                            <div class="action-desc">Review pending mentor applications</div>
+                        </div>
+                    </a>
+                    <a href="admin_users.php" class="action-card white">
+                        <div class="action-icon">👥</div>
+                        <div>
+                            <div class="action-title">Manage Users</div>
+                            <div class="action-desc">View and manage all users</div>
+                        </div>
+                    </a>
+                    <a href="admin_sessions.php" class="action-card white">
+                        <div class="action-icon">📅</div>
+                        <div>
+                            <div class="action-title">Sessions</div>
+                            <div class="action-desc">Monitor mentoring sessions</div>
+                        </div>
+                    </a>
+                    <a href="admin_reports.php" class="action-card white">
+                        <div class="action-icon">📊</div>
+                        <div>
+                            <div class="action-title">Reports</div>
+                            <div class="action-desc">View platform analytics</div>
                         </div>
                     </a>
                 </div>
