@@ -219,7 +219,11 @@ if ($user_role === 'admin') {
                     </div>
                     <div class="stat-card">
                         <div class="stat-value"><?php echo $messages; ?></div>
-                        <div class="stat-label">Messages</div>
+                        <?php if ($messages === 1): ?>
+                            <div class="stat-label">Message</div>
+                        <?php else: ?>
+                            <div class="stat-label">Messages</div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -334,11 +338,20 @@ if ($user_role === 'admin') {
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-value"><?php echo $active_students; ?></div>
-                            <div class="stat-label">Active Students</div>
+                            <?php if ($active_students === 1): ?>
+                                <div class="stat-label">Active Student</div>
+                            <?php else: ?>
+                                <div class="stat-label">Active Students</div>
+                            <?php endif; ?>
                         </div>
+
                         <div class="stat-card">
                             <div class="stat-value"><?php echo $pending_requests; ?></div>
-                            <div class="stat-label">Requests</div>
+                            <?php if ($pending_requests === 1): ?>
+                                <div class="stat-label">Pending Request</div>
+                            <?php else: ?>
+                                <div class="stat-label">Pending Requests</div>
+                            <?php endif; ?>
                         </div>
                         <div class="stat-card">
                             <div class="stat-value"><?php echo $avg_rating; ?></div>
