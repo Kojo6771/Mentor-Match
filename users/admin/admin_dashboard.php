@@ -40,10 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt = $pdo->prepare("UPDATE users SET role = 'mentor' WHERE id = ?");
                     $stmt->execute([$app['user_id']]);
                     
-                    // Create mentor profile
-                    $stmt = $pdo->prepare("INSERT INTO mentor_profiles (user_id, experience_years, verified) VALUES (?, ?, 1)");
-                    $stmt->execute([$app['user_id'], $app['experience_years']]);
-                    $mentor_id = $pdo->lastInsertId();
+                    // Create mentor profile (mentor_id must equal user_id as per FK constraint)
+                    $stmt = $pdo->prepare("INSERT INTO mentor_profiles (mentor_id, user_id, experience_years, verified) VALUES (?, ?, ?, 1)");
+                    $stmt->execute([$app['user_id'], $app['user_id'], $app['experience_years']]);
+                    $mentor_id = $app['user_id'];
                     
                     // Copy subjects from application to mentor_subjects
                     $stmt = $pdo->prepare("SELECT subject_id FROM mentor_application_subjects WHERE application_id = ?");
@@ -119,6 +119,10 @@ try {
 
 $pending_count = count($pending_applications);
 ?>
+
+
+
+<!-- HMTL -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
