@@ -123,11 +123,26 @@ $pending_count = count($pending_applications);
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#06b6d4">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Admin Panel — Mentor Match</title>
     <meta name="description" content="Admin panel for managing mentor applications.">
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/admin_dashboard.css">
+    <style>
+        /* Prevent text selection on buttons for touch */
+        button, .btn-back, .btn-dashboard {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+    </style>
 </head>
 <body>
     <div class="admin-container">
@@ -142,7 +157,7 @@ $pending_count = count($pending_applications);
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/>
                     </svg>
-                    Dashboard
+                    <span>Dashboard</span>
                 </a>
             </div>
         </header>

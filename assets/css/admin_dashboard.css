@@ -452,24 +452,126 @@
     border: 1px solid #ef4444;
 }
 
-/* Responsive */
-@media (max-width: 480px) {
+/* Responsive - Mobile First Approach */
+
+/* Small phones (320px and up) */
+@media (max-width: 359px) {
+    .admin-header {
+        padding: 16px 12px;
+    }
+    
     .admin-header h1 {
-        font-size: 1.4rem;
+        font-size: 1.2rem;
+    }
+    
+    .admin-header p {
+        font-size: 0.85rem;
+    }
+    
+    .admin-content {
+        padding: 16px 12px;
+    }
+    
+    .application-card-content {
+        padding: 16px;
+    }
+    
+    .applicant-avatar,
+    .applicant-avatar-placeholder {
+        width: 56px;
+        height: 56px;
+    }
+    
+    .applicant-avatar-placeholder svg {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .applicant-details h3 {
+        font-size: 1.1rem;
+    }
+    
+    .applicant-email {
+        font-size: 0.8rem;
+        word-break: break-all;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+        padding: 3px 8px;
+    }
+    
+    .info-section h4 {
+        font-size: 0.85rem;
+    }
+    
+    .info-section p {
+        font-size: 0.85rem;
+    }
+    
+    .btn-approve,
+    .btn-reject,
+    .btn-confirm-reject,
+    .btn-cancel {
+        padding: 14px 12px;
+        font-size: 0.9rem;
+    }
+    
+    .empty-state {
+        padding: 40px 16px;
+    }
+    
+    .empty-state-icon {
+        width: 64px;
+        height: 64px;
+    }
+    
+    .empty-state-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .empty-state h2 {
+        font-size: 1.25rem;
+    }
+}
+
+/* Regular phones (360px - 480px) */
+@media (max-width: 480px) {
+    .admin-header {
+        padding: 20px 16px;
+    }
+    
+    .admin-header h1 {
+        font-size: 1.35rem;
     }
     
     .admin-header-inner {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
     }
     
     .btn-back {
-        align-self: flex-end;
-        margin-top: -40px;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .btn-back span {
+        display: none;
+    }
+    
+    .section-header h2 {
+        font-size: 1.1rem;
+    }
+    
+    .application-card-content {
+        padding: 20px;
     }
     
     .applicant-header {
         flex-direction: column;
+        gap: 12px;
     }
     
     .applicant-info {
@@ -479,15 +581,198 @@
         width: 100%;
     }
     
+    .applicant-avatar,
+    .applicant-avatar-placeholder {
+        width: 64px;
+        height: 64px;
+    }
+    
+    .applicant-details {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .applicant-details h3 {
+        font-size: 1.2rem;
+        text-align: center;
+    }
+    
     .applicant-email {
         justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .subjects-list {
+        justify-content: center;
+    }
+    
+    .info-section {
+        margin-top: 16px;
+    }
+    
+    .info-section h4 {
+        justify-content: center;
+    }
+    
+    .info-section p {
+        text-align: center;
+    }
+    
+    .application-date {
+        text-align: center;
+        margin-top: 16px;
+        padding-top: 12px;
     }
     
     .action-buttons {
         flex-direction: column;
+        gap: 10px;
+        margin-top: 16px;
+        padding-top: 16px;
+    }
+    
+    .btn-approve,
+    .btn-reject {
+        width: 100%;
+        padding: 14px 20px;
+        /* Larger touch targets for mobile */
+        min-height: 48px;
+    }
+    
+    .rejection-form {
+        margin-top: 16px;
+        padding-top: 16px;
+    }
+    
+    .rejection-form textarea {
+        font-size: 16px; /* Prevents iOS zoom on focus */
+        min-height: 100px;
     }
     
     .rejection-actions {
         flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-confirm-reject,
+    .btn-cancel {
+        width: 100%;
+        min-height: 48px;
+    }
+    
+    .empty-state {
+        padding: 48px 20px;
+    }
+    
+    .btn-dashboard {
+        width: 100%;
+        justify-content: center;
+        min-height: 48px;
+    }
+}
+
+/* Tablets and small laptops (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    .admin-header-inner {
+        max-width: 100%;
+        padding: 0 8px;
+    }
+    
+    .admin-content {
+        max-width: 100%;
+        padding: 24px 20px;
+    }
+    
+    .application-card-content {
+        padding: 24px;
+    }
+    
+    .applicant-info {
+        gap: 20px;
+    }
+}
+
+/* Touch-friendly improvements for all mobile devices */
+@media (hover: none) and (pointer: coarse) {
+    .btn-approve,
+    .btn-reject,
+    .btn-confirm-reject,
+    .btn-cancel,
+    .btn-back,
+    .btn-dashboard {
+        /* Remove hover transforms on touch devices */
+        transform: none !important;
+    }
+    
+    .btn-approve:active {
+        background: #16a34a;
+    }
+    
+    .btn-reject:active {
+        background: #fef2f2;
+    }
+    
+    .btn-confirm-reject:active {
+        background: #dc2626;
+    }
+    
+    .btn-cancel:active {
+        background: #f3f4f6;
+    }
+    
+    .btn-back:active {
+        background: #ecfeff;
+    }
+    
+    .btn-dashboard:active {
+        background: #0891b2;
+    }
+}
+
+/* Safe area insets for notched phones */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .admin-container {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    
+    .admin-header {
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+    }
+    
+    .admin-content {
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+    }
+}
+
+/* Landscape orientation on phones */
+@media (max-height: 500px) and (orientation: landscape) {
+    .admin-header {
+        padding: 12px 16px;
+    }
+    
+    .admin-header h1 {
+        font-size: 1.25rem;
+    }
+    
+    .admin-header p {
+        display: none;
+    }
+    
+    .empty-state {
+        padding: 24px 20px;
+    }
+    
+    .empty-state-icon {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 16px;
+    }
+    
+    .empty-state-icon svg {
+        width: 24px;
+        height: 24px;
     }
 }
