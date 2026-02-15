@@ -262,26 +262,27 @@ if ($user_role === 'admin') {
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-value"><?php echo $pending_applications; ?></div>
-                        <?php if ($pending_applications > 1): ?>
-                            <div class="stat-label">Pending Apps</div>
-                        <?php else: ?>
+                        <?php if ($pending_applications === 1): ?>
                             <div class="stat-label">Pending App</div>
+                        <?php else: ?>
+                            <div class="stat-label">Pending Apps</div>
                         <?php endif; ?>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value"><?php echo $total_mentors; ?></div>
-                        <?php if ($total_mentors > 1): ?>
-                            <div class="stat-label">Mentors</div>
-                        <?php else: ?>
+                        <?php if ($total_mentors === 1): ?>
                             <div class="stat-label">Mentor</div>
+    
+                        <?php else: ?>
+                            <div class="stat-label">Mentors</div>
                         <?php endif; ?>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value"><?php echo $total_students; ?></div>
-                        <?php if ($total_students > 1): ?>
-                            <div class="stat-label">Students</div>
-                        <?php else: ?>
+                        <?php if ($total_students === 1): ?>
                             <div class="stat-label">Student</div>
+                        <?php else: ?>
+                            <div class="stat-label">Students</div>
                         <?php endif; ?>
                     </div>
                 </div>
