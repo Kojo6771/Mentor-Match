@@ -293,7 +293,7 @@ if ($user_role === 'admin') {
 
                 <h2 class="section-title">Quick Actions</h2>
                 <div class="actions-grid">
-                    <a href="../users/admin/admin_dashboard.php" class="action-card">
+                    <a href="../users/admin/manage_applications.php" class="action-card">
                         <div class="action-icon">📋</div>
                         <div>
                             <div class="action-title">Mentor Applications</div>
