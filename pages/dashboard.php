@@ -144,7 +144,7 @@ if ($user_role === 'admin') {
     // Count total mentors
     $total_mentors = 0;
     try {
-        $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'mentor'");
+        $stmt = $pdo->query("SELECT COUNT(*) FROM mentor_profiles WHERE verified = 1");
         $total_mentors = (int)$stmt->fetchColumn();
     } catch (PDOException $e) {
         $total_mentors = 0;
