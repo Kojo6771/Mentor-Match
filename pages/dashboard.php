@@ -121,6 +121,63 @@ if ($user_role === 'mentor') {
     $avg_rating = $avg_rating ? number_format((float)$avg_rating, 1) : 'N/A';
 }
 
+// ============ ADMIN DATA ============
+if ($user_role === 'admin') {
+    // Count pending mentor applications
+    $pending_applications = 0;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM mentor_applications WHERE status = 'pending'");
+        $pending_applications = (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $pending_applications = 0;
+    }
+
+    // Count total users
+    $total_users = 0;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM users");
+        $total_users = (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $total_users = 0;
+    }
+
+    // Count total mentors
+    $total_mentors = 0;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'mentor'");
+        $total_mentors = (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $total_mentors = 0;
+    }
+
+    // Count total students
+    $total_students = 0;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'student'");
+        $total_students = (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $total_students = 0;
+    }
+
+    // Count total sessions
+    $total_sessions = 0;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM sessions");
+        $total_sessions = (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $total_sessions = 0;
+    }
+
+    // Count active sessions (confirmed)
+    $active_sessions = 0;
+    try {
+        $stmt = $pdo->query("SELECT COUNT(*) FROM sessions WHERE status = 'confirmed'");
+        $active_sessions = (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        $active_sessions = 0;
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -162,7 +219,11 @@ if ($user_role === 'mentor') {
                     </div>
                     <div class="stat-card">
                         <div class="stat-value"><?php echo $messages; ?></div>
-                        <div class="stat-label">Messages</div>
+                        <?php if ($messages === 1): ?>
+                            <div class="stat-label">Message</div>
+                        <?php else: ?>
+                            <div class="stat-label">Messages</div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -198,6 +259,70 @@ if ($user_role === 'mentor') {
                     </a>
                 </div>
 
+            <?php elseif($user_role === 'admin'): ?>
+                <!-- ============ ADMIN VIEW ============ -->
+                <p class="lead">Platform administration</p>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value"><?php echo $pending_applications; ?></div>
+                        <?php if ($pending_applications === 1): ?>
+                            <div class="stat-label">Pending App</div>
+                        <?php else: ?>
+                            <div class="stat-label">Pending Apps</div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><?php echo $total_mentors; ?></div>
+                        <?php if ($total_mentors === 1): ?>
+                            <div class="stat-label">Mentor</div>
+    
+                        <?php else: ?>
+                            <div class="stat-label">Mentors</div>
+                        <?php endif; ?>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value"><?php echo $total_students; ?></div>
+                        <?php if ($total_students === 1): ?>
+                            <div class="stat-label">Student</div>
+                        <?php else: ?>
+                            <div class="stat-label">Students</div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <h2 class="section-title">Quick Actions</h2>
+                <div class="actions-grid">
+                    <a href="../users/admin/manage_applications.php" class="action-card">
+                        <div class="action-icon">📋</div>
+                        <div>
+                            <div class="action-title">Mentor Applications</div>
+                            <div class="action-desc">Review pending mentor applications</div>
+                        </div>
+                    </a>
+                    <a href="admin_users.php" class="action-card white">
+                        <div class="action-icon">👥</div>
+                        <div>
+                            <div class="action-title">Manage Users</div>
+                            <div class="action-desc">View and manage all users</div>
+                        </div>
+                    </a>
+                    <a href="admin_sessions.php" class="action-card white">
+                        <div class="action-icon">📅</div>
+                        <div>
+                            <div class="action-title">Sessions</div>
+                            <div class="action-desc">Monitor mentoring sessions</div>
+                        </div>
+                    </a>
+                    <a href="admin_reports.php" class="action-card white">
+                        <div class="action-icon">📊</div>
+                        <div>
+                            <div class="action-title">Reports</div>
+                            <div class="action-desc">View platform analytics</div>
+                        </div>
+                    </a>
+                </div>
+
             <?php else: ?>
                 <!-- ============ MENTOR VIEW ============ -->
                 <?php if ($application_status === 'pending'): ?>
@@ -213,11 +338,20 @@ if ($user_role === 'mentor') {
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-value"><?php echo $active_students; ?></div>
-                            <div class="stat-label">Active Students</div>
+                            <?php if ($active_students === 1): ?>
+                                <div class="stat-label">Active Student</div>
+                            <?php else: ?>
+                                <div class="stat-label">Active Students</div>
+                            <?php endif; ?>
                         </div>
+
                         <div class="stat-card">
                             <div class="stat-value"><?php echo $pending_requests; ?></div>
-                            <div class="stat-label">Requests</div>
+                            <?php if ($pending_requests === 1): ?>
+                                <div class="stat-label">Pending Request</div>
+                            <?php else: ?>
+                                <div class="stat-label">Pending Requests</div>
+                            <?php endif; ?>
                         </div>
                         <div class="stat-card">
                             <div class="stat-value"><?php echo $avg_rating; ?></div>
