@@ -49,8 +49,8 @@ function render_swipe_card($mentor, $index = 0) {
                 <?php if ($has_custom_avatar): ?>
                     <img src="<?= $avatar_url ?>" alt="<?= $full_name ?>" class="swipe-card-avatar">
                 <?php else: ?>
-                    <div class="swipe-card-avatar swipe-card-avatar-fallback">
-                        <span class="avatar-emoji">👨‍🏫</span>
+                    <div class="swipe-card-avatar-fallback">
+                        <span class="avatar-emoji">&#x1F9D1;&#x200D;&#x1F3EB;</span>
                     </div>
                 <?php endif; ?>
             </div>
@@ -178,6 +178,11 @@ function render_swipe_card_styles() {
     }
 
     .swipe-card-avatar-fallback {
+        width: 128px;
+        height: 128px;
+        border-radius: 50%;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         background: linear-gradient(135deg, #f472b6 0%, #ef4444 100%);
         display: flex;
         align-items: center;
@@ -185,7 +190,8 @@ function render_swipe_card_styles() {
     }
 
     .avatar-emoji {
-        font-size: 3rem;
+        font-size: 3.5rem;
+        line-height: 1;
     }
 
     /* Info Section */
@@ -427,9 +433,14 @@ function render_swipe_card_styles() {
             padding: 24px;
         }
 
-        .swipe-card-avatar {
+        .swipe-card-avatar,
+        .swipe-card-avatar-fallback {
             width: 100px;
             height: 100px;
+        }
+
+        .avatar-emoji {
+            font-size: 2.75rem;
         }
 
         .year-number,

@@ -100,56 +100,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     <title>Find a Mentor — Mentor Match</title>
     <meta name="description" content="Swipe to find your perfect mentor match.">
     <link rel="stylesheet" href="../assets/css/styles.css">
-    <style>
-        .container {
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+    <link rel="stylesheet" href="../assets/css/mentor_swipe.css">
 
-        .page-header {
-            text-align: center;
-            margin-bottom: 24px;
-            width: 100%;
-            max-width: 420px;
-        }
-
-        .page-header h1 {
-            font-size: 1.5rem;
-            margin: 0 0 8px;
-            color: #111827;
-        }
-
-        .page-header p {
-            color: var(--muted);
-            margin: 0;
-            font-size: 0.95rem;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--muted);
-            text-decoration: none;
-            font-size: 0.9rem;
-            margin-bottom: 16px;
-        }
-
-        .back-link:hover {
-            color: var(--accent);
-        }
-
-        .swipe-wrapper {
-            width: 100%;
-            max-width: 440px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-    </style>
 </head>
 <body>
     <main class="container">
