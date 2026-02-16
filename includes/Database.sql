@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 10, 2026 at 12:00 AM
+-- Generation Time: Feb 16, 2026 at 01:49 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -63,6 +63,13 @@ CREATE TABLE `mentor_applications` (
   `reviewed_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `mentor_applications`
+--
+
+INSERT INTO `mentor_applications` (`id`, `user_id`, `motivation`, `experience_years`, `status`, `admin_notes`, `submitted_at`, `reviewed_at`) VALUES
+(2, 13, 'I have worked in industry', 4, 'approved', NULL, '2026-02-11 01:36:10', '2026-02-15 03:16:22');
+
 -- --------------------------------------------------------
 
 --
@@ -73,6 +80,13 @@ CREATE TABLE `mentor_application_subjects` (
   `application_id` int(11) NOT NULL,
   `subject_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `mentor_application_subjects`
+--
+
+INSERT INTO `mentor_application_subjects` (`application_id`, `subject_id`) VALUES
+(2, 5);
 
 -- --------------------------------------------------------
 
@@ -88,6 +102,13 @@ CREATE TABLE `mentor_profiles` (
   `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `mentor_profiles`
+--
+
+INSERT INTO `mentor_profiles` (`mentor_id`, `bio`, `experience_years`, `verified`, `user_id`) VALUES
+(13, NULL, 4, 1, 13);
+
 -- --------------------------------------------------------
 
 --
@@ -98,6 +119,13 @@ CREATE TABLE `mentor_subjects` (
   `mentor_id` int(11) NOT NULL,
   `subject_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `mentor_subjects`
+--
+
+INSERT INTO `mentor_subjects` (`mentor_id`, `subject_id`) VALUES
+(13, 5);
 
 -- --------------------------------------------------------
 
@@ -159,8 +187,16 @@ CREATE TABLE `students` (
   `learning_preference` enum('Videos','In person sessions','Quizzes') NOT NULL,
   `bio` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `user_id` int(11) NOT NULL
+  `user_id` int(11) NOT NULL,
+  `mentor_id` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `students`
+--
+
+INSERT INTO `students` (`student_id`, `course`, `year_of_study`, `learning_preference`, `bio`, `created_at`, `user_id`, `mentor_id`) VALUES
+(12, 'Computer science', 3, 'In person sessions', 'I want to be a software developer', '2026-02-11 01:23:13', 12, NULL);
 
 -- --------------------------------------------------------
 
@@ -228,7 +264,9 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `phone`, `email`, `password`, `role`, `created_at`, `profile_picture`) VALUES
-(1, 'Alistair', 'Ridley', '078456621323', 'mrdownbad@gmail.com', '$2y$10$.UTYGKQKYJRsJ4Wmz3rCfeI7hFz/ZEV4Ggfjwd.ZK4R31fWkJsq8q', 'student', '2026-01-29 22:09:09', NULL);
+(1, 'Alistair', 'Ridley', '078456621323', 'mrdownbad@gmail.com', '$2y$10$.UTYGKQKYJRsJ4Wmz3rCfeI7hFz/ZEV4Ggfjwd.ZK4R31fWkJsq8q', 'student', '2026-01-29 22:09:09', NULL),
+(12, 'Kojo', 'Antwi', '07463885316', 'k_wad_wo@hotmail.co.uk', '$2y$10$OTVk1PW1CDgtXcTAeY4noO2ldiFhKRrTrM04Y6jWafZi/McHUHyzm', 'admin', '2026-02-11 01:22:41', 'uploads/profile_pictures/profile_698bd9e129821_1770772961.jpg'),
+(13, 'Jacob', 'Harvey', '07463885316', 'nyashdying@gmail.com', '$2y$10$5C4xySz9am0eWBQWf/BIQuDJ5tMdidEqTBxX2m7lSLG/qpmRNKJpS', 'mentor', '2026-02-11 01:35:51', 'uploads/profile_pictures/profile_698bdcf7225b2_1770773751.jpg');
 
 --
 -- Indexes for dumped tables
@@ -307,7 +345,8 @@ ALTER TABLE `sessions`
 --
 ALTER TABLE `students`
   ADD PRIMARY KEY (`student_id`),
-  ADD KEY `students_user_fk` (`user_id`);
+  ADD KEY `students_user_fk` (`user_id`),
+  ADD KEY `fk_student_mentor` (`mentor_id`);
 
 --
 -- Indexes for table `student_interests`
@@ -350,7 +389,7 @@ ALTER TABLE `interests`
 -- AUTO_INCREMENT for table `mentor_applications`
 --
 ALTER TABLE `mentor_applications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `messages`
@@ -380,7 +419,7 @@ ALTER TABLE `subjects`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- Constraints for dumped tables
@@ -446,6 +485,7 @@ ALTER TABLE `sessions`
 -- Constraints for table `students`
 --
 ALTER TABLE `students`
+  ADD CONSTRAINT `fk_student_mentor` FOREIGN KEY (`mentor_id`) REFERENCES `mentor_profiles` (`mentor_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `students_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
