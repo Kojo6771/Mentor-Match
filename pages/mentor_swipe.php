@@ -17,6 +17,45 @@ if ($user_role !== 'student') {
     exit;
 }
 
+// Handle AJAX swipe request - MUST be before any HTML output
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    header('Content-Type: application/json');
+    
+    $mentor_id = intval($_POST['mentor_id'] ?? 0);
+    $action = $_POST['action'] ?? '';
+    
+    if ($mentor_id && in_array($action, ['like', 'pass'])) {
+        try {
+            $status = $action === 'like' ? 'pending' : 'cancelled';
+            
+            // Check if request already exists
+            $checkSql = "SELECT id FROM mentor_requests WHERE student_id = ? AND mentor_id = ?";
+            $checkStmt = $pdo->prepare($checkSql);
+            $checkStmt->execute([$user_id, $mentor_id]);
+            $existing = $checkStmt->fetch();
+            
+            if ($existing) {
+                // Update existing request
+                $sql = "UPDATE mentor_requests SET status = ?, requested_at = CURRENT_TIMESTAMP WHERE student_id = ? AND mentor_id = ?";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$status, $user_id, $mentor_id]);
+            } else {
+                // Insert new request
+                $sql = "INSERT INTO mentor_requests (student_id, mentor_id, status) VALUES (?, ?, ?)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$user_id, $mentor_id, $status]);
+            }
+            
+            echo json_encode(['success' => true, 'action' => $action, 'mentor_id' => $mentor_id]);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
+        }
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Invalid request', 'mentor_id' => $mentor_id, 'action' => $action]);
+    }
+    exit;
+}
+
 // Include the swipe card component
 require_once '../components/swipe/swipe_card.php';
 
@@ -63,33 +102,6 @@ try {
     unset($mentor);
 } catch (PDOException $e) {
     $mentors = [];
-}
-
-// Handle AJAX swipe request
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    header('Content-Type: application/json');
-    
-    $mentor_id = intval($_POST['mentor_id'] ?? 0);
-    $action = $_POST['action'] ?? '';
-    
-    if ($mentor_id && in_array($action, ['like', 'pass'])) {
-        try {
-            $status = $action === 'like' ? 'pending' : 'rejected';
-            
-            // Insert the swipe decision
-            $sql = "INSERT INTO mentor_requests (student_id, mentor_id, status) VALUES (?, ?, ?)
-                    ON DUPLICATE KEY UPDATE status = VALUES(status), requested_at = CURRENT_TIMESTAMP";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$user_id, $mentor_id, $status]);
-            
-            echo json_encode(['success' => true, 'action' => $action]);
-        } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'error' => 'Database error']);
-        }
-    } else {
-        echo json_encode(['success' => false, 'error' => 'Invalid request']);
-    }
-    exit;
 }
 ?>
 <!DOCTYPE html>
