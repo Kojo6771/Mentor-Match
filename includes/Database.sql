@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 16, 2026 at 01:49 AM
+-- Generation Time: Feb 16, 2026 at 02:25 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -108,6 +108,21 @@ CREATE TABLE `mentor_profiles` (
 
 INSERT INTO `mentor_profiles` (`mentor_id`, `bio`, `experience_years`, `verified`, `user_id`) VALUES
 (13, NULL, 4, 1, 13);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `mentor_requests`
+--
+
+CREATE TABLE `mentor_requests` (
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `mentor_id` int(11) NOT NULL,
+  `status` enum('pending','accepted','rejected','cancelled') DEFAULT 'pending',
+  `requested_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `responded_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -308,6 +323,14 @@ ALTER TABLE `mentor_profiles`
   ADD KEY `mentor_profiles_user_fk` (`user_id`);
 
 --
+-- Indexes for table `mentor_requests`
+--
+ALTER TABLE `mentor_requests`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_active_request` (`student_id`,`mentor_id`),
+  ADD KEY `fk_request_mentor` (`mentor_id`);
+
+--
 -- Indexes for table `mentor_subjects`
 --
 ALTER TABLE `mentor_subjects`
@@ -392,6 +415,12 @@ ALTER TABLE `mentor_applications`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT for table `mentor_requests`
+--
+ALTER TABLE `mentor_requests`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
@@ -450,6 +479,13 @@ ALTER TABLE `mentor_application_subjects`
 ALTER TABLE `mentor_profiles`
   ADD CONSTRAINT `mentor_profiles_ibfk_1` FOREIGN KEY (`mentor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `mentor_profiles_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `mentor_requests`
+--
+ALTER TABLE `mentor_requests`
+  ADD CONSTRAINT `fk_request_mentor` FOREIGN KEY (`mentor_id`) REFERENCES `mentor_profiles` (`mentor_id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_request_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `mentor_subjects`
