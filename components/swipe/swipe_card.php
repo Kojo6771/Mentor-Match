@@ -2,8 +2,7 @@
 /**
  * Swipe Card Component
  * 
- * Usage: Include this file and call render_swipe_card($mentor) 
- * Required: $mentor array with keys: id, first_name, last_name, profile_picture, year_of_study, course, rating, subjects, linkedin_url, github_url
+
  */
 
 function render_swipe_card($mentor, $index = 0) {
