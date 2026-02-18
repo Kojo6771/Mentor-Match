@@ -17,9 +17,33 @@ if ($user_role !== 'student') {
     exit;
 }
 
-// Handle AJAX swipe request - MUST be before any HTML output
+// Get the student_id from students table
+$student_id = null;
+try {
+    $studentStmt = $pdo->prepare('SELECT student_id FROM students WHERE user_id = ?');
+    $studentStmt->execute([$user_id]);
+    $studentRow = $studentStmt->fetch();
+    if ($studentRow) {
+        $student_id = $studentRow['student_id'];
+    } else {
+        // No student profile - redirect to profile setup
+        header('Location: ../users/student/student_profile_setup.php');
+        exit;
+    }
+} catch (PDOException $e) {
+    // Database error
+    header('Location: dashboard.php');
+    exit;
+}
+
+// Handle AJAX swipe request 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     header('Content-Type: application/json');
+    
+    if (!$student_id) {
+        echo json_encode(['success' => false, 'error' => 'Student profile not found. Please complete your profile first.']);
+        exit;
+    }
     
     $mentor_id = intval($_POST['mentor_id'] ?? 0);
     $action = $_POST['action'] ?? '';
@@ -28,27 +52,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         try {
             $status = $action === 'like' ? 'pending' : 'cancelled';
             
+            // Verify mentor exists
+            $mentorCheck = $pdo->prepare("SELECT mentor_id FROM mentor_profiles WHERE mentor_id = ?");
+            $mentorCheck->execute([$mentor_id]);
+            if (!$mentorCheck->fetch()) {
+                echo json_encode(['success' => false, 'error' => 'Mentor not found', 'mentor_id' => $mentor_id]);
+                exit;
+            }
+            
             // Check if request already exists
             $checkSql = "SELECT id FROM mentor_requests WHERE student_id = ? AND mentor_id = ?";
             $checkStmt = $pdo->prepare($checkSql);
-            $checkStmt->execute([$user_id, $mentor_id]);
+            $checkStmt->execute([$student_id, $mentor_id]);
             $existing = $checkStmt->fetch();
             
             if ($existing) {
                 // Update existing request
                 $sql = "UPDATE mentor_requests SET status = ?, requested_at = CURRENT_TIMESTAMP WHERE student_id = ? AND mentor_id = ?";
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute([$status, $user_id, $mentor_id]);
+                $stmt->execute([$status, $student_id, $mentor_id]);
+                echo json_encode(['success' => true, 'action' => $action, 'mentor_id' => $mentor_id, 'operation' => 'updated']);
             } else {
                 // Insert new request
                 $sql = "INSERT INTO mentor_requests (student_id, mentor_id, status) VALUES (?, ?, ?)";
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute([$user_id, $mentor_id, $status]);
+                $stmt->execute([$student_id, $mentor_id, $status]);
+                echo json_encode(['success' => true, 'action' => $action, 'mentor_id' => $mentor_id, 'operation' => 'inserted', 'request_id' => $pdo->lastInsertId()]);
             }
-            
-            echo json_encode(['success' => true, 'action' => $action, 'mentor_id' => $mentor_id]);
         } catch (PDOException $e) {
-            echo json_encode(['success' => false, 'error' => 'Database error: ' . $e->getMessage()]);
+            echo json_encode([
+                'success' => false, 
+                'error' => 'Database error: ' . $e->getMessage(),
+                'student_id' => $student_id,
+                'mentor_id' => $mentor_id,
+                'status' => $status ?? null
+            ]);
         }
     } else {
         echo json_encode(['success' => false, 'error' => 'Invalid request', 'mentor_id' => $mentor_id, 'action' => $action]);
@@ -64,7 +102,7 @@ $mentors = [];
 try {
     $sql = "
         SELECT 
-            u.id,
+            mp.mentor_id as id,
             u.first_name,
             u.last_name,
             u.profile_picture,
@@ -74,19 +112,19 @@ try {
             GROUP_CONCAT(DISTINCT s.name SEPARATOR '|||') as subjects
         FROM users u
         INNER JOIN mentor_profiles mp ON mp.user_id = u.id AND mp.verified = 1
-        LEFT JOIN mentor_subjects ms ON ms.mentor_id = u.id
+        LEFT JOIN mentor_subjects ms ON ms.mentor_id = mp.mentor_id
         LEFT JOIN subjects s ON s.id = ms.subject_id
-        LEFT JOIN reviews r ON r.mentor_id = u.id
+        LEFT JOIN reviews r ON r.mentor_id = mp.mentor_id
         WHERE u.role = 'mentor'
-        AND u.id NOT IN (
+        AND mp.mentor_id NOT IN (
             SELECT mentor_id FROM mentor_requests WHERE student_id = ?
         )
-        GROUP BY u.id
+        GROUP BY mp.mentor_id
         ORDER BY rating DESC, u.first_name ASC
         LIMIT 20
     ";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$user_id]);
+    $stmt->execute([$student_id]);
     $mentors = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Process subjects from GROUP_CONCAT
@@ -104,6 +142,9 @@ try {
     $mentors = [];
 }
 ?>
+
+
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -170,6 +211,8 @@ try {
     <script>
     // Handle swipe actions - send to server
     window.onMentorSwipe = function(mentorId, action) {
+        console.log('Sending swipe request:', { mentorId, action });
+        
         fetch('mentor_swipe.php', {
             method: 'POST',
             headers: {
@@ -177,14 +220,24 @@ try {
             },
             body: `mentor_id=${mentorId}&action=${action}`
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log('Server response:', data);
             if (data.success) {
-                console.log(`Mentor ${mentorId}: ${action}`);
+                console.log(`✓ Mentor ${mentorId}: ${action} - Request saved successfully`);
+            } else {
+                console.error('Failed to save request:', data.error);
+                alert('Failed to save your choice: ' + (data.error || 'Unknown error'));
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error sending swipe request:', error);
+            alert('Failed to save your choice. Please try again.');
         });
     };
     </script>
