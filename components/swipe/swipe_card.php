@@ -10,12 +10,21 @@ function render_swipe_card($mentor, $index = 0) {
     $first_name = htmlspecialchars($mentor['first_name'] ?? 'Mentor');
     $last_name = htmlspecialchars($mentor['last_name'] ?? '');
     $full_name = trim("$first_name $last_name");
-    
-    // Profile picture with fallback
-    $profile_picture = $mentor['profile_picture'] ?? '';
+
+    // Use mentor's profile picture from query
+    $profile_picture = $mentor['profile_picture'] ?? null;
+    $avatar_url = '';
     $fallback_avatar = 'https://ui-avatars.com/api/?name=' . urlencode($full_name) . '&background=3b82f6&color=fff&size=128';
-    $avatar_url = !empty($profile_picture) ? '../../' . htmlspecialchars($profile_picture) : $fallback_avatar;
-    $has_custom_avatar = !empty($profile_picture);
+
+    // Profile picture with fallback (page URL is /pages/mentor_swipe.php)
+    if (!empty($profile_picture)) {
+        // Stored as 'uploads/profile_pictures/filename.ext'
+        $avatar_url = '../' . htmlspecialchars($profile_picture);
+        $has_custom_avatar = true;
+    } else {
+        $avatar_url = $fallback_avatar;
+        $has_custom_avatar = false;
+    }
     
     // Year of study
     $year = intval($mentor['year_of_study'] ?? 3);
