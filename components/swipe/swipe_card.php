@@ -1,8 +1,8 @@
 <?php
 /**
  * Swipe Card Component
- * 
-
+ * Renders a swipeable card for a mentor profile with dynamic data and graceful fallbacks.
+ * Includes styles and JavaScript for swipe interactions.
  */
 
 function render_swipe_card($mentor, $index = 0) {
@@ -17,7 +17,7 @@ function render_swipe_card($mentor, $index = 0) {
 
     // Build avatar URL: uploaded image if present, otherwise generated fallback image
     if ($profile_picture !== '' && $profile_picture !== null) {
-        // Stored as 'uploads/profile_pictures/filename.ext' relative to project root
+        
         $avatar_url = '../' . htmlspecialchars($profile_picture);
     } else {
         $avatar_url = $fallback_avatar;
@@ -41,35 +41,51 @@ function render_swipe_card($mentor, $index = 0) {
     // Subjects/Expertise
     $subjects = $mentor['subjects'] ?? ['Object-oriented programming', 'Web development', 'Database Design'];
     
+    // Bio
+    $bio = htmlspecialchars($mentor['bio'] ?? 'Passionate about helping students succeed in their academic journey.');
+    
     // External links
     $linkedin_url = htmlspecialchars($mentor['linkedin_url'] ?? '#');
     $github_url = htmlspecialchars($mentor['github_url'] ?? '#');
     
     $z_index = 100 - $index;
     ?>
+
     <div class="swipe-card" data-mentor-id="<?= $mentor_id ?>" data-index="<?= $index ?>" style="z-index: <?= $z_index ?>;">
+        <div class="swipe-card-accent"></div>
         <div class="swipe-card-inner">
-            <!-- Profile Picture (with automatic fallback URL) -->
-            <div class="swipe-card-avatar-container">
-                <img src="<?php echo $avatar_url; ?>" alt="<?php echo $full_name; ?>" class="swipe-card-avatar" onerror="this.onerror=null; this.src='<?php echo $fallback_avatar; ?>';">
+            <!-- Header: Profile Picture + Info side by side -->
+            <div class="swipe-card-header">
+                <!-- Profile Picture (with automatic fallback URL) -->
+                <div class="swipe-card-avatar-container">
+                    <img src="<?php echo $avatar_url; ?>" alt="<?php echo $full_name; ?>" class="swipe-card-avatar" onerror="this.onerror=null; this.src='<?php echo $fallback_avatar; ?>';">
+                </div>
+
+                <!-- Year and Course -->
+                <div class="swipe-card-info">
+                    <div class="swipe-card-year">
+                        <span class="year-number"><?php echo $year; ?></span><sup class="year-suffix"><?php echo $year_suffix; ?></sup>
+                        <span class="year-label">Year</span>
+                    </div>
+                    <h3 class="swipe-card-course"><?php echo $course; ?></h3>
+                    
+                    <!-- Star Rating -->
+                    <div class="swipe-card-rating">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <svg class="star-icon <?php echo $i <= floor($rating) ? 'star-filled' : 'star-empty'; ?>" viewBox="0 0 24 24" width="24" height="24">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                        <?php endfor; ?>
+                    </div>
+                </div>
             </div>
 
-            <!-- Year and Course -->
-            <div class="swipe-card-info">
-                <div class="swipe-card-year">
-                    <span class="year-number"><?php echo $year; ?></span><sup class="year-suffix"><?php echo $year_suffix; ?></sup>
-                    <span class="year-label">Year</span>
-                </div>
-                <h3 class="swipe-card-course"><?php echo $course; ?></h3>
-                
-                <!-- Star Rating -->
-                <div class="swipe-card-rating">
-                    <?php for ($i = 1; $i <= 5; $i++): ?>
-                        <svg class="star-icon <?php echo $i <= floor($rating) ? 'star-filled' : 'star-empty'; ?>" viewBox="0 0 24 24" width="28" height="28">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                    <?php endfor; ?>
-                </div>
+            <div class="swipe-card-divider"></div>
+
+            <!-- Bio -->
+            <div class="swipe-card-section">
+                <h4 class="swipe-card-section-title">About me:</h4>
+                <p class="swipe-card-bio"><?php echo $bio; ?></p>
             </div>
 
             <div class="swipe-card-divider"></div>
@@ -125,16 +141,16 @@ function render_swipe_card_styles() {
     .swipe-container {
         position: relative;
         width: 100%;
-        max-width: 420px;
-        height: 620px;
+        max-width: 480px;
+        height: 600px;
         margin: 0 auto;
     }
 
     .swipe-card {
         position: absolute;
         width: 100%;
-        max-width: 420px;
-        background: #f3f4f6;
+        max-width: 480px;
+        background: #f8f9fa;
         border-radius: 24px;
         box-shadow: 0 8px 30px rgba(15, 23, 42, 0.12);
         cursor: grab;
@@ -142,6 +158,12 @@ function render_swipe_card_styles() {
         touch-action: pan-y;
         transition: transform 0.1s ease-out;
         overflow: hidden;
+    }
+
+    .swipe-card-accent {
+        height: 6px;
+        background: linear-gradient(90deg, #00d4ff, #00b8d4);
+        width: 100%;
     }
 
     .swipe-card:active {
@@ -157,14 +179,20 @@ function render_swipe_card_styles() {
     }
 
     .swipe-card-inner {
-        padding: 32px;
+        padding: 36px;
+    }
+
+    /* Header - Avatar + Info side by side */
+    .swipe-card-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 32px;
+        margin-bottom: 12px;
     }
 
     /* Avatar */
     .swipe-card-avatar-container {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 24px;
+        flex-shrink: 0;
     }
 
     .swipe-card-avatar {
@@ -172,7 +200,7 @@ function render_swipe_card_styles() {
         height: 128px;
         border-radius: 50%;
         object-fit: cover;
-        border: 4px solid #fff;
+        border: 5px solid #00d4ff;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
@@ -180,7 +208,7 @@ function render_swipe_card_styles() {
         width: 128px;
         height: 128px;
         border-radius: 50%;
-        border: 4px solid #fff;
+        border: 5px solid #fff;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         background: linear-gradient(135deg, #f472b6 0%, #ef4444 100%);
         display: flex;
@@ -189,26 +217,27 @@ function render_swipe_card_styles() {
     }
 
     .avatar-emoji {
-        font-size: 3.5rem;
+        font-size: 4rem;
         line-height: 1;
     }
 
     /* Info Section */
     .swipe-card-info {
-        text-align: center;
-        margin-bottom: 8px;
+        text-align: right;
+        flex: 1;
+        padding-top: 8px;
     }
 
     .swipe-card-year {
         display: flex;
         align-items: baseline;
-        justify-content: center;
+        justify-content: flex-end;
         gap: 4px;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
 
     .year-number {
-        font-size: 3.5rem;
+        font-size: 4.5rem;
         font-weight: 700;
         line-height: 1;
         color: #111827;
@@ -218,10 +247,11 @@ function render_swipe_card_styles() {
         font-size: 1.5rem;
         font-weight: 600;
         color: #111827;
+        margin-right: 6px;
     }
 
     .year-label {
-        font-size: 3.5rem;
+        font-size: 4.5rem;
         font-weight: 700;
         line-height: 1;
         color: #111827;
@@ -229,17 +259,19 @@ function render_swipe_card_styles() {
 
     .swipe-card-course {
         font-size: 1.5rem;
-        font-weight: 700;
+        font-weight: 600;
         color: #111827;
-        margin: 8px 0;
+        margin: 8px 0 12px;
+        border-bottom: 2px solid #111827;
+        padding-bottom: 6px;
+        display: inline-block;
     }
 
     /* Star Rating */
     .swipe-card-rating {
         display: flex;
-        justify-content: center;
-        gap: 4px;
-        margin-top: 12px;
+        justify-content: flex-end;
+        gap: 6px;
     }
 
     .star-icon {
@@ -260,21 +292,21 @@ function render_swipe_card_styles() {
 
     /* Divider */
     .swipe-card-divider {
-        height: 2px;
+        height: 4px;
         background: #d1d5db;
-        margin: 20px 0;
+        margin: 24px 0;
     }
 
     /* Sections */
     .swipe-card-section {
-        margin-bottom: 8px;
+        margin-bottom: 12px;
     }
 
     .swipe-card-section-title {
-        font-size: 1.25rem;
+        font-size: 1.4rem;
         font-weight: 700;
         color: #111827;
-        margin: 0 0 16px;
+        margin: 0 0 18px;
     }
 
     .swipe-card-list {
@@ -286,9 +318,9 @@ function render_swipe_card_styles() {
     .swipe-card-list-item {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
-        font-size: 1.1rem;
+        gap: 14px;
+        margin-bottom: 14px;
+        font-size: 1.2rem;
         color: #111827;
     }
 
@@ -297,8 +329,8 @@ function render_swipe_card_styles() {
     }
 
     .bullet {
-        width: 12px;
-        height: 12px;
+        width: 14px;
+        height: 14px;
         background: #111827;
         border-radius: 50%;
         flex-shrink: 0;
@@ -307,11 +339,19 @@ function render_swipe_card_styles() {
     .swipe-card-link {
         color: var(--accent, #3b82f6);
         text-decoration: underline;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
     }
 
     .swipe-card-link:hover {
         color: #2563eb;
+    }
+
+    /* Bio */
+    .swipe-card-bio {
+        font-size: 1.1rem;
+        line-height: 1.5;
+        color: #374151;
+        margin: 0;
     }
 
     /* Swipe Indicators */
@@ -429,35 +469,39 @@ function render_swipe_card_styles() {
         }
 
         .swipe-card-inner {
-            padding: 24px;
+            padding: 20px 24px 24px;
+        }
+
+        .swipe-card-header {
+            gap: 16px;
         }
 
         .swipe-card-avatar,
         .swipe-card-avatar-fallback {
-            width: 100px;
-            height: 100px;
+            width: 90px;
+            height: 90px;
         }
 
         .avatar-emoji {
-            font-size: 2.75rem;
+            font-size: 2.5rem;
         }
 
         .year-number,
         .year-label {
-            font-size: 2.75rem;
+            font-size: 2.25rem;
         }
 
         .year-suffix {
-            font-size: 1.25rem;
+            font-size: 0.85rem;
         }
 
         .swipe-card-course {
-            font-size: 1.25rem;
+            font-size: 1rem;
         }
 
         .star-icon {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
         }
 
         .swipe-btn {
