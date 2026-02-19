@@ -47,14 +47,15 @@ if ($user_role === 'student') {
     $pending = 0;
     $messages = 0;
     if ($profile) {
+        
         // Count accepted mentor connections
-        $sql = "SELECT COUNT(DISTINCT mentor_id) FROM sessions WHERE student_id = ? AND status IN ('confirmed','completed')";
+        $sql = "SELECT COUNT(DISTINCT mentor_id) FROM mentor_requests WHERE student_id = ? AND status IN ('accepted')";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$user_id]);
         $connections = (int)$stmt->fetchColumn();
 
         // Count pending requests
-        $sql = "SELECT COUNT(*) FROM sessions WHERE student_id = ? AND status = 'pending'";
+        $sql = "SELECT COUNT(*) FROM mentor_requests WHERE student_id = ? AND status = 'pending'";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$user_id]);
         $pending = (int)$stmt->fetchColumn();
@@ -96,13 +97,13 @@ if ($user_role === 'mentor') {
     $avg_rating = null;
 
     // Count active students
-    $sql = "SELECT COUNT(DISTINCT student_id) FROM sessions WHERE mentor_id = ? AND status IN ('confirmed','completed')";
+    $sql = "SELECT COUNT(DISTINCT student_id) FROM mentor_requests WHERE mentor_id = ? AND status IN ('accepted')";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$user_id]);
     $active_students = (int)$stmt->fetchColumn();
 
     // Count pending requests
-    $sql = "SELECT COUNT(*) FROM sessions WHERE mentor_id = ? AND status = 'pending'";
+    $sql = "SELECT COUNT(*) FROM mentor_requests WHERE mentor_id = ? AND status = 'pending'";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$user_id]);
     $pending_requests = (int)$stmt->fetchColumn();

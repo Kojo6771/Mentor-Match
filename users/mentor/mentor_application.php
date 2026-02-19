@@ -90,6 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $success = true;
             $_POST = [];
+            header("Refresh:3; url=../../pages/dashboard.php");
         } catch (PDOException $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
