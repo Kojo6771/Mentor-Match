@@ -12,18 +12,15 @@ function render_swipe_card($mentor, $index = 0) {
     $full_name = trim("$first_name $last_name");
 
     // Use mentor's profile picture from query
-    $profile_picture = $mentor['profile_picture'] ?? null;
-    $avatar_url = '';
+    $profile_picture = isset($mentor['profile_picture']) ? trim($mentor['profile_picture']) : '';
     $fallback_avatar = 'https://ui-avatars.com/api/?name=' . urlencode($full_name) . '&background=3b82f6&color=fff&size=128';
 
-    // Profile picture with fallback (page URL is /pages/mentor_swipe.php)
-    if (!empty($profile_picture)) {
-        // Stored as 'uploads/profile_pictures/filename.ext'
+    // Build avatar URL: uploaded image if present, otherwise generated fallback image
+    if ($profile_picture !== '' && $profile_picture !== null) {
+        // Stored as 'uploads/profile_pictures/filename.ext' relative to project root
         $avatar_url = '../' . htmlspecialchars($profile_picture);
-        $has_custom_avatar = true;
     } else {
         $avatar_url = $fallback_avatar;
-        $has_custom_avatar = false;
     }
     
     // Year of study
@@ -52,29 +49,23 @@ function render_swipe_card($mentor, $index = 0) {
     ?>
     <div class="swipe-card" data-mentor-id="<?= $mentor_id ?>" data-index="<?= $index ?>" style="z-index: <?= $z_index ?>;">
         <div class="swipe-card-inner">
-            <!-- Profile Picture -->
+            <!-- Profile Picture (with automatic fallback URL) -->
             <div class="swipe-card-avatar-container">
-                <?php if ($has_custom_avatar): ?>
-                    <img src="<?= $avatar_url ?>" alt="<?= $full_name ?>" class="swipe-card-avatar">
-                <?php else: ?>
-                    <div class="swipe-card-avatar-fallback">
-                        <span class="avatar-emoji">&#x1F9D1;&#x200D;&#x1F3EB;</span>
-                    </div>
-                <?php endif; ?>
+                <img src="<?php echo $avatar_url; ?>" alt="<?php echo $full_name; ?>" class="swipe-card-avatar" onerror="this.onerror=null; this.src='<?php echo $fallback_avatar; ?>';">
             </div>
 
             <!-- Year and Course -->
             <div class="swipe-card-info">
                 <div class="swipe-card-year">
-                    <span class="year-number"><?= $year ?></span><sup class="year-suffix"><?= $year_suffix ?></sup>
+                    <span class="year-number"><?php echo $year; ?></span><sup class="year-suffix"><?php echo $year_suffix; ?></sup>
                     <span class="year-label">Year</span>
                 </div>
-                <h3 class="swipe-card-course"><?= $course ?></h3>
+                <h3 class="swipe-card-course"><?php echo $course; ?></h3>
                 
                 <!-- Star Rating -->
                 <div class="swipe-card-rating">
                     <?php for ($i = 1; $i <= 5; $i++): ?>
-                        <svg class="star-icon <?= $i <= floor($rating) ? 'star-filled' : 'star-empty' ?>" viewBox="0 0 24 24" width="28" height="28">
+                        <svg class="star-icon <?php echo $i <= floor($rating) ? 'star-filled' : 'star-empty'; ?>" viewBox="0 0 24 24" width="28" height="28">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                         </svg>
                     <?php endfor; ?>
@@ -93,7 +84,7 @@ function render_swipe_card($mentor, $index = 0) {
                     ?>
                         <li class="swipe-card-list-item">
                             <span class="bullet"></span>
-                            <span><?= htmlspecialchars($subject) ?></span>
+                            <span><?php echo htmlspecialchars($subject); ?></span>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -107,11 +98,11 @@ function render_swipe_card($mentor, $index = 0) {
                 <ul class="swipe-card-list">
                     <li class="swipe-card-list-item">
                         <span class="bullet"></span>
-                        <a href="<?= $linkedin_url ?>" class="swipe-card-link" target="_blank" rel="noopener">LinkedIn</a>
+                        <a href="<?php echo $linkedin_url; ?>" class="swipe-card-link" target="_blank" rel="noopener">LinkedIn</a>
                     </li>
                     <li class="swipe-card-list-item">
                         <span class="bullet"></span>
-                        <a href="<?= $github_url ?>" class="swipe-card-link" target="_blank" rel="noopener">GitHub</a>
+                        <a href="<?php echo $github_url; ?>" class="swipe-card-link" target="_blank" rel="noopener">GitHub</a>
                     </li>
                 </ul>
             </div>
