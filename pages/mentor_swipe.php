@@ -204,7 +204,7 @@ try {
                 </div>
             <?php endif; ?>
         </div>
-        <br><br>
+        
         <?php include '../includes/nav.php'; ?>
     </main>
 

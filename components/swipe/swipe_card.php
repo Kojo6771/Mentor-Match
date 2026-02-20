@@ -3,6 +3,7 @@
  * Swipe Card Component
  * Renders a swipeable card for a mentor profile with dynamic data and graceful fallbacks.
  * Includes styles and JavaScript for swipe interactions.
+
  */
 
 function render_swipe_card($mentor, $index = 0) {
