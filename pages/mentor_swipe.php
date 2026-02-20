@@ -204,6 +204,8 @@ try {
                 </div>
             <?php endif; ?>
         </div>
+        <br><br>
+        <?php include '../includes/nav.php'; ?>
     </main>
 
     <?php render_swipe_card_scripts(); ?>
