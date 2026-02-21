@@ -135,11 +135,11 @@ function render_swipe_card_styles() {
     .swipe-container {
         position: relative;
         width: 100%;
-        max-width: 400px;
-        height: calc(100vh - 220px);
-        height: calc(100dvh - 220px); /* Dynamic viewport for mobile */
-        max-height: 520px;
-        min-height: 400px;
+        max-width: 480px;
+        height: calc(100vh - 240px);
+        height: calc(100dvh - 240px);
+        max-height: 500px;
+        min-height: 380px;
         margin: 0 auto;
     }
 
@@ -147,9 +147,9 @@ function render_swipe_card_styles() {
         position: absolute;
         width: 100%;
         max-width: 480px;
-        background: #f8f9fa;
-        border-radius: 24px;
-        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.12);
+        background: var(--card, #ffffff);
+        border-radius: 14px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
         cursor: grab;
         user-select: none;
         touch-action: pan-y;
@@ -494,12 +494,12 @@ function render_swipe_card_styles() {
         .swipe-container {
             height: calc(100vh - 200px);
             height: calc(100dvh - 200px);
-            max-height: 480px;
-            min-height: 350px;
+            max-height: 460px;
+            min-height: 340px;
         }
 
         .swipe-card {
-            border-radius: 20px;
+            border-radius: 14px;
         }
 
         .swipe-card-inner {

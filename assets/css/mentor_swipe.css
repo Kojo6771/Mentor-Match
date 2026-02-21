@@ -1,8 +1,8 @@
         .container {
-            padding: 12px;
-            padding-bottom: 80px; /* Space for fixed bottom navbar */
+            padding: 16px;
+            padding-bottom: 90px; /* Space for fixed bottom navbar */
             min-height: 100vh;
-            min-height: 100dvh; /* Dynamic viewport height for mobile */
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -11,9 +11,9 @@
 
         .page-header {
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             width: 100%;
-            max-width: 420px;
+            max-width: 480px;
         }
 
         .page-header h1 {
@@ -30,7 +30,7 @@
 
         .swipe-wrapper {
             width: 100%;
-            max-width: 400px;
+            max-width: 480px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -40,16 +40,16 @@
         /* Mobile-first responsive adjustments */
         @media (max-width: 480px) {
             .container {
-                padding: 8px;
+                padding: 12px;
                 padding-bottom: 85px;
             }
 
             .page-header {
-                margin-bottom: 8px;
+                margin-bottom: 12px;
             }
 
             .page-header h1 {
-                font-size: 1.1rem;
+                font-size: 1.15rem;
             }
 
             .page-header p {
@@ -59,11 +59,11 @@
 
         @media (max-height: 700px) {
             .page-header {
-                margin-bottom: 6px;
+                margin-bottom: 8px;
             }
 
             .page-header h1 {
-                font-size: 1rem;
+                font-size: 1.1rem;
             }
 
             .page-header p {
