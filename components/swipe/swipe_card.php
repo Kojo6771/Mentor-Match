@@ -135,8 +135,11 @@ function render_swipe_card_styles() {
     .swipe-container {
         position: relative;
         width: 100%;
-        max-width: 480px;
-        height: 560px;
+        max-width: 400px;
+        height: calc(100vh - 220px);
+        height: calc(100dvh - 220px); /* Dynamic viewport for mobile */
+        max-height: 520px;
+        min-height: 400px;
         margin: 0 auto;
     }
 
@@ -193,7 +196,7 @@ function render_swipe_card_styles() {
     }
 
     .swipe-card-inner {
-        padding: 36px;
+        padding: 24px;
     }
 
     /* Header - Avatar + Info side by side */
@@ -260,28 +263,28 @@ function render_swipe_card_styles() {
     }
 
     .year-number {
-        font-size: 4.5rem;
+        font-size: 2.75rem;
         font-weight: 700;
         line-height: 1;
         color: #111827;
     }
 
     .year-suffix {
-        font-size: 1.5rem;
+        font-size: 1rem;
         font-weight: 600;
         color: #111827;
         margin-right: 6px;
     }
 
     .year-label {
-        font-size: 4.5rem;
+        font-size: 2.75rem;
         font-weight: 700;
         line-height: 1;
         color: #111827;
     }
 
     .swipe-card-course {
-        font-size: 1.5rem;
+        font-size: 1.15rem;
         font-weight: 600;
         color: #111827;
         margin: 8px 0 12px;
@@ -410,8 +413,8 @@ function render_swipe_card_styles() {
         display: flex;
         justify-content: center;
         gap: 48px;
-        margin-top: 12px;
-        margin-bottom: 90px; /* Space for fixed bottom navbar */
+        margin-top: 10px;
+        margin-bottom: 0; /* Container handles bottom spacing */
     }
 
     .swipe-btn {
@@ -486,52 +489,157 @@ function render_swipe_card_styles() {
         font-size: 0.95rem;
     }
 
-    /* Responsive */
+    /* Responsive - Mobile phones */
     @media (max-width: 480px) {
         .swipe-container {
-            height: 540px;
+            height: calc(100vh - 200px);
+            height: calc(100dvh - 200px);
+            max-height: 480px;
+            min-height: 350px;
+        }
+
+        .swipe-card {
+            border-radius: 20px;
         }
 
         .swipe-card-inner {
-            padding: 20px 24px 24px;
+            padding: 16px 18px 20px;
         }
 
         .swipe-card-header {
-            gap: 16px;
+            gap: 14px;
+            margin-bottom: 8px;
         }
 
         .swipe-card-avatar,
         .swipe-card-avatar-fallback {
-            width: 90px;
-            height: 90px;
+            width: 80px;
+            height: 80px;
+            border-width: 3px;
+        }
+
+        .swipe-card-name {
+            font-size: 0.95rem;
+            margin-top: 6px;
         }
 
         .avatar-emoji {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
         }
 
         .year-number,
         .year-label {
-            font-size: 2.25rem;
+            font-size: 1.75rem;
         }
 
         .year-suffix {
-            font-size: 0.85rem;
+            font-size: 0.7rem;
         }
 
         .swipe-card-course {
-            font-size: 1rem;
+            font-size: 0.9rem;
+            margin: 4px 0 8px;
+            padding-bottom: 4px;
         }
 
         .star-icon {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .swipe-card-rating {
+            gap: 3px;
+        }
+
+        .swipe-card-divider {
+            margin: 14px 0;
+            height: 3px;
+        }
+
+        .swipe-card-section-title {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .swipe-card-bio {
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .swipe-card-list-item {
+            font-size: 1rem;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .bullet {
+            width: 10px;
+            height: 10px;
+        }
+
+        .swipe-actions {
+            margin-top: 8px;
+            gap: 40px;
         }
 
         .swipe-btn {
-            width: 56px;
-            height: 56px;
+            width: 60px;
+            height: 60px;
+            font-size: 1.6rem;
+        }
+
+        .swipe-indicator {
+            font-size: 1.2rem;
+            padding: 10px 18px;
+        }
+    }
+
+    /* Very small phones */
+    @media (max-width: 380px) {
+        .swipe-card-inner {
+            padding: 14px 16px 18px;
+        }
+
+        .swipe-card-avatar,
+        .swipe-card-avatar-fallback {
+            width: 70px;
+            height: 70px;
+        }
+
+        .year-number,
+        .year-label {
             font-size: 1.5rem;
+        }
+
+        .swipe-card-course {
+            font-size: 0.85rem;
+        }
+
+        .swipe-card-bio {
+            font-size: 0.9rem;
+        }
+    }
+
+    /* Short screens - reduce vertical spacing */
+    @media (max-height: 700px) {
+        .swipe-container {
+            min-height: 320px;
+        }
+
+        .swipe-card-inner {
+            padding: 14px 16px 16px;
+        }
+
+        .swipe-card-divider {
+            margin: 10px 0;
+        }
+
+        .swipe-card-section {
+            margin-bottom: 6px;
+        }
+
+        .swipe-card-section-title {
+            margin-bottom: 8px;
         }
     }
     </style>
