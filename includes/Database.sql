@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 16, 2026 at 02:25 AM
+-- Generation Time: Feb 21, 2026 at 01:58 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -56,6 +56,8 @@ CREATE TABLE `mentor_applications` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `motivation` text NOT NULL,
+  `linkedin` varchar(255) DEFAULT NULL,
+  `github` varchar(255) DEFAULT NULL,
   `experience_years` int(11) DEFAULT NULL,
   `status` enum('pending','approved','rejected') DEFAULT 'pending',
   `admin_notes` text DEFAULT NULL,
@@ -67,8 +69,9 @@ CREATE TABLE `mentor_applications` (
 -- Dumping data for table `mentor_applications`
 --
 
-INSERT INTO `mentor_applications` (`id`, `user_id`, `motivation`, `experience_years`, `status`, `admin_notes`, `submitted_at`, `reviewed_at`) VALUES
-(2, 13, 'I have worked in industry', 4, 'approved', NULL, '2026-02-11 01:36:10', '2026-02-15 03:16:22');
+INSERT INTO `mentor_applications` (`id`, `user_id`, `motivation`, `linkedin`, `github`, `experience_years`, `status`, `admin_notes`, `submitted_at`, `reviewed_at`) VALUES
+(2, 13, 'I have worked in industry', NULL, NULL, 4, 'approved', NULL, '2026-02-11 01:36:10', '2026-02-15 03:16:22'),
+(3, 14, 'So that I can share my knowledge with more students', NULL, NULL, 2, 'approved', NULL, '2026-02-16 02:41:10', '2026-02-16 02:46:09');
 
 -- --------------------------------------------------------
 
@@ -86,7 +89,8 @@ CREATE TABLE `mentor_application_subjects` (
 --
 
 INSERT INTO `mentor_application_subjects` (`application_id`, `subject_id`) VALUES
-(2, 5);
+(2, 5),
+(3, 11);
 
 -- --------------------------------------------------------
 
@@ -97,6 +101,8 @@ INSERT INTO `mentor_application_subjects` (`application_id`, `subject_id`) VALUE
 CREATE TABLE `mentor_profiles` (
   `mentor_id` int(11) NOT NULL,
   `bio` text DEFAULT NULL,
+  `linkedin` varchar(255) DEFAULT NULL,
+  `github` varchar(255) DEFAULT NULL,
   `experience_years` int(11) DEFAULT NULL,
   `verified` tinyint(1) DEFAULT 0,
   `user_id` int(11) NOT NULL
@@ -106,8 +112,9 @@ CREATE TABLE `mentor_profiles` (
 -- Dumping data for table `mentor_profiles`
 --
 
-INSERT INTO `mentor_profiles` (`mentor_id`, `bio`, `experience_years`, `verified`, `user_id`) VALUES
-(13, NULL, 4, 1, 13);
+INSERT INTO `mentor_profiles` (`mentor_id`, `bio`, `linkedin`, `github`, `experience_years`, `verified`, `user_id`) VALUES
+(13, 'I like to mentor initttt', 'https://www.linkedin.com/in/kwadwo-antwi/', NULL, 4, 1, 13),
+(14, NULL, NULL, NULL, 2, 1, 14);
 
 -- --------------------------------------------------------
 
@@ -140,7 +147,8 @@ CREATE TABLE `mentor_subjects` (
 --
 
 INSERT INTO `mentor_subjects` (`mentor_id`, `subject_id`) VALUES
-(13, 5);
+(13, 5),
+(14, 11);
 
 -- --------------------------------------------------------
 
@@ -211,6 +219,7 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`student_id`, `course`, `year_of_study`, `learning_preference`, `bio`, `created_at`, `user_id`, `mentor_id`) VALUES
+(1, 'Engineering', 1, 'In person sessions', '', '2026-02-20 23:39:36', 1, NULL),
 (12, 'Computer science', 3, 'In person sessions', 'I want to be a software developer', '2026-02-11 01:23:13', 12, NULL);
 
 -- --------------------------------------------------------
@@ -281,7 +290,8 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `phone`, `email`, `password`, `role`, `created_at`, `profile_picture`) VALUES
 (1, 'Alistair', 'Ridley', '078456621323', 'mrdownbad@gmail.com', '$2y$10$.UTYGKQKYJRsJ4Wmz3rCfeI7hFz/ZEV4Ggfjwd.ZK4R31fWkJsq8q', 'student', '2026-01-29 22:09:09', NULL),
 (12, 'Kojo', 'Antwi', '07463885316', 'k_wad_wo@hotmail.co.uk', '$2y$10$OTVk1PW1CDgtXcTAeY4noO2ldiFhKRrTrM04Y6jWafZi/McHUHyzm', 'admin', '2026-02-11 01:22:41', 'uploads/profile_pictures/profile_698bd9e129821_1770772961.jpg'),
-(13, 'Jacob', 'Harvey', '07463885316', 'nyashdying@gmail.com', '$2y$10$5C4xySz9am0eWBQWf/BIQuDJ5tMdidEqTBxX2m7lSLG/qpmRNKJpS', 'mentor', '2026-02-11 01:35:51', 'uploads/profile_pictures/profile_698bdcf7225b2_1770773751.jpg');
+(13, 'Jacob', 'Harvey', '07463885316', 'nyashdying@gmail.com', '$2y$10$5C4xySz9am0eWBQWf/BIQuDJ5tMdidEqTBxX2m7lSLG/qpmRNKJpS', 'mentor', '2026-02-11 01:35:51', 'uploads/profile_pictures/profile_698bdcf7225b2_1770773751.jpg'),
+(14, 'George', 'Burell', '07809639807', 'GJ@gmail.com', '$2y$10$mY9.9HyJju6ePXFPlwO/A.ykCpIHFusAqaqzfHK3njZkaoKDPCnv2', 'mentor', '2026-02-16 02:40:36', 'uploads/profile_pictures/profile_699283a3eb925_1771209635.JPG');
 
 --
 -- Indexes for dumped tables
@@ -412,13 +422,13 @@ ALTER TABLE `interests`
 -- AUTO_INCREMENT for table `mentor_applications`
 --
 ALTER TABLE `mentor_applications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `mentor_requests`
 --
 ALTER TABLE `mentor_requests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `messages`
@@ -448,7 +458,7 @@ ALTER TABLE `subjects`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Constraints for dumped tables

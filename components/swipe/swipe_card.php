@@ -46,8 +46,8 @@ function render_swipe_card($mentor, $index = 0) {
     $bio = htmlspecialchars($mentor['bio'] ?? 'Passionate about helping students succeed in their academic journey.');
     
     // External links
-    $linkedin_url = htmlspecialchars($mentor['linkedin_url'] ?? '#');
-    $github_url = htmlspecialchars($mentor['github_url'] ?? '#');
+    $linkedin_url = htmlspecialchars($mentor['linkedin'] ?? '#');
+    $github_url = htmlspecialchars($mentor['github'] ?? '#');
     
     $z_index = 100 - $index;
     ?>
@@ -92,19 +92,29 @@ function render_swipe_card($mentor, $index = 0) {
             <div class="swipe-card-divider"></div>
 
             <!-- External Links -->
+            <?php 
+            $has_linkedin = !empty($linkedin_url) && $linkedin_url !== '#';
+            $has_github = !empty($github_url) && $github_url !== '#';
+            if ($has_linkedin || $has_github): 
+            ?>
             <div class="swipe-card-section">
                 <h4 class="swipe-card-section-title">External links:</h4>
                 <ul class="swipe-card-list">
+                    <?php if ($has_linkedin): ?>
                     <li class="swipe-card-list-item">
                         <span class="bullet"></span>
                         <a href="<?php echo $linkedin_url; ?>" class="swipe-card-link" target="_blank" rel="noopener">LinkedIn</a>
                     </li>
+                    <?php endif; ?>
+                    <?php if ($has_github): ?>
                     <li class="swipe-card-list-item">
                         <span class="bullet"></span>
                         <a href="<?php echo $github_url; ?>" class="swipe-card-link" target="_blank" rel="noopener">GitHub</a>
                     </li>
+                    <?php endif; ?>
                 </ul>
             </div>
+            <?php endif; ?>
         </div>
 
         <!-- Swipe indicators -->
