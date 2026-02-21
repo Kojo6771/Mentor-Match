@@ -807,12 +807,21 @@ function render_swipe_card_scripts() {
         function updateEmptyState() {
             const emptyState = container.querySelector('.swipe-empty');
             const visibleCards = container.querySelectorAll('.swipe-card:not(.removed)');
+            const swipeActions = document.querySelector('.swipe-actions');
             
-            if (emptyState) {
-                if (visibleCards.length === 0) {
+            if (visibleCards.length === 0) {
+                if (emptyState) {
                     emptyState.classList.add('visible');
-                } else {
+                }
+                if (swipeActions) {
+                    swipeActions.style.display = 'none';
+                }
+            } else {
+                if (emptyState) {
                     emptyState.classList.remove('visible');
+                }
+                if (swipeActions) {
+                    swipeActions.style.display = 'flex';
                 }
             }
         }
