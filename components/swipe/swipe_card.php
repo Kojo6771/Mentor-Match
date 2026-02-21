@@ -401,6 +401,7 @@ function render_swipe_card_styles() {
         justify-content: center;
         gap: 48px;
         margin-top: 24px;
+        margin-bottom: 90px; /* Space for fixed bottom navbar */
     }
 
     .swipe-btn {

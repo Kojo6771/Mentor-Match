@@ -1,6 +1,7 @@
         .container {
             padding: 20px;
-            min-height: 100vh;
+            padding-bottom: 50px; /* Space for fixed bottom navbar */
+            min-height: 60vh;
             display: flex;
             flex-direction: column;
             align-items: center;
