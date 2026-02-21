@@ -136,7 +136,7 @@ function render_swipe_card_styles() {
         position: relative;
         width: 100%;
         max-width: 480px;
-        height: 600px;
+        height: 560px;
         margin: 0 auto;
     }
 
@@ -410,7 +410,7 @@ function render_swipe_card_styles() {
         display: flex;
         justify-content: center;
         gap: 48px;
-        margin-top: 24px;
+        margin-top: 12px;
         margin-bottom: 90px; /* Space for fixed bottom navbar */
     }
 
@@ -489,7 +489,7 @@ function render_swipe_card_styles() {
     /* Responsive */
     @media (max-width: 480px) {
         .swipe-container {
-            height: 580px;
+            height: 540px;
         }
 
         .swipe-card-inner {
