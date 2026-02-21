@@ -149,8 +149,28 @@ function render_swipe_card_styles() {
         cursor: grab;
         user-select: none;
         touch-action: pan-y;
-        transition: transform 0.1s ease-out;
+        transition: transform 0.25s ease-out, opacity 0.25s ease-out;
         overflow: hidden;
+        transform-origin: center top;
+    }
+
+    /* Stacked card effects - cards behind are slightly larger to peek out */
+    .swipe-card.stack-1 {
+        transform: scale(1.02) translateY(10px);
+        opacity: 0.9;
+        cursor: default;
+    }
+
+    .swipe-card.stack-2 {
+        transform: scale(1.04) translateY(20px);
+        opacity: 0.75;
+        cursor: default;
+    }
+
+    .swipe-card.stack-3 {
+        transform: scale(1.06) translateY(30px);
+        opacity: 0.6;
+        cursor: default;
     }
 
     .swipe-card-accent {
@@ -531,8 +551,19 @@ function render_swipe_card_scripts() {
             cards = Array.from(container.querySelectorAll('.swipe-card:not(.removed)'));
             cards.forEach((card, index) => {
                 card.style.zIndex = 100 - index;
+                // Remove all stack classes first
+                card.classList.remove('stack-1', 'stack-2', 'stack-3');
+                // Apply stack class based on position (not for the top card)
                 if (index === 0) {
                     attachListeners(card);
+                    card.style.transform = '';
+                    card.style.opacity = '';
+                } else if (index === 1) {
+                    card.classList.add('stack-1');
+                } else if (index === 2) {
+                    card.classList.add('stack-2');
+                } else if (index >= 3) {
+                    card.classList.add('stack-3');
                 }
             });
             updateEmptyState();
