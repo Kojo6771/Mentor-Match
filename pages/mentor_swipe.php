@@ -108,6 +108,8 @@ try {
             u.profile_picture,
             mp.bio,
             mp.experience_years,
+            mp.linkedin,
+            mp.github,
             COALESCE(AVG(r.rating), 5) as rating,
             GROUP_CONCAT(DISTINCT s.name SEPARATOR '|||') as subjects
         FROM users u
@@ -134,8 +136,6 @@ try {
             : ['General Tutoring', 'Academic Support', 'Study Skills'];
         $mentor['course'] = $mentor['subjects'][0] ?? 'General Studies';
         $mentor['year_of_study'] = 3; // Default, could be fetched from profile
-        $mentor['linkedin_url'] = '#';
-        $mentor['github_url'] = '#';
     }
     unset($mentor);
 } catch (PDOException $e) {
