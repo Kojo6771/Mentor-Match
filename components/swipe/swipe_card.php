@@ -91,24 +91,6 @@ function render_swipe_card($mentor, $index = 0) {
 
             <div class="swipe-card-divider"></div>
 
-            <!-- Areas of Expertise -->
-            <div class="swipe-card-section">
-                <h4 class="swipe-card-section-title">Area's of expertise:</h4>
-                <ul class="swipe-card-list">
-                    <?php 
-                    $displayed_subjects = array_slice($subjects, 0, 3);
-                    foreach ($displayed_subjects as $subject): 
-                    ?>
-                        <li class="swipe-card-list-item">
-                            <span class="bullet"></span>
-                            <span><?php echo htmlspecialchars($subject); ?></span>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-
-            <div class="swipe-card-divider"></div>
-
             <!-- External Links -->
             <div class="swipe-card-section">
                 <h4 class="swipe-card-section-title">External links:</h4>
