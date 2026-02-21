@@ -135,7 +135,7 @@ try {
             ? explode('|||', $mentor['subjects']) 
             : ['General Tutoring', 'Academic Support', 'Study Skills'];
         $mentor['course'] = $mentor['subjects'][0] ?? 'General Studies';
-        $mentor['year_of_study'] = 3; // Default, could be fetched from profile
+        $mentor['year_of_study'] = intval($mentor['experience_years'] ?? 1);
     }
     unset($mentor);
 } catch (PDOException $e) {
