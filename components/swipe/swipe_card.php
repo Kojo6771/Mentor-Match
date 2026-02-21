@@ -60,6 +60,7 @@ function render_swipe_card($mentor, $index = 0) {
                 <!-- Profile Picture (with automatic fallback URL) -->
                 <div class="swipe-card-avatar-container">
                     <img src="<?php echo $avatar_url; ?>" alt="<?php echo $full_name; ?>" class="swipe-card-avatar" onerror="this.onerror=null; this.src='<?php echo $fallback_avatar; ?>';">
+                    <h2 class="swipe-card-name"><?php echo $full_name; ?></h2>
                 </div>
 
                 <!-- Year and Course -->
@@ -232,6 +233,15 @@ function render_swipe_card_styles() {
     .avatar-emoji {
         font-size: 4rem;
         line-height: 1;
+    }
+
+    /* Mentor Name */
+    .swipe-card-name {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #111827;
+        margin: 10px 0 0;
+        text-align: center;
     }
 
     /* Info Section */
