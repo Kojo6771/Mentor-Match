@@ -102,6 +102,7 @@ try {
             mr.requested_at,
             s.course,
             s.year_of_study,
+            s.learning_preference,
             s.bio,
             u.first_name,
             u.last_name,
@@ -169,6 +170,11 @@ try {
                                     <p class="student-meta">
                                         <?php echo htmlspecialchars($request['course']); ?> • Year <?php echo htmlspecialchars($request['year_of_study']); ?>
                                     </p>
+                                    <?php if (!empty($request['learning_preference'])): ?>
+                                    <p class="student-preference">
+                                        📚 Prefers: <?php echo htmlspecialchars($request['learning_preference']); ?>
+                                    </p>
+                                    <?php endif; ?>
 
                                     <p class="student-bio">
                                         <?php echo !empty($request['bio']) ? htmlspecialchars($request['bio']) : 'No bio provided'; ?>
