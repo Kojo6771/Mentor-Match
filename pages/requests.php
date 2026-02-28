@@ -156,7 +156,13 @@ try {
             <div class="header-row">
                 <a href="dashboard.php" class="back-btn">← Back</a>
                 <h1 class="page-title">Connection Requests</h1>
-                <button id="filterBtn" class="filter-btn" title="Toggle filter by subject">🔍</button>
+                <div class="filter-toggle-wrapper">
+                    <label class="filter-label">Filter</label>
+                    <button id="filterBtn" class="filter-toggle" title="Toggle filter by subject">
+                        <span class="toggle-track"></span>
+                        <span class="toggle-thumb"></span>
+                    </button>
+                </div>
             </div>
         </div>
 
