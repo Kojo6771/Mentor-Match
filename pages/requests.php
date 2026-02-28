@@ -170,11 +170,9 @@ try {
                                         <?php echo htmlspecialchars($request['course']); ?> • Year <?php echo htmlspecialchars($request['year_of_study']); ?>
                                     </p>
 
-                                    <?php if (!empty($request['bio'])): ?>
-                                        <p class="student-bio">
-                                            <?php echo htmlspecialchars($request['bio']); ?>
-                                        </p>
-                                    <?php endif; ?>
+                                    <p class="student-bio">
+                                        <?php echo !empty($request['bio']) ? htmlspecialchars($request['bio']) : 'No bio provided'; ?>
+                                    </p>
 
                                     <div class="request-time">
                                         <svg class="clock-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
