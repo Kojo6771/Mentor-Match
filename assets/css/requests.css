@@ -10,16 +10,16 @@
 /* Header */
 .page-header {
     width: 100%;
-    max-width: 700px;
-    margin: 0 auto 20px;
+    max-width: 520px;
+    margin: 0 auto 14px;
 }
 
 .header-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 10px;
+    margin-bottom: 8px;
 }
 
 .back-btn {
@@ -28,7 +28,7 @@
     color: var(--muted);
     font-size: 0.9rem;
     cursor: pointer;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: 8px;
     transition: all 0.2s;
     text-decoration: none;
@@ -43,7 +43,7 @@
 }
 
 .page-title {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 700;
     margin: 0;
     color: #111827;
@@ -56,7 +56,7 @@
 /* Main Content */
 .requests-container {
     width: 100%;
-    max-width: 760px;
+    max-width: 520px;
     margin: 0 auto;
 }
 
@@ -64,37 +64,37 @@
 .requests-list {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 10px;
 }
 
 .request-card {
     background: var(--card);
     border: 1px solid #e6e9ef;
-    border-radius: 14px;
-    padding: 16px;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 1px 6px rgba(15, 23, 42, 0.06);
     transition: box-shadow 0.2s, opacity 0.3s, transform 0.3s;
 }
 
 .request-card:hover {
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.1);
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.1);
 }
 
 .card-content {
     display: flex;
-    gap: 14px;
+    gap: 10px;
     align-items: flex-start;
 }
 
 .student-info {
     flex: 1;
     display: flex;
-    gap: 14px;
+    gap: 10px;
 }
 
 .avatar {
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
@@ -102,8 +102,8 @@
 }
 
 .avatar-placeholder {
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%);
     display: flex;
@@ -114,8 +114,8 @@
 }
 
 .avatar-icon {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
     color: var(--accent);
 }
 
@@ -124,26 +124,26 @@
 }
 
 .student-name {
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     color: #111827;
 }
 
 .student-meta {
     color: var(--muted);
-    font-size: 0.875rem;
-    margin-bottom: 8px;
+    font-size: 0.8rem;
+    margin-bottom: 6px;
 }
 
 .student-bio {
     color: #374151;
-    font-size: 0.875rem;
-    margin-top: 10px;
-    line-height: 1.5;
-    padding: 10px 12px;
+    font-size: 0.8rem;
+    margin-top: 8px;
+    line-height: 1.4;
+    padding: 8px 10px;
     background: var(--bg);
-    border-radius: 8px;
+    border-radius: 6px;
     border-left: 3px solid var(--accent);
 }
 
@@ -152,29 +152,29 @@
     align-items: center;
     gap: 6px;
     color: var(--muted);
-    font-size: 0.75rem;
-    margin-top: 10px;
+    font-size: 0.7rem;
+    margin-top: 8px;
 }
 
 .clock-icon {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
 }
 
 /* Action Buttons */
 .action-buttons {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     flex-shrink: 0;
 }
 
 .btn {
-    padding: 10px 18px;
-    border-radius: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
     border: none;
     font-weight: 600;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -190,14 +190,14 @@
 }
 
 .btn-accept {
-    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    background: #22c55e;
     color: white;
-    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
+    box-shadow: none;
 }
 
 .btn-accept:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.35);
+    transform: none;
+    background: #16a34a;
 }
 
 .btn-decline {
@@ -213,8 +213,8 @@
 }
 
 .btn-icon {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
 }
 
 /* Empty State */
@@ -292,7 +292,7 @@
 
     .requests-container,
     .page-header {
-        max-width: 560px;
+        max-width: 480px;
     }
 
     .card-content {
@@ -300,22 +300,22 @@
     }
 
     .action-buttons {
-        flex-direction: row;
+        flex-direction: column;
         width: 100%;
-        gap: 10px;
+        gap: 6px;
     }
 
     .btn {
-        flex: 1;
-        min-height: 42px;
+        width: 100%;
+        min-height: 38px;
     }
 
     .page-header {
-        margin-bottom: 16px;
+        margin-bottom: 12px;
     }
 
     .page-title {
-        font-size: 1.15rem;
+        font-size: 1.05rem;
     }
 
     .spacer {
@@ -338,8 +338,8 @@
     }
 
     .request-card {
-        padding: 12px;
-        border-radius: 12px;
+        padding: 10px;
+        border-radius: 10px;
     }
 
     .student-info {
@@ -348,25 +348,22 @@
 
     .avatar,
     .avatar-placeholder {
-        width: 50px;
-        height: 50px;
+        width: 42px;
+        height: 42px;
     }
 
     .avatar-icon {
-        width: 24px;
-        height: 24px;
+        width: 18px;
+        height: 18px;
     }
 
     .student-meta,
     .student-bio {
-        font-size: 0.82rem;
-    }
-
-    .action-buttons {
-        flex-direction: column;
+        font-size: 0.78rem;
     }
 
     .btn {
         width: 100%;
+        font-size: 0.78rem;
     }
 }
