@@ -43,6 +43,28 @@
     color: var(--accent);
 }
 
+.filter-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.filter-btn:hover {
+    background: rgba(59, 130, 246, 0.08);
+}
+
+.filter-btn.filter-active {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent);
+}
+
 .page-title {
     font-size: 1.1rem;
     font-weight: 700;
@@ -59,6 +81,31 @@
     width: 100%;
     max-width: 520px;
     margin: 0 auto;
+}
+
+.filter-status {
+    width: 100%;
+    max-width: 520px;
+    margin: 8px auto 12px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-align: center;
+    background: var(--bg);
+    border-radius: 6px;
+    border: 1px solid #e6e9ef;
+}
+
+.filter-empty-msg {
+    width: 100%;
+    max-width: 520px;
+    margin: 20px auto;
+    padding: 16px;
+    text-align: center;
+    color: var(--muted);
+    background: var(--bg);
+    border-radius: 10px;
+    border: 1px solid #e6e9ef;
 }
 
 /* Request Cards */

@@ -92,6 +92,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax'])) {
     exit;
 }
 
+// Fetch mentor subjects
+$mentorSubjects = [];
+try {
+    $stmt = $pdo->prepare('SELECT subject_id FROM mentor_subjects WHERE mentor_id = ?');
+    $stmt->execute([$mentor_id]);
+    $mentorSubjects = array_map(function($row) { return $row['subject_id']; }, $stmt->fetchAll(PDO::FETCH_ASSOC));
+} catch (PDOException $e) {
+    $mentorSubjects = [];
+}
+
 // Fetch pending requests for this mentor
 $requests = [];
 try {
@@ -116,6 +126,13 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$mentor_id]);
     $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Fetch student interests for each request
+    foreach ($requests as &$request) {
+        $interestStmt = $pdo->prepare('SELECT interest_id FROM student_interests WHERE student_id = ?');
+        $interestStmt->execute([$request['student_id']]);
+        $request['student_interests'] = array_map(function($row) { return $row['interest_id']; }, $interestStmt->fetchAll(PDO::FETCH_ASSOC));
+    }
 } catch (PDOException $e) {
     $requests = [];
 }
@@ -139,16 +156,18 @@ try {
             <div class="header-row">
                 <a href="dashboard.php" class="back-btn">← Back</a>
                 <h1 class="page-title">Connection Requests</h1>
-                <div class="spacer"></div>
+                <button id="filterBtn" class="filter-btn" title="Toggle filter by subject">🔍</button>
             </div>
         </div>
+
+        <div id="filterStatus" class="filter-status">Showing all requests</div>
 
         <!-- Main Content -->
         <div class="requests-container">
         <?php if (count($requests) > 0): ?>
             <div class="requests-list">
                 <?php foreach ($requests as $request): ?>
-                    <div class="request-card" data-request-id="<?php echo $request['id']; ?>">
+                    <div class="request-card" data-request-id="<?php echo $request['id']; ?>" data-interests="<?php echo htmlspecialchars(json_encode($request['student_interests'])); ?>">
                         <div class="card-content">
                             <div class="student-info">
                                 <?php if (!empty($request['profile_picture'])): ?>
@@ -288,6 +307,68 @@ try {
                     }
                 });
             });
+        }
+
+        // Filter functionality
+        const mentorSubjects = <?php echo json_encode($mentorSubjects); ?>;
+        const filterBtn = document.getElementById('filterBtn');
+        const filterStatus = document.getElementById('filterStatus');
+        let filterBySubject = false;
+
+        filterBtn.addEventListener('click', function() {
+            filterBySubject = !filterBySubject;
+            updateFilter();
+        });
+
+        function updateFilter() {
+            const cards = document.querySelectorAll('.request-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const studentInterests = JSON.parse(card.dataset.interests || '[]');
+                const hasMatchingSubject = studentInterests.some(interest => mentorSubjects.includes(interest));
+                
+                if (filterBySubject) {
+                    // Show only cards with matching subjects
+                    if (hasMatchingSubject) {
+                        card.style.display = '';
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                } else {
+                    // Show all cards
+                    card.style.display = '';
+                    visibleCount++;
+                }
+            });
+
+            // Update filter status and button
+            if (filterBySubject) {
+                filterStatus.textContent = 'Showing matching subjects only (' + visibleCount + ')';
+                filterBtn.classList.add('filter-active');
+            } else {
+                filterStatus.textContent = 'Showing all requests (' + visibleCount + ')';
+                filterBtn.classList.remove('filter-active');
+            }
+
+            // Show message if no cards match
+            const requestsList = document.querySelector('.requests-list');
+            if (requestsList && visibleCount === 0) {
+                let emptyMsg = document.getElementById('filterEmptyMsg');
+                if (!emptyMsg) {
+                    emptyMsg = document.createElement('div');
+                    emptyMsg.id = 'filterEmptyMsg';
+                    emptyMsg.className = 'filter-empty-msg';
+                    emptyMsg.textContent = 'No requests match your subjects';
+                    requestsList.parentNode.insertBefore(emptyMsg, requestsList);
+                }
+                requestsList.style.display = 'none';
+            } else if (requestsList) {
+                requestsList.style.display = '';
+                const emptyMsg = document.getElementById('filterEmptyMsg');
+                if (emptyMsg) emptyMsg.remove();
+            }
         }
     </script>
 
