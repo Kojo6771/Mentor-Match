@@ -284,5 +284,7 @@ try {
             });
         }
     </script>
+
+    <?php include '../includes/nav.php'; ?>
 </body>
 </html>
