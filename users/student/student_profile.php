@@ -265,6 +265,8 @@ $mentor_avatar_url = ($pairedMentor && !empty($pairedMentor['profile_picture']))
 	? '../../' . $pairedMentor['profile_picture']
 	: $mentor_fallback_avatar;
 ?>
+
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
