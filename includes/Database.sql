@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 28, 2026 at 02:01 AM
+-- Generation Time: Mar 07, 2026 at 02:26 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,17 +33,6 @@ CREATE TABLE `availability` (
   `available_date` date NOT NULL,
   `start_time` time NOT NULL,
   `end_time` time NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `interests`
---
-
-CREATE TABLE `interests` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -130,6 +119,16 @@ CREATE TABLE `mentor_requests` (
   `requested_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `responded_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `mentor_requests`
+--
+
+INSERT INTO `mentor_requests` (`id`, `student_id`, `mentor_id`, `status`, `requested_at`, `responded_at`) VALUES
+(10, 15, 13, 'pending', '2026-03-07 00:50:47', NULL),
+(11, 15, 14, 'cancelled', '2026-03-07 00:50:48', NULL),
+(12, 1, 13, 'pending', '2026-03-07 01:19:14', NULL),
+(13, 1, 14, 'cancelled', '2026-03-07 01:19:16', NULL);
 
 -- --------------------------------------------------------
 
@@ -234,18 +233,8 @@ CREATE TABLE `students` (
 
 INSERT INTO `students` (`student_id`, `course`, `year_of_study`, `learning_preference`, `bio`, `created_at`, `user_id`, `mentor_id`) VALUES
 (1, 'Engineering', 1, 'In person sessions', '', '2026-02-20 23:39:36', 1, NULL),
-(12, 'Computer science', 3, 'In person sessions', 'I want to be a software developer', '2026-02-11 01:23:13', 12, NULL);
-
--- --------------------------------------------------------
-
---
--- Table structure for table `student_interests`
---
-
-CREATE TABLE `student_interests` (
-  `student_id` int(11) NOT NULL,
-  `interest_id` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+(12, 'Computer science', 3, 'In person sessions', 'I want to be a software developer', '2026-02-11 01:23:13', 12, NULL),
+(15, 'Computer Science', 1, 'In person sessions', 'I am in my first year doing Object oriented programming', '2026-03-07 00:50:39', 15, NULL);
 
 -- --------------------------------------------------------
 
@@ -305,7 +294,8 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `phone`, `email`, `passwor
 (1, 'Alistair', 'Ridley', '078456621323', 'mrdownbad@gmail.com', '$2y$10$.UTYGKQKYJRsJ4Wmz3rCfeI7hFz/ZEV4Ggfjwd.ZK4R31fWkJsq8q', 'student', '2026-01-29 22:09:09', NULL),
 (12, 'Kojo', 'Antwi', '07463885316', 'k_wad_wo@hotmail.co.uk', '$2y$10$OTVk1PW1CDgtXcTAeY4noO2ldiFhKRrTrM04Y6jWafZi/McHUHyzm', 'admin', '2026-02-11 01:22:41', 'uploads/profile_pictures/profile_698bd9e129821_1770772961.jpg'),
 (13, 'Jacob', 'Harvey', '07463885316', 'nyashdying@gmail.com', '$2y$10$5C4xySz9am0eWBQWf/BIQuDJ5tMdidEqTBxX2m7lSLG/qpmRNKJpS', 'mentor', '2026-02-11 01:35:51', 'uploads/profile_pictures/profile_698bdcf7225b2_1770773751.jpg'),
-(14, 'George', 'Burell', '07809639807', 'GJ@gmail.com', '$2y$10$mY9.9HyJju6ePXFPlwO/A.ykCpIHFusAqaqzfHK3njZkaoKDPCnv2', 'mentor', '2026-02-16 02:40:36', 'uploads/profile_pictures/profile_699283a3eb925_1771209635.JPG');
+(14, 'George', 'Burell', '07809639807', 'GJ@gmail.com', '$2y$10$mY9.9HyJju6ePXFPlwO/A.ykCpIHFusAqaqzfHK3njZkaoKDPCnv2', 'mentor', '2026-02-16 02:40:36', 'uploads/profile_pictures/profile_699283a3eb925_1771209635.JPG'),
+(15, 'Stacey', 'Slater', '07463885316', 'ST@gmail.com', '$2y$10$iV5yq/O/PX5tOIzCnyEzouc7p9KF5oz40tliUppJEtn7JulnHKF9e', 'student', '2026-03-07 00:49:00', 'uploads/profile_pictures/profile_69ab75fcd2b29_1772844540.webp');
 
 --
 -- Indexes for dumped tables
@@ -317,13 +307,6 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `phone`, `email`, `passwor
 ALTER TABLE `availability`
   ADD PRIMARY KEY (`id`),
   ADD KEY `mentor_id` (`mentor_id`);
-
---
--- Indexes for table `interests`
---
-ALTER TABLE `interests`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `name` (`name`);
 
 --
 -- Indexes for table `mentor_applications`
@@ -404,13 +387,6 @@ ALTER TABLE `students`
   ADD KEY `fk_student_mentor` (`mentor_id`);
 
 --
--- Indexes for table `student_interests`
---
-ALTER TABLE `student_interests`
-  ADD PRIMARY KEY (`student_id`,`interest_id`),
-  ADD KEY `interest_id` (`interest_id`);
-
---
 -- Indexes for table `subjects`
 --
 ALTER TABLE `subjects`
@@ -435,12 +411,6 @@ ALTER TABLE `availability`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `interests`
---
-ALTER TABLE `interests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `mentor_applications`
 --
 ALTER TABLE `mentor_applications`
@@ -450,13 +420,13 @@ ALTER TABLE `mentor_applications`
 -- AUTO_INCREMENT for table `mentor_requests`
 --
 ALTER TABLE `mentor_requests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `mentor_student_matches`
 --
 ALTER TABLE `mentor_student_matches`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `messages`
@@ -486,7 +456,7 @@ ALTER TABLE `subjects`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- Constraints for dumped tables
@@ -569,13 +539,6 @@ ALTER TABLE `students`
   ADD CONSTRAINT `fk_student_mentor` FOREIGN KEY (`mentor_id`) REFERENCES `mentor_profiles` (`mentor_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `students_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `student_interests`
---
-ALTER TABLE `student_interests`
-  ADD CONSTRAINT `student_interests_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `student_interests_ibfk_2` FOREIGN KEY (`interest_id`) REFERENCES `interests` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
