@@ -28,7 +28,7 @@ if ($userRole === 'mentor') {
         ['name' => 'calendar', 'label' => 'Calendar', 'path' => $navBasePath . 'pages/calendar.php', 'icon' => 'calendar'],
         ['name' => 'mentor_swipe', 'label' => 'Mentors', 'path' => $navBasePath . 'pages/mentor_swipe.php', 'icon' => 'mentors'],
         ['name' => 'chatbot', 'label' => 'Chatbot', 'path' => $navBasePath . 'pages/chatbot.php', 'icon' => 'chat'],
-        ['name' => 'student_profile_setup', 'label' => 'Settings', 'path' => $navBasePath . 'users/student/student_profile_setup.php', 'icon' => 'settings'],
+        ['name' => 'student_profile', 'label' => 'Settings', 'path' => $navBasePath . 'users/student/student_profile.php', 'icon' => 'settings'],
     ];
 } elseif ($userRole === 'admin') {
     $navItems = [
