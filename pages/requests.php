@@ -92,12 +92,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ajax'])) {
     exit;
 }
 
-// Fetch mentor subjects
+// Fetch mentor subjects with names
 $mentorSubjects = [];
 try {
-    $stmt = $pdo->prepare('SELECT subject_id FROM mentor_subjects WHERE mentor_id = ?');
+    $stmt = $pdo->prepare('
+        SELECT s.name 
+        FROM mentor_subjects ms 
+        JOIN subjects s ON ms.subject_id = s.id 
+        WHERE ms.mentor_id = ?
+    ');
     $stmt->execute([$mentor_id]);
-    $mentorSubjects = array_map(function($row) { return $row['subject_id']; }, $stmt->fetchAll(PDO::FETCH_ASSOC));
+    $mentorSubjects = array_map(function($row) { return strtolower(trim($row['name'])); }, $stmt->fetchAll(PDO::FETCH_ASSOC));
 } catch (PDOException $e) {
     $mentorSubjects = [];
 }
@@ -126,13 +131,6 @@ try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$mentor_id]);
     $requests = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
-    // Fetch student interests for each request
-    foreach ($requests as &$request) {
-        $interestStmt = $pdo->prepare('SELECT interest_id FROM student_interests WHERE student_id = ?');
-        $interestStmt->execute([$request['student_id']]);
-        $request['student_interests'] = array_map(function($row) { return $row['interest_id']; }, $interestStmt->fetchAll(PDO::FETCH_ASSOC));
-    }
 } catch (PDOException $e) {
     $requests = [];
 }
@@ -173,7 +171,7 @@ try {
         <?php if (count($requests) > 0): ?>
             <div class="requests-list">
                 <?php foreach ($requests as $request): ?>
-                    <div class="request-card" data-request-id="<?php echo $request['id']; ?>" data-interests="<?php echo htmlspecialchars(json_encode($request['student_interests'])); ?>">
+                    <div class="request-card" data-request-id="<?php echo $request['id']; ?>" data-course="<?php echo htmlspecialchars(strtolower(trim($request['course']))); ?>">
                         <div class="card-content">
                             <div class="student-info">
                                 <?php if (!empty($request['profile_picture'])): ?>
@@ -331,8 +329,8 @@ try {
             let visibleCount = 0;
 
             cards.forEach(card => {
-                const studentInterests = JSON.parse(card.dataset.interests || '[]');
-                const hasMatchingSubject = studentInterests.some(interest => mentorSubjects.includes(interest));
+                const studentCourse = card.dataset.course || '';
+                const hasMatchingSubject = mentorSubjects.includes(studentCourse);
                 
                 if (filterBySubject) {
                     // Show only cards with matching subjects
