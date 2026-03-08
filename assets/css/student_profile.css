@@ -97,9 +97,49 @@ h1 {
     margin-bottom: 10px;
 }
 
+#profile_picture::file-selector-button {
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+#profile_picture:hover::file-selector-button,
+#profile_picture:focus-visible::file-selector-button {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(59, 130, 246, 0.24);
+}
+
+#profile_picture:active::file-selector-button {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+}
+
 .avatar-btn {
     width: auto;
     min-width: 140px;
+}
+
+.avatar-btn,
+.profile-form > .btn {
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.avatar-btn:hover,
+.profile-form > .btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.28);
+}
+
+.avatar-btn:active,
+.profile-form > .btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(59, 130, 246, 0.2);
+}
+
+.avatar-btn:focus-visible,
+.profile-form > .btn:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.35);
+    outline-offset: 2px;
 }
 
 .profile-form {

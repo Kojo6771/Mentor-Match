@@ -302,6 +302,30 @@ $mentor_avatar_url = ($pairedMentor && !empty($pairedMentor['profile_picture']))
 				</div>
 			<?php endif; ?>
 
+			<section class="card pairing-card" aria-labelledby="pairing-heading">
+				<h2 id="pairing-heading" class="section-title">Current Mentor Pairing</h2>
+
+				<?php if ($pairedMentor): ?>
+					<div class="mentor-summary">
+						<img src="<?php echo htmlspecialchars($mentor_avatar_url); ?>" alt="Mentor profile" class="mentor-avatar" data-fallback="<?php echo htmlspecialchars($mentor_fallback_avatar); ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;">
+						<div class="mentor-details">
+							<h3><?php echo htmlspecialchars(($pairedMentor['first_name'] ?? '') . ' ' . ($pairedMentor['last_name'] ?? '')); ?></h3>
+							<p><?php echo htmlspecialchars($pairedMentor['email'] ?? ''); ?></p>
+							<?php if (!empty($pairedMentor['subjects'])): ?>
+								<p class="mentor-meta"><strong>Subjects:</strong> <?php echo htmlspecialchars($pairedMentor['subjects']); ?></p>
+							<?php endif; ?>
+						</div>
+					</div>
+
+					<form method="POST" class="remove-form" onsubmit="return confirm('Remove your pairing with this mentor?');">
+						<input type="hidden" name="action" value="remove_pairing">
+						<button type="submit" class="btn danger-btn">Remove Pairing</button>
+					</form>
+				<?php else: ?>
+					<p class="empty-pairing">You are not currently paired with a mentor.</p>
+				<?php endif; ?>
+			</section>
+
 			<section class="card profile-card" aria-labelledby="profile-heading">
 				<h2 id="profile-heading" class="section-title">Your Profile</h2>
 
@@ -382,30 +406,6 @@ $mentor_avatar_url = ($pairedMentor && !empty($pairedMentor['profile_picture']))
 
 					<button class="btn" type="submit">Save Changes</button>
 				</form>
-			</section>
-
-			<section class="card pairing-card" aria-labelledby="pairing-heading">
-				<h2 id="pairing-heading" class="section-title">Current Mentor Pairing</h2>
-
-				<?php if ($pairedMentor): ?>
-					<div class="mentor-summary">
-						<img src="<?php echo htmlspecialchars($mentor_avatar_url); ?>" alt="Mentor profile" class="mentor-avatar" data-fallback="<?php echo htmlspecialchars($mentor_fallback_avatar); ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;">
-						<div class="mentor-details">
-							<h3><?php echo htmlspecialchars(($pairedMentor['first_name'] ?? '') . ' ' . ($pairedMentor['last_name'] ?? '')); ?></h3>
-							<p><?php echo htmlspecialchars($pairedMentor['email'] ?? ''); ?></p>
-							<?php if (!empty($pairedMentor['subjects'])): ?>
-								<p class="mentor-meta"><strong>Subjects:</strong> <?php echo htmlspecialchars($pairedMentor['subjects']); ?></p>
-							<?php endif; ?>
-						</div>
-					</div>
-
-					<form method="POST" class="remove-form" onsubmit="return confirm('Remove your pairing with this mentor?');">
-						<input type="hidden" name="action" value="remove_pairing">
-						<button type="submit" class="btn danger-btn">Remove Pairing</button>
-					</form>
-				<?php else: ?>
-					<p class="empty-pairing">You are not currently paired with a mentor.</p>
-				<?php endif; ?>
 			</section>
 		</div>
 	</main>
