@@ -91,28 +91,57 @@ if ($user_role === 'mentor') {
 			');
 			$studentsStmt->execute([$mentor_id]);
 			$student_options = $studentsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+			// Get last message for each student
+			foreach ($student_options as &$student) {
+				try {
+					$lastMsgStmt = $pdo->prepare('
+						SELECT message, sent_at, sender_id
+						FROM messages
+						WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)
+						ORDER BY sent_at DESC, id DESC
+						LIMIT 1
+					');
+					$lastMsgStmt->execute([$user_id, $student['user_id'], $student['user_id'], $user_id]);
+					$lastMsg = $lastMsgStmt->fetch(PDO::FETCH_ASSOC);
+					
+					if ($lastMsg) {
+						$student['last_message'] = $lastMsg['message'];
+						$student['last_message_time'] = $lastMsg['sent_at'];
+						$student['last_sender_id'] = $lastMsg['sender_id'];
+					} else {
+						$student['last_message'] = null;
+						$student['last_message_time'] = null;
+						$student['last_sender_id'] = null;
+					}
+				} catch (PDOException $e) {
+					$student['last_message'] = null;
+					$student['last_message_time'] = null;
+					$student['last_sender_id'] = null;
+				}
+			}
+			unset($student);
 		} catch (PDOException $e) {
 			$student_options = [];
 		}
 	}
 
-	if (!empty($student_options)) {
-		$requested_student = (int)($_GET['student'] ?? 0);
+	// Handle selected student for chat modal
+	$requested_student = (int)($_GET['student'] ?? 0);
+	if (!empty($student_options) && $requested_student > 0) {
 		$allowed_user_ids = array_map(static function ($student) {
 			return (int)$student['user_id'];
 		}, $student_options);
 
-		if ($requested_student > 0 && in_array($requested_student, $allowed_user_ids, true)) {
+		if (in_array($requested_student, $allowed_user_ids, true)) {
 			$selected_student_user_id = $requested_student;
-		} else {
-			$selected_student_user_id = (int)$student_options[0]['user_id'];
-		}
-
-		foreach ($student_options as $student) {
-			if ((int)$student['user_id'] === $selected_student_user_id) {
-				$chat_partner = $student;
-				$chat_partner_user_id = $selected_student_user_id;
-				break;
+			
+			foreach ($student_options as $student) {
+				if ((int)$student['user_id'] === $selected_student_user_id) {
+					$chat_partner = $student;
+					$chat_partner_user_id = $selected_student_user_id;
+					break;
+				}
 			}
 		}
 	}
@@ -221,6 +250,7 @@ if ($chat_partner) {
 }
 ?>
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -233,96 +263,193 @@ if ($chat_partner) {
 </head>
 <body>
 	<main class="container">
-		<section class="chat-page card" aria-labelledby="chat-heading">
-			<h1 id="chat-heading">Chatroom</h1>
-			<p class="lead">
-				<?php if ($user_role === 'student'): ?>
-					Chat directly with your mentor.
-				<?php else: ?>
-					Select a student and start chatting.
+		<?php if ($user_role === 'student'): ?>
+			<!-- Student View: Direct Chat with Mentor -->
+			<section class="chat-page card" aria-labelledby="chat-heading">
+				<h1 id="chat-heading">Chatroom</h1>
+				<p class="lead">Chat directly with your mentor.</p>
+
+				<?php if (!empty($errors)): ?>
+					<div class="errors" role="alert">
+						<?php foreach ($errors as $error): ?>
+							<div><?php echo htmlspecialchars($error); ?></div>
+						<?php endforeach; ?>
+					</div>
 				<?php endif; ?>
-			</p>
 
-			<?php if (!empty($errors)): ?>
-				<div class="errors" role="alert">
-					<?php foreach ($errors as $error): ?>
-						<div><?php echo htmlspecialchars($error); ?></div>
-					<?php endforeach; ?>
-				</div>
-			<?php endif; ?>
+				<?php if (!empty($successes)): ?>
+					<div class="success" role="status">
+						<?php foreach ($successes as $success): ?>
+							<div><?php echo htmlspecialchars($success); ?></div>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
 
-			<?php if (!empty($successes)): ?>
-				<div class="success" role="status">
-					<?php foreach ($successes as $success): ?>
-						<div><?php echo htmlspecialchars($success); ?></div>
-					<?php endforeach; ?>
-				</div>
-			<?php endif; ?>
+				<?php if (!$chat_partner_user_id): ?>
+					<p class="empty-state">You are not currently paired with a mentor.</p>
+				<?php else: ?>
+					<div class="chat-partner">
+						<img src="<?php echo htmlspecialchars($partner_avatar); ?>" alt="Chat partner" class="partner-avatar">
+						<div class="chat-partner__details">
+							<h2><?php echo htmlspecialchars($partner_name); ?></h2>
+							<?php if ($partner_email !== ''): ?>
+								<p><?php echo htmlspecialchars($partner_email); ?></p>
+							<?php endif; ?>
+							<?php if ($partner_meta !== ''): ?>
+								<p class="partner-meta"><?php echo htmlspecialchars($partner_meta); ?></p>
+							<?php endif; ?>
+						</div>
+					</div>
 
-			<?php if ($user_role === 'mentor'): ?>
-				<form method="GET" class="picker-form">
-					<label for="student">Student</label>
-					<select class="input" id="student" name="student" onchange="this.form.submit()" <?php echo empty($student_options) ? 'disabled' : ''; ?>>
-						<?php if (empty($student_options)): ?>
-							<option value="">No matched students</option>
+					<div class="messages" id="messages-container">
+						<?php if (empty($conversation_messages)): ?>
+							<p class="empty-conversation">No messages yet. Start the conversation below.</p>
 						<?php else: ?>
-							<?php foreach ($student_options as $student): ?>
-								<option value="<?php echo (int)$student['user_id']; ?>" <?php echo ((int)$student['user_id'] === (int)$selected_student_user_id) ? 'selected' : ''; ?>>
-									<?php echo htmlspecialchars(trim(($student['first_name'] ?? '') . ' ' . ($student['last_name'] ?? ''))); ?>
-								</option>
+							<?php foreach ($conversation_messages as $message): ?>
+								<?php $is_own = ((int)$message['sender_id'] === $user_id); ?>
+								<article class="message-bubble <?php echo $is_own ? 'is-own' : 'is-other'; ?>">
+									<p><?php echo nl2br(htmlspecialchars($message['message'])); ?></p>
+									<time datetime="<?php echo htmlspecialchars($message['sent_at']); ?>">
+										<?php echo htmlspecialchars(date('M j, g:i a', strtotime($message['sent_at']))); ?>
+									</time>
+								</article>
 							<?php endforeach; ?>
 						<?php endif; ?>
-					</select>
-				</form>
-			<?php endif; ?>
+					</div>
 
-			<?php if (!$chat_partner_user_id): ?>
-				<p class="empty-state">
-					<?php if ($user_role === 'student'): ?>
-						You are not currently paired with a mentor.
-					<?php else: ?>
-						You do not have any matched students yet.
-					<?php endif; ?>
-				</p>
-			<?php else: ?>
-				<div class="chat-partner">
-					<img src="<?php echo htmlspecialchars($partner_avatar); ?>" alt="Chat partner" class="partner-avatar">
-					<div class="chat-partner__details">
-						<h2><?php echo htmlspecialchars($partner_name); ?></h2>
-						<?php if ($partner_email !== ''): ?>
-							<p><?php echo htmlspecialchars($partner_email); ?></p>
-						<?php endif; ?>
-						<?php if ($partner_meta !== ''): ?>
-							<p class="partner-meta"><?php echo htmlspecialchars($partner_meta); ?></p>
-						<?php endif; ?>
+					<form method="POST" class="composer" novalidate>
+						<input type="hidden" name="action" value="send_message">
+						<input type="hidden" name="receiver_id" value="<?php echo (int)$chat_partner_user_id; ?>">
+						<label for="message" class="sr-only">Message</label>
+						<textarea class="input message-input" id="message" name="message" maxlength="2000" rows="3" placeholder="Type your message..." required></textarea>
+						<button type="submit" class="btn">Send</button>
+					</form>
+				<?php endif; ?>
+			</section>
+
+		<?php else: ?>
+			<!-- Mentor View: Student List with Chat Modal -->
+			<section class="chat-page card" aria-labelledby="chat-heading">
+				<h1 id="chat-heading">Messages</h1>
+
+				<?php if (!empty($errors)): ?>
+					<div class="errors" role="alert">
+						<?php foreach ($errors as $error): ?>
+							<div><?php echo htmlspecialchars($error); ?></div>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
+
+				<?php if (!empty($successes)): ?>
+					<div class="success" role="status">
+						<?php foreach ($successes as $success): ?>
+							<div><?php echo htmlspecialchars($success); ?></div>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
+
+				<?php if (empty($student_options)): ?>
+					<p class="empty-state">You do not have any matched students yet.</p>
+				<?php else: ?>
+					<!-- Students List -->
+					<div class="conversations-list">
+						<?php foreach ($student_options as $student): ?>
+							<?php
+								$student_name = trim(($student['first_name'] ?? '') . ' ' . ($student['last_name'] ?? ''));
+								$avatar_fallback = 'https://ui-avatars.com/api/?name=' . urlencode($student_name) . '&background=3b82f6&color=fff&size=128';
+								$student_avatar = !empty($student['profile_picture']) ? '../' . $student['profile_picture'] : $avatar_fallback;
+								
+								$last_message = $student['last_message'] ?? null;
+								$last_time = $student['last_message_time'] ?? null;
+								$is_sent_by_me = $student['last_sender_id'] == $user_id;
+								
+								$preview_text = 'No messages yet';
+								if ($last_message) {
+									$preview = strlen($last_message) > 50 ? substr($last_message, 0, 50) . '...' : $last_message;
+									$preview_text = ($is_sent_by_me ? 'You: ' : '') . $preview;
+								}
+								
+								$time_display = '';
+								if ($last_time) {
+									$timestamp = strtotime($last_time);
+									$now = time();
+									$diff = $now - $timestamp;
+									
+									if ($diff < 60) {
+										$time_display = 'Just now';
+									} elseif ($diff < 3600) {
+										$time_display = floor($diff / 60) . 'm';
+									} elseif ($diff < 86400) {
+										$time_display = floor($diff / 3600) . 'h';
+									} elseif ($diff < 604800) {
+										$time_display = floor($diff / 86400) . 'd';
+									} else {
+										$time_display = date('M j', $timestamp);
+									}
+								}
+							?>
+							<a href="?student=<?php echo (int)$student['user_id']; ?>" class="conversation-item" data-student-id="<?php echo (int)$student['user_id']; ?>">
+								<img src="<?php echo htmlspecialchars($student_avatar); ?>" alt="<?php echo htmlspecialchars($student_name); ?>" class="conversation-avatar">
+								<div class="conversation-details">
+									<div class="conversation-header">
+										<h3 class="conversation-name"><?php echo htmlspecialchars($student_name); ?></h3>
+										<?php if ($time_display): ?>
+											<span class="conversation-time"><?php echo htmlspecialchars($time_display); ?></span>
+										<?php endif; ?>
+									</div>
+									<p class="conversation-preview"><?php echo htmlspecialchars($preview_text); ?></p>
+								</div>
+							</a>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
+			</section>
+
+			<!-- Chat Modal -->
+			<?php if ($chat_partner_user_id): ?>
+				<div class="chat-modal is-open" id="chatModal">
+					<div class="chat-modal__backdrop"></div>
+					<div class="chat-modal__panel">
+						<div class="chat-modal__header">
+							<div class="chat-modal__partner">
+								<img src="<?php echo htmlspecialchars($partner_avatar); ?>" alt="Partner" class="chat-modal__avatar">
+								<div>
+									<h2 class="chat-modal__name"><?php echo htmlspecialchars($partner_name); ?></h2>
+									<?php if ($partner_meta !== ''): ?>
+										<p class="chat-modal__meta"><?php echo htmlspecialchars($partner_meta); ?></p>
+									<?php endif; ?>
+								</div>
+							</div>
+							<button type="button" class="chat-modal__close" aria-label="Close chat">&times;</button>
+						</div>
+
+						<div class="chat-modal__messages" id="messages-container">
+							<?php if (empty($conversation_messages)): ?>
+								<p class="empty-conversation">No messages yet. Start the conversation below.</p>
+							<?php else: ?>
+								<?php foreach ($conversation_messages as $message): ?>
+									<?php $is_own = ((int)$message['sender_id'] === $user_id); ?>
+									<article class="message-bubble <?php echo $is_own ? 'is-own' : 'is-other'; ?>">
+										<p><?php echo nl2br(htmlspecialchars($message['message'])); ?></p>
+										<time datetime="<?php echo htmlspecialchars($message['sent_at']); ?>">
+											<?php echo htmlspecialchars(date('M j, g:i a', strtotime($message['sent_at']))); ?>
+										</time>
+									</article>
+								<?php endforeach; ?>
+							<?php endif; ?>
+						</div>
+
+						<form method="POST" class="chat-modal__composer" novalidate>
+							<input type="hidden" name="action" value="send_message">
+							<input type="hidden" name="receiver_id" value="<?php echo (int)$chat_partner_user_id; ?>">
+							<label for="message" class="sr-only">Message</label>
+							<textarea class="input message-input" id="message" name="message" maxlength="2000" rows="3" placeholder="Type your message..." required></textarea>
+							<button type="submit" class="btn">Send</button>
+						</form>
 					</div>
 				</div>
-
-				<div class="messages" id="messages-container">
-					<?php if (empty($conversation_messages)): ?>
-						<p class="empty-conversation">No messages yet. Start the conversation below.</p>
-					<?php else: ?>
-						<?php foreach ($conversation_messages as $message): ?>
-							<?php $is_own = ((int)$message['sender_id'] === $user_id); ?>
-							<article class="message-bubble <?php echo $is_own ? 'is-own' : 'is-other'; ?>">
-								<p><?php echo nl2br(htmlspecialchars($message['message'])); ?></p>
-								<time datetime="<?php echo htmlspecialchars($message['sent_at']); ?>">
-									<?php echo htmlspecialchars(date('M j, g:i a', strtotime($message['sent_at']))); ?>
-								</time>
-							</article>
-						<?php endforeach; ?>
-					<?php endif; ?>
-				</div>
-
-				<form method="POST" class="composer" novalidate>
-					<input type="hidden" name="action" value="send_message">
-					<input type="hidden" name="receiver_id" value="<?php echo (int)$chat_partner_user_id; ?>">
-					<label for="message" class="sr-only">Message</label>
-					<textarea class="input message-input" id="message" name="message" maxlength="2000" rows="3" placeholder="Type your message..." required></textarea>
-					<button type="submit" class="btn">Send</button>
-				</form>
 			<?php endif; ?>
-		</section>
+		<?php endif; ?>
 	</main>
 
 	<?php include '../includes/nav.php'; ?>
@@ -332,6 +459,32 @@ if ($chat_partner) {
 			const container = document.getElementById('messages-container');
 			if (container) {
 				container.scrollTop = container.scrollHeight;
+			}
+
+			// Handle chat modal close button
+			const chatModal = document.getElementById('chatModal');
+			const closeBtn = document.querySelector('.chat-modal__close');
+			const backdrop = document.querySelector('.chat-modal__backdrop');
+
+			if (closeBtn && chatModal) {
+				closeBtn.addEventListener('click', function () {
+					window.history.back();
+				});
+			}
+
+			if (backdrop && chatModal) {
+				backdrop.addEventListener('click', function () {
+					window.history.back();
+				});
+			}
+
+			// Handle escape key to close modal
+			if (chatModal) {
+				document.addEventListener('keydown', function (e) {
+					if (e.key === 'Escape' && chatModal.classList.contains('is-open')) {
+						window.history.back();
+					}
+				});
 			}
 		})();
 	</script>
