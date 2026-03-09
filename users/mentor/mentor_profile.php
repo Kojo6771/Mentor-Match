@@ -301,7 +301,7 @@ $avatar_url = !empty($user['profile_picture']) ? '../../' . $user['profile_pictu
 				<div class="profile-section-head">
 					<h2 id="profile-heading" class="section-title">Your Details</h2>
 					<button type="button" class="btn view-students-btn" id="open-students-modal">
-						View Students<?php echo !empty($students) ? ' (' . count($students) . ')' : ''; ?>
+						<?php echo count($students) === 1 ? 'View Student' : 'View Students'; ?><?php echo count($students) > 1 ? ' (' . count($students) . ')' : ''; ?>
 					</button>
 				</div>
 

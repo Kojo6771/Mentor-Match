@@ -130,7 +130,7 @@
 .students-modal.is-open {
     display: flex;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .students-modal__backdrop {
@@ -146,7 +146,6 @@
     max-width: 560px;
     max-height: calc(100vh - 120px);
     overflow-y: auto;
-    margin-top: 8px;
 }
 
 .students-modal__top {
