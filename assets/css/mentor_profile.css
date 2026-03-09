@@ -80,6 +80,10 @@
     line-height: 1.45;
 }
 
+.pairing-remove-form {
+    margin-top: 10px;
+}
+
 .carousel-controls {
     display: grid;
     grid-template-columns: 1fr 1fr;

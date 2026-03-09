@@ -161,6 +161,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			}
 		}
 	}
+
+	if ($action === 'remove_pairing') {
+		$student_id = (int)($_POST['student_id'] ?? 0);
+
+		if ($student_id <= 0) {
+			$errors[] = 'Invalid student selection.';
+		} else {
+			try {
+				$mentorIdStmt = $pdo->prepare('SELECT mentor_id FROM mentor_profiles WHERE user_id = ? LIMIT 1');
+				$mentorIdStmt->execute([$user_id]);
+				$current_mentor_id = (int)($mentorIdStmt->fetchColumn() ?: $user_id);
+
+				$ownershipStmt = $pdo->prepare('SELECT student_id FROM students WHERE student_id = ? AND mentor_id = ? LIMIT 1');
+				$ownershipStmt->execute([$student_id, $current_mentor_id]);
+				$belongs_to_mentor = $ownershipStmt->fetchColumn();
+
+				if (!$belongs_to_mentor) {
+					$errors[] = 'You can only remove your own student pairings.';
+				} else {
+					$pdo->beginTransaction();
+
+					$clearStudentStmt = $pdo->prepare('UPDATE students SET mentor_id = NULL WHERE student_id = ? AND mentor_id = ?');
+					$clearStudentStmt->execute([$student_id, $current_mentor_id]);
+
+					$deactivateMatchStmt = $pdo->prepare('UPDATE mentor_student_matches SET active = 0 WHERE student_id = ? AND mentor_id = ? AND active = 1');
+					$deactivateMatchStmt->execute([$student_id, $current_mentor_id]);
+
+					$pdo->commit();
+					$successes[] = 'Student pairing removed successfully.';
+				}
+			} catch (PDOException $e) {
+				if ($pdo->inTransaction()) {
+					$pdo->rollBack();
+				}
+				$errors[] = 'Failed to remove pairing. Please try again.';
+			}
+		}
+	}
 }
 
 $user = null;
@@ -321,6 +359,12 @@ $avatar_url = !empty($user['profile_picture']) ? '../../' . $user['profile_pictu
 									<span class="detail-label">Bio</span>
 									<p class="student-bio-text"><?php echo htmlspecialchars($student['bio'] ?: 'No bio added yet.'); ?></p>
 								</div>
+
+								<form method="POST" class="pairing-remove-form" onsubmit="return confirm('Remove this student pairing?');">
+									<input type="hidden" name="action" value="remove_pairing">
+									<input type="hidden" name="student_id" value="<?php echo (int)$student['student_id']; ?>">
+									<button type="submit" class="btn danger-btn">Remove Pairing</button>
+								</form>
 							</article>
 						<?php endforeach; ?>
 					</div>
