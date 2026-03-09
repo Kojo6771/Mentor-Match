@@ -524,7 +524,7 @@ if ($user_role === 'mentor') {
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Profile â€” Mentor Match</title>
+	<title>Profile - Mentor Match</title>
 	<meta name="description" content="Manage your profile on Mentor Match.">
 	<link rel="stylesheet" href="../assets/css/styles.css">
 	<link rel="stylesheet" href="../assets/css/student_profile.css">
@@ -636,7 +636,7 @@ if ($user_role === 'mentor') {
 					<section class="card pairing-card mentor-modal__panel" aria-labelledby="pairing-heading" role="dialog" aria-modal="true">
 						<div class="mentor-modal__top">
 							<h2 id="pairing-heading" class="section-title">Current Mentor Pairing</h2>
-							<button type="button" class="mentor-close-btn" id="close-mentor-modal" aria-label="Close mentor view">âœ•</button>
+							<button type="button" class="mentor-close-btn" id="close-mentor-modal" aria-label="Close mentor view">&times;</button>
 						</div>
 
 						<?php if ($pairedMentor): ?>
@@ -742,7 +742,7 @@ if ($user_role === 'mentor') {
 									<span class="students-counter"><span id="student-position">1</span> / <?php echo count($students); ?></span>
 								<?php endif; ?>
 							</div>
-							<button type="button" class="students-close-btn" id="close-students-modal" aria-label="Close student view">âœ•</button>
+							<button type="button" class="students-close-btn" id="close-students-modal" aria-label="Close student view">&times;</button>
 						</div>
 
 						<?php if (empty($students)): ?>
@@ -773,15 +773,15 @@ if ($user_role === 'mentor') {
 										<div class="student-details-grid">
 											<div>
 												<span class="detail-label">Course</span>
-												<span class="detail-value"><?php echo htmlspecialchars($student['course'] ?? 'â€”'); ?></span>
+												<span class="detail-value"><?php echo htmlspecialchars($student['course'] ?? '-'); ?></span>
 											</div>
 											<div>
 												<span class="detail-label">Year</span>
-												<span class="detail-value"><?php echo htmlspecialchars((string)($student['year_of_study'] ?? 'â€”')); ?></span>
+												<span class="detail-value"><?php echo htmlspecialchars((string)($student['year_of_study'] ?? '-')); ?></span>
 											</div>
 											<div>
 												<span class="detail-label">Preference</span>
-												<span class="detail-value"><?php echo htmlspecialchars($student['learning_preference'] ?? 'â€”'); ?></span>
+												<span class="detail-value"><?php echo htmlspecialchars($student['learning_preference'] ?? '-'); ?></span>
 											</div>
 											<div>
 												<span class="detail-label">Phone</span>
