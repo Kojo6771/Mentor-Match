@@ -33,7 +33,7 @@ if ($userRole === 'mentor') {
 } elseif ($userRole === 'admin') {
     $navItems = [
         ['name' => 'dashboard', 'label' => 'Home', 'path' => $navBasePath . 'pages/dashboard.php', 'icon' => 'home'],
-        ['name' => 'admin_dashboard', 'label' => 'Applications', 'path' => $navBasePath . 'users/admin/admin_dashboard.php', 'icon' => 'requests'],
+        ['name' => 'admin_dashboard', 'label' => 'Applications', 'path' => $navBasePath . 'users/admin/manage_applications.php', 'icon' => 'requests'],
         ['name' => 'admin_users', 'label' => 'Users', 'path' => $navBasePath . 'pages/admin_users.php', 'icon' => 'users'],
         ['name' => 'admin_sessions', 'label' => 'Sessions', 'path' => $navBasePath . 'pages/admin_sessions.php', 'icon' => 'calendar'],
         ['name' => 'admin_reports', 'label' => 'Reports', 'path' => $navBasePath . 'pages/admin_reports.php', 'icon' => 'reports'],
