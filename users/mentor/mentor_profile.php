@@ -281,12 +281,6 @@ $avatar_url = !empty($user['profile_picture']) ? '../../' . $user['profile_pictu
 <body>
 	<main class="container">
 		<div class="profile-page">
-			<div class="page-header">
-				<a href="../../pages/dashboard.php" class="back-link">← Back</a>
-				<h1>Mentor Profile</h1>
-				<p class="lead">Update your mentor details and review your current students.</p>
-			</div>
-
 			<?php if (!empty($errors)): ?>
 				<div class="errors" role="alert">
 					<?php foreach ($errors as $error): ?>
