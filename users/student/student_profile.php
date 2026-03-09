@@ -280,12 +280,6 @@ $mentor_avatar_url = ($pairedMentor && !empty($pairedMentor['profile_picture']))
 <body>
 	<main class="container">
 		<div class="profile-page">
-			<div class="page-header">
-				<a href="../../pages/dashboard.php" class="back-link">← Back</a>
-				<h1>Profile Settings</h1>
-				<p class="lead">Manage your account information and mentor pairing.</p>
-			</div>
-
 			<?php if (!empty($errors)): ?>
 				<div class="errors" role="alert">
 					<?php foreach ($errors as $error): ?>

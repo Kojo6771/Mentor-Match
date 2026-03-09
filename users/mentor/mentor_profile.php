@@ -443,10 +443,12 @@ $avatar_url = !empty($user['profile_picture']) ? '../../' . $user['profile_pictu
 							<?php endforeach; ?>
 						</div>
 
-						<div class="carousel-controls">
-							<button type="button" class="btn secondary-nav" id="student-prev">Previous</button>
-							<button type="button" class="btn secondary-nav" id="student-next">Next</button>
-						</div>
+						<?php if (count($students) > 1): ?>
+							<div class="carousel-controls">
+								<button type="button" class="btn secondary-nav" id="student-prev">Previous</button>
+								<button type="button" class="btn secondary-nav" id="student-next">Next</button>
+							</div>
+						<?php endif; ?>
 					<?php endif; ?>
 				</section>
 			</div>
