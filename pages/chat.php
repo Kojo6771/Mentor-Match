@@ -23,6 +23,10 @@ $chat_partner_user_id = null;
 $student_options = [];
 $selected_student_user_id = null;
 
+if (($_GET['sent'] ?? '') === '1') {
+	$successes[] = 'Message sent.';
+}
+
 if ($user_role === 'student') {
 	$studentProfile = null;
 
@@ -179,14 +183,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			try {
 				$insertStmt = $pdo->prepare('INSERT INTO messages (sender_id, receiver_id, message, sent_at) VALUES (?, ?, ?, NOW())');
 				$insertStmt->execute([$user_id, $receiver_id, $message]);
-				$successes[] = 'Message sent.';
 
-				if ($user_role === 'mentor' && $receiver_id > 0) {
-					header('Location: chat.php?student=' . $receiver_id);
-					exit;
-				}
-
-				header('Location: chat.php');
+				header('Location: chat.php?sent=1');
 				exit;
 			} catch (PDOException $e) {
 				$errors[] = 'Failed to send message. Please try again.';
