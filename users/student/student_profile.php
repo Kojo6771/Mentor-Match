@@ -302,32 +302,11 @@ $mentor_avatar_url = ($pairedMentor && !empty($pairedMentor['profile_picture']))
 				</div>
 			<?php endif; ?>
 
-			<section class="card pairing-card" aria-labelledby="pairing-heading">
-				<h2 id="pairing-heading" class="section-title">Current Mentor Pairing</h2>
-
-				<?php if ($pairedMentor): ?>
-					<div class="mentor-summary">
-						<img src="<?php echo htmlspecialchars($mentor_avatar_url); ?>" alt="Mentor profile" class="mentor-avatar" data-fallback="<?php echo htmlspecialchars($mentor_fallback_avatar); ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;">
-						<div class="mentor-details">
-							<h3><?php echo htmlspecialchars(($pairedMentor['first_name'] ?? '') . ' ' . ($pairedMentor['last_name'] ?? '')); ?></h3>
-							<p><?php echo htmlspecialchars($pairedMentor['email'] ?? ''); ?></p>
-							<?php if (!empty($pairedMentor['subjects'])): ?>
-								<p class="mentor-meta"><strong>Subjects:</strong> <?php echo htmlspecialchars($pairedMentor['subjects']); ?></p>
-							<?php endif; ?>
-						</div>
-					</div>
-
-					<form method="POST" class="remove-form" onsubmit="return confirm('Remove your pairing with this mentor?');">
-						<input type="hidden" name="action" value="remove_pairing">
-						<button type="submit" class="btn danger-btn">Remove Pairing</button>
-					</form>
-				<?php else: ?>
-					<p class="empty-pairing">You are not currently paired with a mentor.</p>
-				<?php endif; ?>
-			</section>
-
 			<section class="card profile-card" aria-labelledby="profile-heading">
-				<h2 id="profile-heading" class="section-title">Your Profile</h2>
+				<div class="profile-section-head">
+					<h2 id="profile-heading" class="section-title">Your Profile</h2>
+					<button type="button" class="btn view-mentor-btn" id="open-mentor-modal">View Mentor</button>
+				</div>
 
 				<form method="POST" enctype="multipart/form-data" class="avatar-row">
 					<input type="hidden" name="action" value="upload_photo">
@@ -407,9 +386,84 @@ $mentor_avatar_url = ($pairedMentor && !empty($pairedMentor['profile_picture']))
 					<button class="btn" type="submit">Save Changes</button>
 				</form>
 			</section>
+
+			<div class="mentor-modal" id="mentor-modal" aria-hidden="true">
+				<div class="mentor-modal__backdrop" data-close-mentor></div>
+				<section class="card pairing-card mentor-modal__panel" aria-labelledby="pairing-heading" role="dialog" aria-modal="true">
+					<div class="mentor-modal__top">
+						<h2 id="pairing-heading" class="section-title">Current Mentor Pairing</h2>
+						<button type="button" class="mentor-close-btn" id="close-mentor-modal" aria-label="Close mentor view">✕</button>
+					</div>
+
+					<?php if ($pairedMentor): ?>
+						<div class="mentor-summary">
+							<img src="<?php echo htmlspecialchars($mentor_avatar_url); ?>" alt="Mentor profile" class="mentor-avatar" data-fallback="<?php echo htmlspecialchars($mentor_fallback_avatar); ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;">
+							<div class="mentor-details">
+								<h3><?php echo htmlspecialchars(($pairedMentor['first_name'] ?? '') . ' ' . ($pairedMentor['last_name'] ?? '')); ?></h3>
+								<p><?php echo htmlspecialchars($pairedMentor['email'] ?? ''); ?></p>
+								<?php if (!empty($pairedMentor['subjects'])): ?>
+									<p class="mentor-meta"><strong>Subjects:</strong> <?php echo htmlspecialchars($pairedMentor['subjects']); ?></p>
+								<?php endif; ?>
+							</div>
+						</div>
+
+						<form method="POST" class="remove-form" onsubmit="return confirm('Remove your pairing with this mentor?');">
+							<input type="hidden" name="action" value="remove_pairing">
+							<button type="submit" class="btn danger-btn">Remove Pairing</button>
+						</form>
+					<?php else: ?>
+						<p class="empty-pairing">You are not currently paired with a mentor.</p>
+					<?php endif; ?>
+				</section>
+			</div>
 		</div>
 	</main>
 
 	<?php include '../../includes/nav.php'; ?>
+
+	<script>
+		(function () {
+			const modal = document.getElementById('mentor-modal');
+			const openMentorBtn = document.getElementById('open-mentor-modal');
+			const closeMentorBtn = document.getElementById('close-mentor-modal');
+			const closeBackdrop = modal ? modal.querySelector('[data-close-mentor]') : null;
+
+			function openMentorModal() {
+				if (!modal) {
+					return;
+				}
+				modal.classList.add('is-open');
+				modal.setAttribute('aria-hidden', 'false');
+				document.body.classList.add('mentor-modal-open');
+			}
+
+			function closeMentorModal() {
+				if (!modal) {
+					return;
+				}
+				modal.classList.remove('is-open');
+				modal.setAttribute('aria-hidden', 'true');
+				document.body.classList.remove('mentor-modal-open');
+			}
+
+			if (openMentorBtn) {
+				openMentorBtn.addEventListener('click', openMentorModal);
+			}
+
+			if (closeMentorBtn) {
+				closeMentorBtn.addEventListener('click', closeMentorModal);
+			}
+
+			if (closeBackdrop) {
+				closeBackdrop.addEventListener('click', closeMentorModal);
+			}
+
+			document.addEventListener('keydown', function (event) {
+				if (event.key === 'Escape') {
+					closeMentorModal();
+				}
+			});
+		})();
+	</script>
 </body>
 </html>

@@ -50,6 +50,44 @@ h1 {
     margin: 0 0 12px;
 }
 
+.profile-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.profile-section-head .section-title {
+    margin: 0;
+}
+
+.view-mentor-btn {
+    width: auto;
+    min-width: 150px;
+    padding: 10px 14px;
+}
+
+.view-mentor-btn {
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.view-mentor-btn:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.28);
+}
+
+.view-mentor-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(59, 130, 246, 0.2);
+}
+
+.view-mentor-btn:focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.35);
+    outline-offset: 2px;
+}
+
 .avatar-row {
     display: flex;
     align-items: center;
@@ -225,6 +263,65 @@ h1 {
     font-size: 0.9rem;
 }
 
+.mentor-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 60;
+    padding: 14px 10px 92px;
+}
+
+.mentor-modal.is-open {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.mentor-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.mentor-modal__panel {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 560px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    margin-top: 8px;
+}
+
+.mentor-modal__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.mentor-close-btn {
+    border: 1px solid #d9e0ea;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--muted);
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.mentor-close-btn:hover {
+    color: #111827;
+    background: #f8fafc;
+}
+
+body.mentor-modal-open {
+    overflow: hidden;
+}
+
 @media (max-width: 640px) {
     .container {
         padding: 14px 10px 92px;
@@ -248,7 +345,20 @@ h1 {
         width: 100%;
     }
 
+    .profile-section-head {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .view-mentor-btn {
+        width: 100%;
+    }
+
     .mentor-summary {
         align-items: flex-start;
+    }
+
+    .mentor-modal__panel {
+        max-height: calc(100vh - 110px);
     }
 }
