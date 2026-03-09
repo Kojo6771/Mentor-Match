@@ -50,8 +50,9 @@
     text-decoration: none;
     color: inherit;
     border-bottom: 1px solid #f3f4f6;
-    transition: background-color 0.2s;
+    transition: all 0.25s ease;
     cursor: pointer;
+    position: relative;
 }
 
 .conversation-item:last-child {
@@ -59,11 +60,23 @@
 }
 
 .conversation-item:hover {
-    background-color: #f8fafc;
+    background-color: #f0f9ff;
+    transform: translateX(4px);
+    box-shadow: -4px 0 0 0 #3b82f6 inset, 0 2px 8px rgba(59, 130, 246, 0.08);
+}
+
+.conversation-item:hover .conversation-avatar {
+    transform: scale(1.05);
+    border-color: #3b82f6;
+}
+
+.conversation-item:hover .conversation-name {
+    color: #3b82f6;
 }
 
 .conversation-item:active {
-    background-color: #f1f5f9;
+    background-color: #e0f2fe;
+    transform: translateX(2px);
 }
 
 .conversation-avatar {
@@ -73,6 +86,7 @@
     object-fit: cover;
     flex-shrink: 0;
     border: 2px solid #e6e9ef;
+    transition: all 0.25s ease;
 }
 
 .conversation-details {
@@ -96,6 +110,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.25s ease;
 }
 
 .conversation-time {
