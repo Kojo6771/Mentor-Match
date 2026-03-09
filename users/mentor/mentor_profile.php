@@ -303,81 +303,13 @@ $avatar_url = !empty($user['profile_picture']) ? '../../' . $user['profile_pictu
 				</div>
 			<?php endif; ?>
 
-			<section class="card pairing-card" aria-labelledby="students-heading">
-				<div class="students-header-row">
-					<h2 id="students-heading" class="section-title">Current Students</h2>
-					<?php if (!empty($students)): ?>
-						<span class="students-counter"><span id="student-position">1</span> / <?php echo count($students); ?></span>
-					<?php endif; ?>
-				</div>
-
-				<?php if (empty($students)): ?>
-					<p class="empty-pairing">You do not have any assigned students yet.</p>
-				<?php else: ?>
-					<div class="student-carousel" data-total="<?php echo count($students); ?>">
-						<?php foreach ($students as $index => $student): ?>
-							<?php
-								$student_name = trim(($student['first_name'] ?? '') . ' ' . ($student['last_name'] ?? ''));
-								if ($student_name === '') {
-									$student_name = 'Student';
-								}
-								$student_fallback_avatar = 'https://ui-avatars.com/api/?name=' . urlencode($student_name) . '&background=3b82f6&color=fff&size=128';
-								$student_avatar = !empty($student['profile_picture']) ? '../../' . $student['profile_picture'] : $student_fallback_avatar;
-							?>
-							<article class="student-card <?php echo $index === 0 ? 'is-active' : 'is-hidden'; ?>" data-index="<?php echo $index; ?>">
-								<div class="student-summary">
-									<img src="<?php echo htmlspecialchars($student_avatar); ?>" alt="<?php echo htmlspecialchars($student_name); ?> profile" class="mentor-avatar" data-fallback="<?php echo htmlspecialchars($student_fallback_avatar); ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;">
-									<div class="mentor-details">
-										<h3><?php echo htmlspecialchars($student_name); ?></h3>
-										<p><?php echo htmlspecialchars($student['email'] ?? ''); ?></p>
-										<?php if (!empty($student['matched_at'])): ?>
-											<p class="student-meta"><strong>Matched:</strong> <?php echo htmlspecialchars(date('M j, Y', strtotime($student['matched_at']))); ?></p>
-										<?php endif; ?>
-									</div>
-								</div>
-
-								<div class="student-details-grid">
-									<div>
-										<span class="detail-label">Course</span>
-										<span class="detail-value"><?php echo htmlspecialchars($student['course'] ?? '—'); ?></span>
-									</div>
-									<div>
-										<span class="detail-label">Year</span>
-										<span class="detail-value"><?php echo htmlspecialchars((string)($student['year_of_study'] ?? '—')); ?></span>
-									</div>
-									<div>
-										<span class="detail-label">Preference</span>
-										<span class="detail-value"><?php echo htmlspecialchars($student['learning_preference'] ?? '—'); ?></span>
-									</div>
-									<div>
-										<span class="detail-label">Phone</span>
-										<span class="detail-value"><?php echo htmlspecialchars($student['phone'] ?? 'Not provided'); ?></span>
-									</div>
-								</div>
-
-								<div class="student-bio-wrap">
-									<span class="detail-label">Bio</span>
-									<p class="student-bio-text"><?php echo htmlspecialchars($student['bio'] ?: 'No bio added yet.'); ?></p>
-								</div>
-
-								<form method="POST" class="pairing-remove-form" onsubmit="return confirm('Remove this student pairing?');">
-									<input type="hidden" name="action" value="remove_pairing">
-									<input type="hidden" name="student_id" value="<?php echo (int)$student['student_id']; ?>">
-									<button type="submit" class="btn danger-btn">Remove Pairing</button>
-								</form>
-							</article>
-						<?php endforeach; ?>
-					</div>
-
-					<div class="carousel-controls">
-						<button type="button" class="btn secondary-nav" id="student-prev">Previous</button>
-						<button type="button" class="btn secondary-nav" id="student-next">Next</button>
-					</div>
-				<?php endif; ?>
-			</section>
-
 			<section class="card profile-card" aria-labelledby="profile-heading">
-				<h2 id="profile-heading" class="section-title">Your Details</h2>
+				<div class="profile-section-head">
+					<h2 id="profile-heading" class="section-title">Your Details</h2>
+					<button type="button" class="btn view-students-btn" id="open-students-modal">
+						View Students<?php echo !empty($students) ? ' (' . count($students) . ')' : ''; ?>
+					</button>
+				</div>
 
 				<form method="POST" enctype="multipart/form-data" class="avatar-row">
 					<input type="hidden" name="action" value="upload_photo">
@@ -445,6 +377,85 @@ $avatar_url = !empty($user['profile_picture']) ? '../../' . $user['profile_pictu
 					<button class="btn" type="submit">Save Changes</button>
 				</form>
 			</section>
+
+			<div class="students-modal" id="students-modal" aria-hidden="true">
+				<div class="students-modal__backdrop" data-close-students></div>
+				<section class="card pairing-card students-modal__panel" aria-labelledby="students-heading" role="dialog" aria-modal="true">
+					<div class="students-modal__top">
+						<div class="students-header-row">
+							<h2 id="students-heading" class="section-title">Current Students</h2>
+							<?php if (!empty($students)): ?>
+								<span class="students-counter"><span id="student-position">1</span> / <?php echo count($students); ?></span>
+							<?php endif; ?>
+						</div>
+						<button type="button" class="students-close-btn" id="close-students-modal" aria-label="Close student view">✕</button>
+					</div>
+
+					<?php if (empty($students)): ?>
+						<p class="empty-pairing">You do not have any assigned students yet.</p>
+					<?php else: ?>
+						<div class="student-carousel" data-total="<?php echo count($students); ?>">
+							<?php foreach ($students as $index => $student): ?>
+								<?php
+									$student_name = trim(($student['first_name'] ?? '') . ' ' . ($student['last_name'] ?? ''));
+									if ($student_name === '') {
+										$student_name = 'Student';
+									}
+									$student_fallback_avatar = 'https://ui-avatars.com/api/?name=' . urlencode($student_name) . '&background=3b82f6&color=fff&size=128';
+									$student_avatar = !empty($student['profile_picture']) ? '../../' . $student['profile_picture'] : $student_fallback_avatar;
+								?>
+								<article class="student-card <?php echo $index === 0 ? 'is-active' : 'is-hidden'; ?>" data-index="<?php echo $index; ?>">
+									<div class="student-summary">
+										<img src="<?php echo htmlspecialchars($student_avatar); ?>" alt="<?php echo htmlspecialchars($student_name); ?> profile" class="mentor-avatar" data-fallback="<?php echo htmlspecialchars($student_fallback_avatar); ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;">
+										<div class="mentor-details">
+											<h3><?php echo htmlspecialchars($student_name); ?></h3>
+											<p><?php echo htmlspecialchars($student['email'] ?? ''); ?></p>
+											<?php if (!empty($student['matched_at'])): ?>
+												<p class="student-meta"><strong>Matched:</strong> <?php echo htmlspecialchars(date('M j, Y', strtotime($student['matched_at']))); ?></p>
+											<?php endif; ?>
+										</div>
+									</div>
+
+									<div class="student-details-grid">
+										<div>
+											<span class="detail-label">Course</span>
+											<span class="detail-value"><?php echo htmlspecialchars($student['course'] ?? '—'); ?></span>
+										</div>
+										<div>
+											<span class="detail-label">Year</span>
+											<span class="detail-value"><?php echo htmlspecialchars((string)($student['year_of_study'] ?? '—')); ?></span>
+										</div>
+										<div>
+											<span class="detail-label">Preference</span>
+											<span class="detail-value"><?php echo htmlspecialchars($student['learning_preference'] ?? '—'); ?></span>
+										</div>
+										<div>
+											<span class="detail-label">Phone</span>
+											<span class="detail-value"><?php echo htmlspecialchars($student['phone'] ?? 'Not provided'); ?></span>
+										</div>
+									</div>
+
+									<div class="student-bio-wrap">
+										<span class="detail-label">Bio</span>
+										<p class="student-bio-text"><?php echo htmlspecialchars($student['bio'] ?: 'No bio added yet.'); ?></p>
+									</div>
+
+									<form method="POST" class="pairing-remove-form" onsubmit="return confirm('Remove this student pairing?');">
+										<input type="hidden" name="action" value="remove_pairing">
+										<input type="hidden" name="student_id" value="<?php echo (int)$student['student_id']; ?>">
+										<button type="submit" class="btn danger-btn">Remove Pairing</button>
+									</form>
+								</article>
+							<?php endforeach; ?>
+						</div>
+
+						<div class="carousel-controls">
+							<button type="button" class="btn secondary-nav" id="student-prev">Previous</button>
+							<button type="button" class="btn secondary-nav" id="student-next">Next</button>
+						</div>
+					<?php endif; ?>
+				</section>
+			</div>
 		</div>
 	</main>
 
@@ -452,12 +463,49 @@ $avatar_url = !empty($user['profile_picture']) ? '../../' . $user['profile_pictu
 
 	<script>
 		(function () {
-			const cards = Array.from(document.querySelectorAll('.student-card'));
-			const total = cards.length;
-			if (!total) {
-				return;
+			const modal = document.getElementById('students-modal');
+			const openStudentsBtn = document.getElementById('open-students-modal');
+			const closeStudentsBtn = document.getElementById('close-students-modal');
+			const closeBackdrop = modal ? modal.querySelector('[data-close-students]') : null;
+
+			function openStudentsModal() {
+				if (!modal) {
+					return;
+				}
+				modal.classList.add('is-open');
+				modal.setAttribute('aria-hidden', 'false');
+				document.body.classList.add('students-modal-open');
 			}
 
+			function closeStudentsModal() {
+				if (!modal) {
+					return;
+				}
+				modal.classList.remove('is-open');
+				modal.setAttribute('aria-hidden', 'true');
+				document.body.classList.remove('students-modal-open');
+			}
+
+			if (openStudentsBtn) {
+				openStudentsBtn.addEventListener('click', openStudentsModal);
+			}
+
+			if (closeStudentsBtn) {
+				closeStudentsBtn.addEventListener('click', closeStudentsModal);
+			}
+
+			if (closeBackdrop) {
+				closeBackdrop.addEventListener('click', closeStudentsModal);
+			}
+
+			document.addEventListener('keydown', function (event) {
+				if (event.key === 'Escape') {
+					closeStudentsModal();
+				}
+			});
+
+			const cards = Array.from(document.querySelectorAll('.student-card'));
+			const total = cards.length;
 			const prevBtn = document.getElementById('student-prev');
 			const nextBtn = document.getElementById('student-next');
 			const positionEl = document.getElementById('student-position');
@@ -474,17 +522,19 @@ $avatar_url = !empty($user['profile_picture']) ? '../../' . $user['profile_pictu
 				}
 			}
 
-			prevBtn.addEventListener('click', function () {
-				currentIndex = (currentIndex - 1 + total) % total;
-				renderCard(currentIndex);
-			});
+			if (total > 0 && prevBtn && nextBtn) {
+				prevBtn.addEventListener('click', function () {
+					currentIndex = (currentIndex - 1 + total) % total;
+					renderCard(currentIndex);
+				});
 
-			nextBtn.addEventListener('click', function () {
-				currentIndex = (currentIndex + 1) % total;
-				renderCard(currentIndex);
-			});
+				nextBtn.addEventListener('click', function () {
+					currentIndex = (currentIndex + 1) % total;
+					renderCard(currentIndex);
+				});
 
-			renderCard(currentIndex);
+				renderCard(currentIndex);
+			}
 		})();
 	</script>
 </body>

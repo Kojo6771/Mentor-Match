@@ -1,3 +1,21 @@
+.profile-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.profile-section-head .section-title {
+    margin: 0;
+}
+
+.view-students-btn {
+    width: auto;
+    min-width: 150px;
+    padding: 10px 14px;
+}
+
 .students-header-row {
     display: flex;
     justify-content: space-between;
@@ -101,7 +119,74 @@
     color: #111827;
 }
 
+.students-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 60;
+    padding: 14px 10px 92px;
+}
+
+.students-modal.is-open {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.students-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.students-modal__panel {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 560px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    margin-top: 8px;
+}
+
+.students-modal__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.students-close-btn {
+    border: 1px solid #d9e0ea;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--muted);
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.students-close-btn:hover {
+    color: #111827;
+    background: #f8fafc;
+}
+
+body.students-modal-open {
+    overflow: hidden;
+}
+
 @media (max-width: 640px) {
+    .profile-section-head {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .view-students-btn {
+        width: 100%;
+    }
+
     .students-header-row {
         align-items: flex-start;
         flex-direction: column;
@@ -113,5 +198,9 @@
 
     .student-details-grid {
         grid-template-columns: 1fr;
+    }
+
+    .students-modal__panel {
+        max-height: calc(100vh - 110px);
     }
 }
