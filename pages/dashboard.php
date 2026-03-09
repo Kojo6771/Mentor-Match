@@ -97,7 +97,7 @@ if ($user_role === 'mentor') {
     $avg_rating = null;
 
     // Count active students
-    $sql = "SELECT COUNT(DISTINCT student_id) FROM mentor_requests WHERE mentor_id = ? AND status IN ('accepted')";
+    $sql = "SELECT COUNT(DISTINCT student_id) FROM mentor_student_matches WHERE mentor_id = ? AND active = '1'";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$user_id]);
     $active_students = (int)$stmt->fetchColumn();
