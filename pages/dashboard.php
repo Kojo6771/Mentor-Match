@@ -251,7 +251,7 @@ if ($user_role === 'admin') {
                             <div class="action-desc">Get help with university questions</div>
                         </div>
                     </a>
-                    <a href="../users/student/student_profile.php" class="action-card white">
+                    <a href="profile.php" class="action-card white">
                         <div class="action-icon">👤</div>
                         <div>
                             <div class="action-title">My Profile</div>
@@ -383,7 +383,7 @@ if ($user_role === 'admin') {
                                 <div class="action-desc">Manage your available time slots</div>
                             </div>
                         </a>
-                        <a href="../users/mentor/mentor_profile.php" class="action-card white">
+                        <a href="profile.php" class="action-card white">
                             <div class="action-icon">👤</div>
                             <div>
                                 <div class="action-title">My Profile</div>

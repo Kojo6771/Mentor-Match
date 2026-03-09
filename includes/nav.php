@@ -20,7 +20,7 @@ if ($userRole === 'mentor') {
         ['name' => 'calendar', 'label' => 'Calendar', 'path' => $navBasePath . 'pages/calendar.php', 'icon' => 'calendar'],
         ['name' => 'requests', 'label' => 'Requests', 'path' => $navBasePath . 'pages/requests.php', 'icon' => 'requests'],
         ['name' => 'chat', 'label' => 'Chats', 'path' => $navBasePath . 'pages/chat.php', 'icon' => 'chat'],
-        ['name' => 'mentor_profile', 'label' => 'Settings', 'path' => $navBasePath . 'users/mentor/mentor_profile.php', 'icon' => 'settings'],
+        ['name' => 'profile', 'label' => 'Settings', 'path' => $navBasePath . 'pages/profile.php', 'icon' => 'settings'],
     ];
 } elseif ($userRole === 'student') {
     $navItems = [
@@ -28,7 +28,7 @@ if ($userRole === 'mentor') {
         ['name' => 'calendar', 'label' => 'Calendar', 'path' => $navBasePath . 'pages/calendar.php', 'icon' => 'calendar'],
         ['name' => 'mentor_swipe', 'label' => 'Mentors', 'path' => $navBasePath . 'pages/mentor_swipe.php', 'icon' => 'mentors'],
         ['name' => 'chatbot', 'label' => 'Chatbot', 'path' => $navBasePath . 'pages/chatbot.php', 'icon' => 'chat'],
-        ['name' => 'student_profile', 'label' => 'Settings', 'path' => $navBasePath . 'users/student/student_profile.php', 'icon' => 'settings'],
+        ['name' => 'profile', 'label' => 'Settings', 'path' => $navBasePath . 'pages/profile.php', 'icon' => 'settings'],
     ];
 } elseif ($userRole === 'admin') {
     $navItems = [
