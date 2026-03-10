@@ -125,6 +125,29 @@ if ($user_role === 'mentor') {
 				}
 			}
 			unset($student);
+
+			usort($student_options, static function (array $a, array $b): int {
+				$aTime = $a['last_message_time'] ?? null;
+				$bTime = $b['last_message_time'] ?? null;
+
+				if (!empty($aTime) && !empty($bTime)) {
+					$aTimestamp = strtotime($aTime) ?: 0;
+					$bTimestamp = strtotime($bTime) ?: 0;
+
+					if ($aTimestamp !== $bTimestamp) {
+						return $bTimestamp <=> $aTimestamp;
+					}
+				} elseif (!empty($aTime)) {
+					return -1;
+				} elseif (!empty($bTime)) {
+					return 1;
+				}
+
+				$aName = trim(($a['first_name'] ?? '') . ' ' . ($a['last_name'] ?? ''));
+				$bName = trim(($b['first_name'] ?? '') . ' ' . ($b['last_name'] ?? ''));
+
+				return strcasecmp($aName, $bName);
+			});
 		} catch (PDOException $e) {
 			$student_options = [];
 		}

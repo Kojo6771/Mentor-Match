@@ -40,6 +40,7 @@
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid #e6e9ef;
+    -webkit-overflow-scrolling: touch;
 }
 
 .conversation-item {
@@ -53,6 +54,8 @@
     transition: all 0.25s ease;
     cursor: pointer;
     position: relative;
+    -webkit-tap-highlight-color: rgba(59, 130, 246, 0.1);
+    touch-action: manipulation;
 }
 
 .conversation-item:last-child {
@@ -217,12 +220,16 @@
     padding: 0;
     width: 32px;
     height: 32px;
+    min-height: 44px;
+    min-width: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
     transition: background-color 0.2s, color 0.2s;
     flex-shrink: 0;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .chat-modal__close:hover {
@@ -239,6 +246,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
 }
 
 .chat-modal__composer {
@@ -302,6 +311,8 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
 }
 
 .message-bubble {
@@ -356,12 +367,19 @@
 .message-input {
     min-height: 86px;
     resize: vertical;
+    font-size: 1rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .composer .btn,
 .chat-modal__composer .btn {
     width: auto;
     min-width: 120px;
+    min-height: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .sr-only {
@@ -384,45 +402,268 @@
         padding: 16px 14px;
     }
 
-    .chat-modal__panel {
-        width: 95%;
-        max-height: 90vh;
-        border-radius: 12px;
+    .chat-page h1 {
+        font-size: 1.15rem;
     }
 
-    .chat-modal__header {
-        padding: 12px 16px;
+    .chat-page .lead {
+        font-size: 0.88rem;
     }
 
-    .chat-modal__messages {
-        padding: 12px 16px;
-        max-height: calc(90vh - 180px);
-    }
-
-    .chat-modal__composer {
-        padding: 12px 16px;
-        grid-template-columns: 1fr;
-    }
-
-    .composer {
-        grid-template-columns: 1fr;
-    }
-
-    .composer .btn,
-    .chat-modal__composer .btn {
-        width: 100%;
-    }
-
-    .message-bubble {
-        max-width: 92%;
-    }
-
+    /* Conversations List - Mobile */
     .conversation-item {
         padding: 12px 14px;
+        gap: 12px;
+    }
+
+    .conversation-item:hover {
+        transform: translateX(2px);
     }
 
     .conversation-avatar {
         width: 52px;
         height: 52px;
+    }
+
+    .conversation-name {
+        font-size: 0.95rem;
+    }
+
+    .conversation-time {
+        font-size: 0.75rem;
+    }
+
+    .conversation-preview {
+        font-size: 0.85rem;
+    }
+
+    /* Chat Partner - Student View Mobile */
+    .chat-partner {
+        padding: 10px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .partner-avatar {
+        width: 52px;
+        height: 52px;
+    }
+
+    .chat-partner__details h2 {
+        font-size: 0.95rem;
+    }
+
+    .chat-partner__details p {
+        font-size: 0.85rem;
+    }
+
+    /* Messages Container - Mobile */
+    .messages {
+        min-height: 240px;
+        max-height: 45vh;
+        padding: 10px;
+    }
+
+    .message-bubble {
+        max-width: 92%;
+        padding: 9px 11px;
+    }
+
+    .message-bubble p {
+        font-size: 0.9rem;
+    }
+
+    .message-bubble time {
+        font-size: 0.7rem;
+    }
+
+    /* Composer - Mobile */
+    .composer {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .composer .btn {
+        width: 100%;
+        padding: 11px;
+    }
+
+    .message-input {
+        min-height: 72px;
+        font-size: 0.95rem;
+    }
+
+    /* Chat Modal - Mobile */
+    .chat-modal__panel {
+        width: 95%;
+        max-width: 95%;
+        max-height: 92vh;
+        border-radius: 12px;
+        margin: 0 auto;
+    }
+
+    .chat-modal__header {
+        padding: 12px 14px;
+    }
+
+    .chat-modal__partner {
+        gap: 10px;
+    }
+
+    .chat-modal__avatar {
+        width: 44px;
+        height: 44px;
+    }
+
+    .chat-modal__name {
+        font-size: 0.95rem;
+    }
+
+    .chat-modal__meta {
+        font-size: 0.8rem;
+    }
+
+    .chat-modal__close {
+        width: 30px;
+        height: 30px;
+        font-size: 1.8rem;
+    }
+
+    .chat-modal__messages {
+        padding: 12px 14px;
+        max-height: calc(92vh - 190px);
+        min-height: 250px;
+    }
+
+    .chat-modal__composer {
+        padding: 12px 14px;
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .chat-modal__composer .btn {
+        width: 100%;
+        padding: 11px;
+    }
+
+    .empty-state,
+    .empty-conversation {
+        padding: 10px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Extra Small Screens */
+@media (max-width: 400px) {
+    .container {
+        padding: 12px 8px 92px;
+    }
+
+    .chat-page {
+        padding: 14px 12px;
+    }
+
+    .chat-page h1 {
+        font-size: 1.1rem;
+    }
+
+    .conversation-item {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+
+    .conversation-avatar {
+        width: 48px;
+        height: 48px;
+    }
+
+    .conversation-name {
+        font-size: 0.9rem;
+    }
+
+    .conversation-preview {
+        font-size: 0.82rem;
+    }
+
+    .chat-partner {
+        padding: 8px;
+    }
+
+    .partner-avatar {
+        width: 48px;
+        height: 48px;
+    }
+
+    .chat-partner__details h2 {
+        font-size: 0.9rem;
+    }
+
+    .chat-partner__details p {
+        font-size: 0.82rem;
+    }
+
+    .messages {
+        min-height: 220px;
+        padding: 8px;
+    }
+
+    .message-bubble {
+        max-width: 94%;
+        padding: 8px 10px;
+        font-size: 0.88rem;
+    }
+
+    .chat-modal__panel {
+        width: 98%;
+        max-height: 94vh;
+        border-radius: 10px;
+    }
+
+    .chat-modal__header {
+        padding: 10px 12px;
+    }
+
+    .chat-modal__avatar {
+        width: 40px;
+        height: 40px;
+    }
+
+    .chat-modal__name {
+        font-size: 0.9rem;
+    }
+
+    .chat-modal__messages {
+        padding: 10px 12px;
+        max-height: calc(94vh - 180px);
+    }
+
+    .chat-modal__composer {
+        padding: 10px 12px;
+    }
+
+    .message-input {
+        min-height: 64px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Landscape Mode on Mobile */
+@media (max-width: 900px) and (max-height: 500px) {
+    .messages {
+        max-height: 30vh;
+        min-height: 150px;
+    }
+
+    .chat-modal__panel {
+        max-height: 88vh;
+    }
+
+    .chat-modal__messages {
+        max-height: calc(88vh - 160px);
+        min-height: 120px;
+    }
+
+    .message-input {
+        min-height: 60px;
     }
 }
