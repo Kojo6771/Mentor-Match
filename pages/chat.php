@@ -286,7 +286,7 @@ if ($chat_partner) {
 	<main class="container">
 		<?php if ($user_role === 'student'): ?>
 			<!-- Student View: Direct Chat with Mentor -->
-			<section class="chat-page card" aria-labelledby="chat-heading">
+			<section class="chat-page chat-page--student card" aria-labelledby="chat-heading">
 				<h1 id="chat-heading">Chatroom</h1>
 				<p class="lead">Chat directly with your mentor.</p>
 
