@@ -15,6 +15,10 @@ if (!in_array($user_role, ['student', 'mentor'], true)) {
 	exit;
 }
 
+if ($user_role === 'student') {
+	$_SESSION['student_chat_last_opened_at'] = date('Y-m-d H:i:s');
+}
+
 $errors = [];
 $successes = [];
 $conversation_messages = [];

@@ -34,6 +34,7 @@ if (!empty($profile_picture)) {
 if ($user_role === 'student') {
     // Fetch student profile
     $profile = null;
+    $last_chat_opened_at = $_SESSION['student_chat_last_opened_at'] ?? null;
     try {
         $stmt = $pdo->prepare('SELECT * FROM students WHERE student_id = ?');
         $stmt->execute([$user_id]);
@@ -60,10 +61,16 @@ if ($user_role === 'student') {
         $stmt->execute([$user_id]);
         $pending = (int)$stmt->fetchColumn();
 
-        // Count messages
-        $sql = "SELECT COUNT(*) FROM messages WHERE sender_id = ? OR receiver_id = ?";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$user_id, $user_id]);
+        // Count new incoming messages since the student last opened chat
+        if (!empty($last_chat_opened_at) && strtotime((string)$last_chat_opened_at) !== false) {
+            $sql = "SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND sent_at > ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$user_id, $last_chat_opened_at]);
+        } else {
+            $sql = "SELECT COUNT(*) FROM messages WHERE receiver_id = ?";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([$user_id]);
+        }
         $messages = (int)$stmt->fetchColumn();
     }
 }
