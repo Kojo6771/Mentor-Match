@@ -1,4 +1,4 @@
-.container{padding:16px;align-items:flex-start;}
+.container{padding:16px;min-height:90vh;display:flex;align-items:center;justify-content:center;}
 .card{width:100%;max-width:480px;margin:0 auto;}
 .header-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;}
 .avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);}
