@@ -451,7 +451,7 @@ if ($chat_partner) {
 							<?php else: ?>
 								<?php foreach ($conversation_messages as $message): ?>
 									<?php $is_own = ((int)$message['sender_id'] === $user_id); ?>
-									<article class="message-bubble <?php echo $is_own ? 'is-own' : 'is-other'; ?>">
+									<article class="message-bubble <?php echo $is_own ? 'is-own is-mentor-outgoing' : 'is-other is-mentor-incoming'; ?>">
 										<p><?php echo nl2br(htmlspecialchars($message['message'])); ?></p>
 										<time datetime="<?php echo htmlspecialchars($message['sent_at']); ?>">
 											<?php echo htmlspecialchars(date('M j, g:i a', strtotime($message['sent_at']))); ?>

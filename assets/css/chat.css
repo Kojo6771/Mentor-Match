@@ -353,11 +353,19 @@
 }
 
 .chat-modal__messages .message-bubble.is-own {
-    align-self: flex-start;
+    align-self: flex-end;
 }
 
 .chat-modal__messages .message-bubble.is-other {
+    align-self: flex-start;
+}
+
+.chat-modal__messages .message-bubble.is-mentor-outgoing {
     align-self: flex-end;
+}
+
+.chat-modal__messages .message-bubble.is-mentor-incoming {
+    align-self: flex-start;
 }
 
 .empty-state,
@@ -393,8 +401,19 @@
     transition: min-height 0.2s ease, height 0.2s ease;
 }
 
+.chat-modal__composer .message-input {
+    min-height: 62px;
+    height: 62px;
+    transition: min-height 0.2s ease, height 0.2s ease;
+}
+
 .composer .message-input:focus,
 .composer .message-input:not(:placeholder-shown) {
+    min-height: 86px;
+    height: 86px;
+}
+
+.chat-modal__composer .message-input:not(:placeholder-shown) {
     min-height: 86px;
     height: 86px;
 }
@@ -529,8 +548,18 @@
         height: 58px;
     }
 
+    .chat-modal__composer .message-input {
+        min-height: 58px;
+        height: 58px;
+    }
+
     .composer .message-input:focus,
     .composer .message-input:not(:placeholder-shown) {
+        min-height: 72px;
+        height: 72px;
+    }
+
+    .chat-modal__composer .message-input:not(:placeholder-shown) {
         min-height: 72px;
         height: 72px;
     }
@@ -698,8 +727,18 @@
         height: 54px;
     }
 
+    .chat-modal__composer .message-input {
+        min-height: 54px;
+        height: 54px;
+    }
+
     .composer .message-input:focus,
     .composer .message-input:not(:placeholder-shown) {
+        min-height: 64px;
+        height: 64px;
+    }
+
+    .chat-modal__composer .message-input:not(:placeholder-shown) {
         min-height: 64px;
         height: 64px;
     }
@@ -735,8 +774,18 @@
         height: 52px;
     }
 
+    .chat-modal__composer .message-input {
+        min-height: 52px;
+        height: 52px;
+    }
+
     .composer .message-input:focus,
     .composer .message-input:not(:placeholder-shown) {
+        min-height: 60px;
+        height: 60px;
+    }
+
+    .chat-modal__composer .message-input:not(:placeholder-shown) {
         min-height: 60px;
         height: 60px;
     }
