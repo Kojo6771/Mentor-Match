@@ -30,9 +30,11 @@ SET time_zone = "+00:00";
 CREATE TABLE `availability` (
   `id` int(11) NOT NULL,
   `mentor_id` int(11) NOT NULL,
-  `available_date` date NOT NULL,
+  `available_date` date DEFAULT NULL,
   `start_time` time NOT NULL,
-  `end_time` time NOT NULL
+  `end_time` time NOT NULL,
+  `day_of_week` tinyint(4) DEFAULT NULL,
+  `is_recurring` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

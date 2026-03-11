@@ -15,6 +15,56 @@ if (!in_array($user_role, ['student', 'mentor'], true)) {
     exit;
 }
 
+// ─── AJAX: Return mentor availability for a given date ────────────
+if (isset($_GET['get_availability']) && isset($_GET['date'])) {
+    header('Content-Type: application/json');
+    $req_date   = trim($_GET['date']);
+    $req_mentor = (int)($_GET['mentor_id'] ?? 0);
+
+    if (!$req_mentor || !strtotime($req_date)) {
+        echo json_encode(['slots' => []]);
+        exit;
+    }
+
+    $dow = (int)date('w', strtotime($req_date));
+    $slots = [];
+
+    // Recurring weekly slots for that day-of-week
+    $stmt = $pdo->prepare('
+        SELECT start_time, end_time FROM availability
+        WHERE mentor_id = ? AND is_recurring = 1 AND day_of_week = ?
+        ORDER BY start_time
+    ');
+    $stmt->execute([$req_mentor, $dow]);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $slots[] = [
+            'start' => date('g:i A', strtotime($r['start_time'])),
+            'end'   => date('g:i A', strtotime($r['end_time'])),
+            'start_raw' => $r['start_time'],
+            'end_raw'   => $r['end_time'],
+        ];
+    }
+
+    // Specific date slots
+    $stmt = $pdo->prepare('
+        SELECT start_time, end_time FROM availability
+        WHERE mentor_id = ? AND is_recurring = 0 AND available_date = ?
+        ORDER BY start_time
+    ');
+    $stmt->execute([$req_mentor, $req_date]);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $r) {
+        $slots[] = [
+            'start' => date('g:i A', strtotime($r['start_time'])),
+            'end'   => date('g:i A', strtotime($r['end_time'])),
+            'start_raw' => $r['start_time'],
+            'end_raw'   => $r['end_time'],
+        ];
+    }
+
+    echo json_encode(['slots' => $slots]);
+    exit;
+}
+
 $errors   = [];
 $successes = [];
 
@@ -119,6 +169,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             } else {
                 $errors[] = 'You must be paired with a mentor first.';
+            }
+        }
+
+        // Validate against mentor availability
+        if (empty($errors) && $mentor_db_id && $date && $start && $end) {
+            $dow = (int)date('w', strtotime($date));
+            $within_avail = false;
+
+            // Check recurring weekly slots
+            $stmt = $pdo->prepare('
+                SELECT COUNT(*) FROM availability
+                WHERE mentor_id = ? AND is_recurring = 1 AND day_of_week = ?
+                  AND start_time <= ? AND end_time >= ?
+            ');
+            $stmt->execute([$mentor_db_id, $dow, $start, $end]);
+            if ($stmt->fetchColumn() > 0) $within_avail = true;
+
+            // Check specific date slots
+            if (!$within_avail) {
+                $stmt = $pdo->prepare('
+                    SELECT COUNT(*) FROM availability
+                    WHERE mentor_id = ? AND is_recurring = 0 AND available_date = ?
+                      AND start_time <= ? AND end_time >= ?
+                ');
+                $stmt->execute([$mentor_db_id, $date, $start, $end]);
+                if ($stmt->fetchColumn() > 0) $within_avail = true;
+            }
+
+            // Check if mentor has ANY availability set
+            if (!$within_avail) {
+                $stmt = $pdo->prepare('SELECT COUNT(*) FROM availability WHERE mentor_id = ?');
+                $stmt->execute([$mentor_db_id]);
+                $has_any_avail = $stmt->fetchColumn() > 0;
+                if ($has_any_avail) {
+                    $errors[] = 'The selected time is outside the mentor\'s available hours. Please check their availability and try again.';
+                }
             }
         }
 
@@ -420,12 +506,20 @@ function cal_url(array $params): string
                     <h1>Calendar</h1>
                     <p>Schedule &amp; manage sessions</p>
                 </div>
-                <?php if (($user_role === 'student' && $partner) || ($user_role === 'mentor' && !empty($paired_students))): ?>
-                    <button type="button" class="btn-new-session" id="openModalBtn">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        New Session
-                    </button>
-                <?php endif; ?>
+                <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+                    <?php if ($user_role === 'mentor'): ?>
+                        <a href="availability.php" class="btn-new-session" style="background:linear-gradient(135deg,#10b981 0%,#06b6d4 100%);text-decoration:none;font-size:0.82rem;padding:9px 14px">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Availability
+                        </a>
+                    <?php endif; ?>
+                    <?php if (($user_role === 'student' && $partner) || ($user_role === 'mentor' && !empty($paired_students))): ?>
+                        <button type="button" class="btn-new-session" id="openModalBtn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            New Session
+                        </button>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <!-- ── Alerts ── -->
@@ -577,6 +671,9 @@ function cal_url(array $params): string
                 <div>
                     <label for="session_date">Date</label>
                     <input type="date" name="session_date" id="session_date" class="input" min="<?php echo date('Y-m-d'); ?>" required>
+                    <div id="availabilityHint" style="margin-top:6px;font-size:0.82rem;color:var(--muted);display:none">
+                        <div id="availabilitySlots"></div>
+                    </div>
                 </div>
 
                 <div class="time-row">
@@ -646,7 +743,38 @@ function cal_url(array $params): string
                 const m = String(month).padStart(2, '0');
                 const d = String(day).padStart(2, '0');
                 dateInput.value = year + '-' + m + '-' + d;
+                fetchAvailability(dateInput.value);
             }
+        }
+
+        // Fetch & show mentor availability when date changes
+        var mentorId = <?php echo json_encode($mentor_db_id ?: 0); ?>;
+        var dateInput = document.getElementById('session_date');
+        if (dateInput) {
+            dateInput.addEventListener('change', function () {
+                fetchAvailability(this.value);
+            });
+        }
+
+        function fetchAvailability(dateVal) {
+            var hint  = document.getElementById('availabilityHint');
+            var slots = document.getElementById('availabilitySlots');
+            if (!hint || !slots || !mentorId || !dateVal) { if(hint) hint.style.display='none'; return; }
+
+            fetch('calendar.php?get_availability=1&date=' + encodeURIComponent(dateVal) + '&mentor_id=' + mentorId)
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    if (data.slots && data.slots.length > 0) {
+                        var html = '<span style="color:#065f46;font-weight:600">&#9679; Available: </span>';
+                        html += data.slots.map(function(s){ return '<span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:6px;font-weight:500;display:inline-block;margin:2px 2px">' + s.start + ' – ' + s.end + '</span>'; }).join(' ');
+                        slots.innerHTML = html;
+                        hint.style.display = 'block';
+                    } else {
+                        slots.innerHTML = '<span style="color:#92400e">No specific availability set for this date</span>';
+                        hint.style.display = 'block';
+                    }
+                })
+                .catch(function(){ hint.style.display = 'none'; });
         }
     })();
     </script>
