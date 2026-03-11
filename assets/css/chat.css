@@ -352,6 +352,14 @@
     border: 1px solid #bfdbfe;
 }
 
+.chat-modal__messages .message-bubble.is-own {
+    align-self: flex-start;
+}
+
+.chat-modal__messages .message-bubble.is-other {
+    align-self: flex-end;
+}
+
 .empty-state,
 .empty-conversation {
     margin: 0;
