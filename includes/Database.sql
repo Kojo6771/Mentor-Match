@@ -205,9 +205,14 @@ CREATE TABLE `sessions` (
   `student_id` int(11) NOT NULL,
   `mentor_id` int(11) NOT NULL,
   `subject_id` int(11) NOT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `location` varchar(255) DEFAULT NULL,
   `session_date` date NOT NULL,
   `start_time` time NOT NULL,
+  `end_time` time DEFAULT NULL,
   `status` enum('pending','confirmed','completed','cancelled') DEFAULT 'pending',
+  `proposed_by` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
