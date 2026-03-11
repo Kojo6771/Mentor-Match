@@ -16,7 +16,13 @@ if (!in_array($user_role, ['student', 'mentor'], true)) {
 }
 
 if ($user_role === 'student') {
-	$_SESSION['student_chat_last_opened_at'] = date('Y-m-d H:i:s');
+	// Mark all incoming messages as read
+	try {
+		$markRead = $pdo->prepare('UPDATE messages SET read_at = NOW() WHERE receiver_id = ? AND read_at IS NULL');
+		$markRead->execute([$user_id]);
+	} catch (PDOException $e) {
+		// silent
+	}
 }
 
 $errors = [];

@@ -13,6 +13,25 @@ $first_name = htmlspecialchars($_SESSION['first_name'] ?? 'there');
 $avatar_url = '';
 $fallback_avatar = 'https://ui-avatars.com/api/?name=' . urlencode($first_name) . '&background=3b82f6&color=fff&size=128';
 
+function getStudentUnreadMessagesCount(PDO $pdo, int $userId): int
+{
+    try {
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND read_at IS NULL');
+        $stmt->execute([$userId]);
+        return (int)$stmt->fetchColumn();
+    } catch (PDOException $e) {
+        return 0;
+    }
+}
+
+if ($user_role === 'student' && (($_GET['live_recent_messages'] ?? '') === '1')) {
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    $recent_count = getStudentUnreadMessagesCount($pdo, (int)$user_id);
+    echo json_encode(['count' => $recent_count]);
+    exit;
+}
+
 // Fetch user's profile picture directly from database
 $profile_picture = null;
 try {
@@ -34,7 +53,6 @@ if (!empty($profile_picture)) {
 if ($user_role === 'student') {
     // Fetch student profile
     $profile = null;
-    $last_chat_opened_at = $_SESSION['student_chat_last_opened_at'] ?? null;
     try {
         $stmt = $pdo->prepare('SELECT * FROM students WHERE student_id = ?');
         $stmt->execute([$user_id]);
@@ -46,7 +64,7 @@ if ($user_role === 'student') {
     // Fetch student stats
     $connections = 0;
     $pending = 0;
-    $messages = 0;
+    $messages = getStudentUnreadMessagesCount($pdo, (int)$user_id);
     if ($profile) {
         
         // Count accepted mentor connections
@@ -60,18 +78,6 @@ if ($user_role === 'student') {
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$user_id]);
         $pending = (int)$stmt->fetchColumn();
-
-        // Count new incoming messages since the student last opened chat
-        if (!empty($last_chat_opened_at) && strtotime((string)$last_chat_opened_at) !== false) {
-            $sql = "SELECT COUNT(*) FROM messages WHERE receiver_id = ? AND sent_at > ?";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$user_id, $last_chat_opened_at]);
-        } else {
-            $sql = "SELECT COUNT(*) FROM messages WHERE receiver_id = ?";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$user_id]);
-        }
-        $messages = (int)$stmt->fetchColumn();
     }
 }
 
@@ -226,11 +232,11 @@ if ($user_role === 'admin') {
                         <div class="stat-label">Pending</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value"><?php echo $messages; ?></div>
+                        <div class="stat-value" id="recent-messages-count"><?php echo $messages; ?></div>
                         <?php if ($messages === 1): ?>
-                            <div class="stat-label">Message</div>
+                            <div class="stat-label" id="recent-messages-label">Message</div>
                         <?php else: ?>
-                            <div class="stat-label">Messages</div>
+                            <div class="stat-label" id="recent-messages-label">Messages</div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -433,5 +439,46 @@ if ($user_role === 'admin') {
     </main>
 
     <?php include '../includes/nav.php'; ?>
+
+    <?php if ($user_role === 'student'): ?>
+    <script>
+        (function () {
+            const countEl = document.getElementById('recent-messages-count');
+            const labelEl = document.getElementById('recent-messages-label');
+
+            if (!countEl || !labelEl) {
+                return;
+            }
+
+            const updateRecentMessagesCount = async function () {
+                try {
+                    const response = await fetch('dashboard.php?live_recent_messages=1&_=' + Date.now(), {
+                        method: 'GET',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        cache: 'no-store'
+                    });
+
+                    if (!response.ok) {
+                        return;
+                    }
+
+                    const payload = await response.json();
+                    const nextCount = Number(payload.count);
+
+                    if (!Number.isFinite(nextCount) || nextCount < 0) {
+                        return;
+                    }
+
+                    countEl.textContent = String(nextCount);
+                    labelEl.textContent = nextCount === 1 ? 'Message' : 'Messages';
+                } catch (error) {
+                    return;
+                }
+            };
+
+            setInterval(updateRecentMessagesCount, 15000);
+        })();
+    </script>
+    <?php endif; ?>
 </body>
 </html>
