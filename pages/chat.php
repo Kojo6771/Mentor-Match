@@ -235,6 +235,7 @@ $partner_name = '';
 $partner_email = '';
 $partner_meta = '';
 $partner_avatar = '';
+$partner_avatar_fallback = '';
 
 if ($chat_partner) {
 	$partner_name = trim(($chat_partner['first_name'] ?? '') . ' ' . ($chat_partner['last_name'] ?? ''));
@@ -266,8 +267,8 @@ if ($chat_partner) {
 		$partner_name = $user_role === 'student' ? 'Your Mentor' : 'Student';
 	}
 
-	$avatar_fallback = 'https://ui-avatars.com/api/?name=' . urlencode($partner_name) . '&background=3b82f6&color=fff&size=128';
-	$partner_avatar = !empty($chat_partner['profile_picture']) ? '../' . $chat_partner['profile_picture'] : $avatar_fallback;
+	$partner_avatar_fallback = 'https://ui-avatars.com/api/?name=' . urlencode($partner_name) . '&background=3b82f6&color=fff&size=128';
+	$partner_avatar = !empty($chat_partner['profile_picture']) ? '../' . ltrim($chat_partner['profile_picture'], '/') : $partner_avatar_fallback;
 }
 ?>
 
@@ -310,7 +311,7 @@ if ($chat_partner) {
 					<p class="empty-state">You are not currently paired with a mentor.</p>
 				<?php else: ?>
 					<div class="chat-partner">
-						<img src="<?php echo htmlspecialchars($partner_avatar); ?>" alt="Chat partner" class="partner-avatar">
+						<img src="<?php echo htmlspecialchars($partner_avatar); ?>" alt="Chat partner" class="partner-avatar" data-fallback="<?php echo htmlspecialchars($partner_avatar_fallback); ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;">
 						<div class="chat-partner__details">
 							<h2><?php echo htmlspecialchars($partner_name); ?></h2>
 							<?php if ($partner_email !== ''): ?>
