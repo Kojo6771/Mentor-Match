@@ -232,6 +232,39 @@
     margin-bottom: 8px;
 }
 
+.avail-day__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-add-day-slot {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1.5px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+}
+
+.btn-add-day-slot svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+}
+
+.btn-add-day-slot:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
 .avail-day__name {
     font-size: 0.92rem;
     font-weight: 600;

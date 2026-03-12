@@ -253,9 +253,15 @@ function fmt_time(string $time): string
                         <div class="avail-day">
                             <div class="avail-day__header">
                                 <h3 class="avail-day__name"><?php echo $day_names[$dow]; ?></h3>
-                                <?php if ($day_counts[$dow] > 0): ?>
-                                    <span class="avail-day__count"><?php echo $day_counts[$dow]; ?> slot<?php echo $day_counts[$dow] !== 1 ? 's' : ''; ?></span>
-                                <?php endif; ?>
+                                <div class="avail-day__header-actions">
+                                    <?php if ($day_counts[$dow] > 0): ?>
+                                        <span class="avail-day__count"><?php echo $day_counts[$dow]; ?> slot<?php echo $day_counts[$dow] !== 1 ? 's' : ''; ?></span>
+                                    <?php endif; ?>
+                                    <button type="button" class="btn-add-day-slot" data-day="<?php echo $dow; ?>" aria-label="Add slot for <?php echo $day_names[$dow]; ?>">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                        Add Slot
+                                    </button>
+                                </div>
                             </div>
 
                             <?php if (empty($slots_by_day[$dow])): ?>
@@ -440,6 +446,31 @@ function fmt_time(string $time): string
                 });
             });
         }
+
+        /* ── Per-day Add Slot buttons ── */
+        document.querySelectorAll('.btn-add-day-slot').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var day = btn.getAttribute('data-day');
+
+                // Switch to "Every Week" mode
+                if (typeToggle) {
+                    typeToggle.querySelectorAll('.avail-type-option').forEach(function (o) {
+                        o.classList.remove('selected');
+                    });
+                    var weeklyOpt = typeToggle.querySelector('[data-value="1"]');
+                    if (weeklyOpt) weeklyOpt.classList.add('selected');
+                }
+                if (isRecurring) isRecurring.value = '1';
+                if (fieldDay)  fieldDay.classList.remove('avail-field-hidden');
+                if (fieldDate) fieldDate.classList.add('avail-field-hidden');
+
+                // Pre-select the day
+                var daySelect = document.getElementById('day_of_week');
+                if (daySelect && day !== null) daySelect.value = day;
+
+                openModal();
+            });
+        });
 
         /* ── Auto-dismiss alerts after 4s ── */
         document.querySelectorAll('.avail-alert').forEach(function (el) {
