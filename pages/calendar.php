@@ -787,7 +787,8 @@ function cal_url(array $params): string
                     availableSlots = data.slots || [];
 
                     if (availableSlots.length > 0) {
-                        var html = '<div class="avail-label">Mentor available:</div><div class="avail-chips">';
+                        var label = isStudent ? 'Mentor available:' : 'Your availability:';
+                        var html = '<div class="avail-label">' + label + '</div><div class="avail-chips">';
                         html += availableSlots.map(function (s, i) {
                             return '<button type="button" class="avail-slot-chip" data-idx="' + i + '">'
                                  + s.start + ' \u2013 ' + s.end + '</button>';
@@ -807,7 +808,7 @@ function cal_url(array $params): string
                                 if (endInput)   endInput.value   = s.end_raw;
                                 slotsEl.querySelectorAll('.avail-slot-chip').forEach(function (c) { c.classList.remove('active'); });
                                 this.classList.add('active');
-                                validateTimes();
+                                if (isStudent) validateTimes();
                             });
                         });
 
@@ -817,16 +818,14 @@ function cal_url(array $params): string
                         }
                     } else {
                         availableSlots = [];
-                        var noMsg = isStudent
-                            ? '<span class="avail-unavail">\u26a0 Your mentor is not available on this day \u2014 please choose a different date.</span>'
-                            : '<span style="color:#92400e">No availability set for this date</span>';
-                        slotsEl.innerHTML = noMsg;
-                        hint.style.display = 'block';
-
                         if (isStudent) {
+                            slotsEl.innerHTML = '<span class="avail-unavail">\u26a0 Your mentor is not available on this day \u2014 please choose a different date.</span>';
+                            hint.style.display = 'block';
                             if (startInput) { startInput.value = ''; startInput.disabled = true; }
                             if (endInput)   { endInput.value   = ''; endInput.disabled   = true; }
                             if (submitBtn)  submitBtn.disabled = true;
+                        } else {
+                            hint.style.display = 'none';
                         }
                     }
                 })
