@@ -277,7 +277,7 @@ if ($cal_month > 12) { $cal_month = 1;  $cal_year++; }
 $first_of_month = mktime(0, 0, 0, $cal_month, 1, $cal_year);
 $month_name     = date('F Y', $first_of_month);
 $days_in_month  = (int)date('t', $first_of_month);
-$start_weekday  = (int)date('w', $first_of_month); // 0=Sun
+$start_weekday  = ((int)date('w', $first_of_month) + 6) % 7; // 0=Mon, 6=Sun
 
 $prev_month = $cal_month - 1;
 $prev_year  = $cal_year;
@@ -543,7 +543,7 @@ function cal_url(array $params): string
                 </div>
 
                 <div class="cal-grid">
-                    <?php foreach (['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] as $wd): ?>
+                    <?php foreach (['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] as $wd): ?>
                         <div class="cal-weekday"><?php echo $wd; ?></div>
                     <?php endforeach; ?>
 
