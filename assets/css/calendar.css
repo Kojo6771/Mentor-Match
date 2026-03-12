@@ -583,6 +583,60 @@
     background: #f9fafb;
 }
 
+/* ── Availability slot chips inside modal ── */
+.avail-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #065f46;
+    margin-bottom: 5px;
+}
+
+.avail-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.avail-slot-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1.5px solid #6ee7b7;
+    background: #d1fae5;
+    color: #065f46;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    white-space: nowrap;
+}
+
+.avail-slot-chip:hover {
+    background: #a7f3d0;
+    border-color: #34d399;
+    transform: translateY(-1px);
+}
+
+.avail-slot-chip.active {
+    background: #059669;
+    border-color: #059669;
+    color: #fff;
+}
+
+.avail-hint-note {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 3px;
+}
+
+.avail-unavail {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #92400e;
+}
+
 /* ---- Success / Error alerts ---- */
 .cal-alert {
     padding: 10px 14px;

@@ -687,6 +687,8 @@ function cal_url(array $params): string
                     </div>
                 </div>
 
+                <div id="timeValidationMsg" style="display:none;margin-top:4px;font-size:0.82rem;color:#b45309;background:#fef3c7;padding:7px 10px;border-radius:8px;border:1px solid #fcd34d;font-weight:500"></div>
+
                 <div>
                     <label for="location">Location / Meeting Link</label>
                     <input type="text" name="location" id="location" class="input" placeholder="e.g., Library Room 3 or Zoom link">
@@ -694,7 +696,7 @@ function cal_url(array $params): string
 
                 <div class="session-modal__footer">
                     <button type="button" class="btn btn-outline" id="cancelModalBtn">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Propose Session</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Propose Session</button>
                 </div>
             </form>
         </div>
@@ -704,77 +706,165 @@ function cal_url(array $params): string
 
     <script>
     (function () {
-        const modal    = document.getElementById('sessionModal');
-        const openBtn  = document.getElementById('openModalBtn');
-        const closeBtn = document.getElementById('closeModalBtn');
+        /* ── Modal open / close ── */
+        const modal     = document.getElementById('sessionModal');
+        const openBtn   = document.getElementById('openModalBtn');
+        const closeBtn  = document.getElementById('closeModalBtn');
         const cancelBtn = document.getElementById('cancelModalBtn');
 
-        function openModal() {
-            if (modal) modal.style.display = 'flex';
-        }
-        function closeModal() {
-            if (modal) modal.style.display = 'none';
-        }
+        function openModal()  { if (modal) modal.style.display = 'flex'; }
+        function closeModal() { if (modal) modal.style.display = 'none'; }
 
-        if (openBtn) openBtn.addEventListener('click', openModal);
-        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (openBtn)   openBtn.addEventListener('click', openModal);
+        if (closeBtn)  closeBtn.addEventListener('click', closeModal);
         if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
 
-        // Close on backdrop click
         if (modal) {
             modal.addEventListener('click', function (e) {
                 if (e.target === modal) closeModal();
             });
         }
 
-        // Escape key
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') closeModal();
         });
 
-        // Pre-fill date if a day is selected
-        const params = new URLSearchParams(window.location.search);
-        const day = params.get('day');
-        const month = params.get('month');
-        const year = params.get('year');
-        if (day && month && year) {
-            const dateInput = document.getElementById('session_date');
-            if (dateInput) {
-                const m = String(month).padStart(2, '0');
-                const d = String(day).padStart(2, '0');
-                dateInput.value = year + '-' + m + '-' + d;
-                fetchAvailability(dateInput.value);
-            }
+        /* ── Availability enforcement ── */
+        var mentorId       = <?php echo json_encode($mentor_db_id ?: 0); ?>;
+        var isStudent      = <?php echo json_encode($user_role === 'student'); ?>;
+        var availableSlots = [];
+        var dateInput      = document.getElementById('session_date');
+        var startInput     = document.getElementById('start_time');
+        var endInput       = document.getElementById('end_time');
+        var submitBtn      = document.getElementById('submitBtn');
+
+        // Students: disable time inputs until a date with availability is chosen
+        if (isStudent && mentorId) {
+            if (startInput) startInput.disabled = true;
+            if (endInput)   endInput.disabled   = true;
+            if (submitBtn)  submitBtn.disabled  = true;
         }
 
-        // Fetch & show mentor availability when date changes
-        var mentorId = <?php echo json_encode($mentor_db_id ?: 0); ?>;
-        var dateInput = document.getElementById('session_date');
+        // Pre-fill date if a day is selected in the calendar URL
+        var params   = new URLSearchParams(window.location.search);
+        var urlDay   = params.get('day');
+        var urlMonth = params.get('month');
+        var urlYear  = params.get('year');
+        if (urlDay && urlMonth && urlYear && dateInput) {
+            var m = String(urlMonth).padStart(2, '0');
+            var d = String(urlDay).padStart(2, '0');
+            dateInput.value = urlYear + '-' + m + '-' + d;
+            fetchAvailability(dateInput.value);
+        }
+
         if (dateInput) {
-            dateInput.addEventListener('change', function () {
-                fetchAvailability(this.value);
-            });
+            dateInput.addEventListener('change', function () { fetchAvailability(this.value); });
+        }
+        if (startInput) {
+            startInput.addEventListener('change', validateTimes);
+            startInput.addEventListener('input',  validateTimes);
+        }
+        if (endInput) {
+            endInput.addEventListener('change', validateTimes);
+            endInput.addEventListener('input',  validateTimes);
         }
 
         function fetchAvailability(dateVal) {
-            var hint  = document.getElementById('availabilityHint');
-            var slots = document.getElementById('availabilitySlots');
-            if (!hint || !slots || !mentorId || !dateVal) { if(hint) hint.style.display='none'; return; }
+            var hint    = document.getElementById('availabilityHint');
+            var slotsEl = document.getElementById('availabilitySlots');
+            if (!hint || !slotsEl) return;
+
+            // Clear times & validation whenever the date changes
+            if (startInput) startInput.value = '';
+            if (endInput)   endInput.value   = '';
+            clearTimeValidation();
+
+            if (!mentorId || !dateVal) { hint.style.display = 'none'; return; }
 
             fetch('calendar.php?get_availability=1&date=' + encodeURIComponent(dateVal) + '&mentor_id=' + mentorId)
-                .then(function(r){ return r.json(); })
-                .then(function(data){
-                    if (data.slots && data.slots.length > 0) {
-                        var html = '<span style="color:#065f46;font-weight:600">&#9679; Available: </span>';
-                        html += data.slots.map(function(s){ return '<span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:6px;font-weight:500;display:inline-block;margin:2px 2px">' + s.start + ' – ' + s.end + '</span>'; }).join(' ');
-                        slots.innerHTML = html;
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    availableSlots = data.slots || [];
+
+                    if (availableSlots.length > 0) {
+                        var html = '<div class="avail-label">Mentor available:</div><div class="avail-chips">';
+                        html += availableSlots.map(function (s, i) {
+                            return '<button type="button" class="avail-slot-chip" data-idx="' + i + '">'
+                                 + s.start + ' \u2013 ' + s.end + '</button>';
+                        }).join('');
+                        html += '</div>';
+                        if (isStudent) {
+                            html += '<div class="avail-hint-note">Click a slot to auto-fill, or enter custom times within a window.</div>';
+                        }
+                        slotsEl.innerHTML = html;
                         hint.style.display = 'block';
+
+                        slotsEl.querySelectorAll('.avail-slot-chip').forEach(function (chip) {
+                            chip.addEventListener('click', function () {
+                                var idx = parseInt(this.getAttribute('data-idx'), 10);
+                                var s = availableSlots[idx];
+                                if (startInput) startInput.value = s.start_raw;
+                                if (endInput)   endInput.value   = s.end_raw;
+                                slotsEl.querySelectorAll('.avail-slot-chip').forEach(function (c) { c.classList.remove('active'); });
+                                this.classList.add('active');
+                                validateTimes();
+                            });
+                        });
+
+                        if (isStudent) {
+                            if (startInput) startInput.disabled = false;
+                            if (endInput)   endInput.disabled   = false;
+                        }
                     } else {
-                        slots.innerHTML = '<span style="color:#92400e">No specific availability set for this date</span>';
+                        availableSlots = [];
+                        var noMsg = isStudent
+                            ? '<span class="avail-unavail">\u26a0 Your mentor is not available on this day \u2014 please choose a different date.</span>'
+                            : '<span style="color:#92400e">No availability set for this date</span>';
+                        slotsEl.innerHTML = noMsg;
                         hint.style.display = 'block';
+
+                        if (isStudent) {
+                            if (startInput) { startInput.value = ''; startInput.disabled = true; }
+                            if (endInput)   { endInput.value   = ''; endInput.disabled   = true; }
+                            if (submitBtn)  submitBtn.disabled = true;
+                        }
                     }
                 })
-                .catch(function(){ hint.style.display = 'none'; });
+                .catch(function () { hint.style.display = 'none'; availableSlots = []; });
+        }
+
+        function validateTimes() {
+            if (!isStudent || availableSlots.length === 0) return;
+            var warnEl = document.getElementById('timeValidationMsg');
+            if (!warnEl) return;
+            var start = startInput ? startInput.value : '';
+            var end   = endInput   ? endInput.value   : '';
+            if (!start || !end) {
+                warnEl.style.display = 'none';
+                if (submitBtn) submitBtn.disabled = true;
+                return;
+            }
+            var within = availableSlots.some(function (s) {
+                return start >= s.start_raw && end <= s.end_raw && start < end;
+            });
+            if (within) {
+                warnEl.style.display = 'none';
+                if (submitBtn) submitBtn.disabled = false;
+            } else {
+                warnEl.textContent = '\u26a0 These times fall outside your mentor\u2019s available windows for this day.';
+                warnEl.style.display = 'block';
+                if (submitBtn) submitBtn.disabled = true;
+            }
+        }
+
+        function clearTimeValidation() {
+            var warnEl = document.getElementById('timeValidationMsg');
+            if (warnEl) warnEl.style.display = 'none';
+            if (isStudent) {
+                if (startInput) startInput.disabled = true;
+                if (endInput)   endInput.disabled   = true;
+                if (submitBtn)  submitBtn.disabled  = true;
+            }
         }
     })();
     </script>
