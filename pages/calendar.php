@@ -787,7 +787,7 @@ function cal_url(array $params): string
                     availableSlots = data.slots || [];
 
                     if (availableSlots.length > 0) {
-                        var label = isStudent ? 'Mentor available:' : 'Your availability:';
+                        var label = isStudent ? 'Mentor available:' : 'Your time slots:';
                         var html = '<div class="avail-label">' + label + '</div><div class="avail-chips">';
                         html += availableSlots.map(function (s, i) {
                             return '<button type="button" class="avail-slot-chip" data-idx="' + i + '">'
