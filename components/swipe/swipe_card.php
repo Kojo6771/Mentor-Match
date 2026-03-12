@@ -36,8 +36,8 @@ function render_swipe_card($mentor, $index = 0) {
     // Course/Subject
     $course = htmlspecialchars($mentor['course'] ?? 'Computer Science');
     
-    // Rating (1-5)
-    $rating = floatval($mentor['rating'] ?? 5);
+    // Average rating
+    $avg_rating = isset($mentor['avg_rating']) ? round((float)$mentor['avg_rating'], 1) : null;
     
     // Subjects/Expertise
     $subjects = $mentor['subjects'] ?? ['Object-oriented programming', 'Web development', 'Database Design'];
@@ -70,15 +70,16 @@ function render_swipe_card($mentor, $index = 0) {
                         <span class="year-label">Year</span>
                     </div>
                     <h3 class="swipe-card-course"><?php echo $course; ?></h3>
-                    
-                    <!-- Star Rating -->
+                    <?php if ($avg_rating !== null): ?>
                     <div class="swipe-card-rating">
                         <?php for ($i = 1; $i <= 5; $i++): ?>
-                            <svg class="star-icon <?php echo $i <= floor($rating) ? 'star-filled' : 'star-empty'; ?>" viewBox="0 0 24 24" width="24" height="24">
+                            <svg class="star-icon <?php echo $i <= floor($avg_rating) ? 'star-filled' : 'star-empty'; ?>" viewBox="0 0 24 24" width="24" height="24">
                                 <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                             </svg>
                         <?php endfor; ?>
+                        <span class="rating-number"><?php echo $avg_rating; ?></span>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -209,14 +210,17 @@ function render_swipe_card_styles() {
 
     /* Avatar */
     .swipe-card-avatar-container {
-        flex-shrink: 0;
+        flex: 0 0 128px;
+        max-width: 128px;
     }
 
     .swipe-card-avatar {
         width: 128px;
         height: 128px;
+        box-sizing: border-box;
         border-radius: 50%;
         object-fit: cover;
+        object-position: center;
         border: 5px solid #00d4ff;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
@@ -224,6 +228,7 @@ function render_swipe_card_styles() {
     .swipe-card-avatar-fallback {
         width: 128px;
         height: 128px;
+        box-sizing: border-box;
         border-radius: 50%;
         border: 5px solid #fff;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -245,12 +250,14 @@ function render_swipe_card_styles() {
         color: #111827;
         margin: 10px 0 0;
         text-align: center;
+        word-break: break-word;
     }
 
     /* Info Section */
     .swipe-card-info {
         text-align: right;
         flex: 1;
+        min-width: 0;
         padding-top: 8px;
     }
 
@@ -296,13 +303,16 @@ function render_swipe_card_styles() {
     /* Star Rating */
     .swipe-card-rating {
         display: flex;
+        align-items: center;
         justify-content: flex-end;
-        gap: 6px;
+        flex-wrap: nowrap;
+        gap: 4px;
+        margin-top: 4px;
     }
 
     .star-icon {
-        width: 28px;
-        height: 28px;
+        width: 22px;
+        height: 22px;
     }
 
     .star-filled {
@@ -314,6 +324,13 @@ function render_swipe_card_styles() {
         fill: none;
         stroke: #d1d5db;
         stroke-width: 1.5;
+    }
+
+    .rating-number {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #6b7280;
+        margin-left: 4px;
     }
 
     /* Divider */
@@ -518,6 +535,11 @@ function render_swipe_card_styles() {
             border-width: 3px;
         }
 
+        .swipe-card-avatar-container {
+            flex-basis: 80px;
+            max-width: 80px;
+        }
+
         .swipe-card-name {
             font-size: 0.95rem;
             margin-top: 6px;
@@ -543,12 +565,12 @@ function render_swipe_card_styles() {
         }
 
         .star-icon {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
         }
 
-        .swipe-card-rating {
-            gap: 3px;
+        .rating-number {
+            font-size: 0.78rem;
         }
 
         .swipe-card-divider {

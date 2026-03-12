@@ -127,12 +127,43 @@ if ($user_role === 'mentor') {
     $stmt->execute([$user_id, $user_id]);
     $messages = (int)$stmt->fetchColumn();
 
-    // Get average rating
-    $sql = "SELECT AVG(rating) FROM reviews WHERE mentor_id = ?";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([$user_id]);
-    $avg_rating = $stmt->fetchColumn();
-    $avg_rating = $avg_rating ? number_format((float)$avg_rating, 1) : 'N/A';
+    // Get average rating (supports both legacy `reviews` and newer `mentor_ratings` schemas)
+    $hasMentorRatingsTable = false;
+    $hasReviewsTable = false;
+
+    try {
+        $tableStmt = $pdo->query("SHOW TABLES LIKE 'mentor_ratings'");
+        $hasMentorRatingsTable = (bool)$tableStmt->fetchColumn();
+    } catch (PDOException $e) {
+        $hasMentorRatingsTable = false;
+    }
+
+    try {
+        $tableStmt = $pdo->query("SHOW TABLES LIKE 'reviews'");
+        $hasReviewsTable = (bool)$tableStmt->fetchColumn();
+    } catch (PDOException $e) {
+        $hasReviewsTable = false;
+    }
+
+    try {
+        if ($hasMentorRatingsTable) {
+            $stmt = $pdo->prepare('SELECT ROUND(AVG(rating), 1) FROM mentor_ratings WHERE mentor_id = ?');
+            $stmt->execute([$user_id]);
+            $avg_rating = $stmt->fetchColumn();
+        }
+
+        if (($avg_rating === null || $avg_rating === false || $avg_rating === '') && $hasReviewsTable) {
+            $stmt = $pdo->prepare('SELECT ROUND(AVG(rating), 1) FROM reviews WHERE mentor_id = ?');
+            $stmt->execute([$user_id]);
+            $avg_rating = $stmt->fetchColumn();
+        }
+    } catch (PDOException $e) {
+        $avg_rating = null;
+    }
+
+    $avg_rating = ($avg_rating !== null && $avg_rating !== false && $avg_rating !== '')
+        ? number_format((float)$avg_rating, 1)
+        : 'N/A';
 }
 
 // ============ ADMIN DATA ============
