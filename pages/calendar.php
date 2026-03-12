@@ -341,9 +341,12 @@ if ($selected_day !== null) {
     $selected_date_sessions = $sessions_by_date[$sel_date_str] ?? [];
 }
 
-// ── Upcoming confirmed ──
-$upcoming = array_filter($sessions, function ($s) use ($today_str) {
-    return $s['session_date'] >= $today_str && $s['status'] === 'confirmed';
+// ── Upcoming confirmed (exclude the selected date to avoid duplicates) ──
+$sel_date_for_filter = $selected_day !== null ? sprintf('%04d-%02d-%02d', $cal_year, $cal_month, (int)$selected_day) : null;
+$upcoming = array_filter($sessions, function ($s) use ($today_str, $sel_date_for_filter) {
+    return $s['session_date'] >= $today_str
+        && $s['status'] === 'confirmed'
+        && $s['session_date'] !== $sel_date_for_filter;
 });
 usort($upcoming, fn($a, $b) => strcmp($a['session_date'] . $a['start_time'], $b['session_date'] . $b['start_time']));
 $upcoming = array_slice($upcoming, 0, 5);
@@ -603,15 +606,17 @@ function cal_url(array $params): string
             <?php endif; ?>
 
             <!-- ── Upcoming Confirmed Sessions ── -->
-            <h3 class="cal-section-title">Upcoming Sessions</h3>
-            <?php if (empty($upcoming)): ?>
-                <div class="cal-empty">
-                    <p>No upcoming confirmed sessions</p>
-                </div>
-            <?php else: ?>
-                <?php foreach ($upcoming as $sess): ?>
-                    <?php echo render_session_card($sess, $user_id, $user_role); ?>
-                <?php endforeach; ?>
+            <?php if ($selected_date_sessions == null): ?>
+                <h3 class="cal-section-title">Upcoming Sessions</h3>
+                <?php if (empty($upcoming)): ?>
+                    <div class="cal-empty">
+                        <p>No upcoming confirmed sessions</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($upcoming as $sess): ?>
+                        <?php echo render_session_card($sess, $user_id, $user_role); ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             <?php endif; ?>
 
             <!-- ── Pending Proposals ── -->
