@@ -433,8 +433,6 @@ if ($user_role === 'admin') {
                 <?php endif; ?>
 
             <?php endif; ?>
-
-            <a href="login.php?logout=1" class="logout-link">Log out</a>
         </section>
     </main>
 

@@ -628,6 +628,7 @@ if ($user_role === 'mentor') {
 						</div>
 
 						<button class="btn" type="submit">Save Changes</button>
+						<a href="login.php?logout=1" class="btn danger-btn logout-btn">Log Out</a>
 					</form>
 				</section>
 
@@ -729,6 +730,7 @@ if ($user_role === 'mentor') {
 						</div>
 
 						<button class="btn" type="submit">Save Changes</button>
+						<a href="login.php?logout=1" class="btn danger-btn logout-btn">Log Out</a>
 					</form>
 				</section>
 

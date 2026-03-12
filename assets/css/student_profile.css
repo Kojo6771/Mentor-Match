@@ -253,6 +253,30 @@ h1 {
     background: #dc2626;
 }
 
+.profile-form > .logout-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    background: #ef4444;
+    margin-top: 2px;
+}
+
+.profile-form > .logout-btn:hover {
+    background: #dc2626;
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.28);
+}
+
+.profile-form > .logout-btn:active {
+    background: #b91c1c;
+    box-shadow: 0 3px 8px rgba(185, 28, 28, 0.2);
+}
+
+.profile-form > .logout-btn:focus-visible {
+    outline: 2px solid rgba(220, 38, 38, 0.35);
+    outline-offset: 2px;
+}
+
 .empty-pairing {
     margin: 0;
     color: var(--muted);
