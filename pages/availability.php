@@ -29,11 +29,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     /* ── Add a new time slot ── */
     if ($action === 'add_slot') {
-        $is_recurring = (int)($_POST['is_recurring'] ?? 1);
-        $day_of_week  = isset($_POST['day_of_week']) ? (int)$_POST['day_of_week'] : null;
-        $avail_date   = trim($_POST['available_date'] ?? '');
-        $start        = trim($_POST['start_time'] ?? '');
-        $end          = trim($_POST['end_time'] ?? '');
+        $is_recurring_raw = trim($_POST['is_recurring'] ?? '1');
+        $is_everyday      = ($is_recurring_raw === '2');
+        $is_recurring     = $is_everyday ? 1 : (int)$is_recurring_raw;
+        $day_of_week      = isset($_POST['day_of_week']) ? (int)$_POST['day_of_week'] : null;
+        $avail_date       = trim($_POST['available_date'] ?? '');
+        $start            = trim($_POST['start_time'] ?? '');
+        $end              = trim($_POST['end_time'] ?? '');
 
         // Validate common fields
         if ($start === '' || $end === '') {
@@ -42,7 +44,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = 'End time must be after start time.';
         }
 
-        if ($is_recurring) {
+        if ($is_everyday) {
+            // Check for overlapping recurring slot on every day
+            if (empty($errors)) {
+                $overlap_days = [];
+                for ($d = 0; $d < 7; $d++) {
+                    $stmt = $pdo->prepare('
+                        SELECT COUNT(*) FROM availability
+                        WHERE mentor_id = ? AND is_recurring = 1 AND day_of_week = ?
+                          AND start_time < ? AND end_time > ?
+                    ');
+                    $stmt->execute([$user_id, $d, $end, $start]);
+                    if ($stmt->fetchColumn() > 0) {
+                        $overlap_days[] = $day_names[$d];
+                    }
+                }
+                if (!empty($overlap_days)) {
+                    $errors[] = 'This overlaps with existing slots on: ' . implode(', ', $overlap_days) . '.';
+                }
+            }
+        } elseif ($is_recurring) {
             if ($day_of_week === null || $day_of_week < 0 || $day_of_week > 6) {
                 $errors[] = 'Please select a day of the week.';
             }
@@ -80,19 +101,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($errors)) {
             try {
-                $stmt = $pdo->prepare('
-                    INSERT INTO availability (mentor_id, available_date, start_time, end_time, day_of_week, is_recurring)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                ');
-                $stmt->execute([
-                    $user_id,
-                    $is_recurring ? null : $avail_date,
-                    $start,
-                    $end,
-                    $is_recurring ? $day_of_week : null,
-                    $is_recurring
-                ]);
-                $successes[] = 'Time slot added!';
+                if ($is_everyday) {
+                    $stmt = $pdo->prepare('
+                        INSERT INTO availability (mentor_id, available_date, start_time, end_time, day_of_week, is_recurring)
+                        VALUES (?, NULL, ?, ?, ?, 1)
+                    ');
+                    for ($d = 0; $d < 7; $d++) {
+                        $stmt->execute([$user_id, $start, $end, $d]);
+                    }
+                    $successes[] = 'Time slot added for every day!';
+                } else {
+                    $stmt = $pdo->prepare('
+                        INSERT INTO availability (mentor_id, available_date, start_time, end_time, day_of_week, is_recurring)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                    ');
+                    $stmt->execute([
+                        $user_id,
+                        $is_recurring ? null : $avail_date,
+                        $start,
+                        $end,
+                        $is_recurring ? $day_of_week : null,
+                        $is_recurring
+                    ]);
+                    $successes[] = 'Time slot added!';
+                }
             } catch (PDOException $e) {
                 $errors[] = 'Could not save the time slot. Please try again.';
             }
@@ -347,6 +379,11 @@ function fmt_time(string $time): string
                             <svg class="avail-type-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
                             Every Week
                         </label>
+                        <label class="avail-type-option" data-value="2">
+                            <input type="radio" name="slot_type_radio" value="2">
+                            <svg class="avail-type-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/><path d="M12 6v6l4 2"/></svg>
+                            Everyday
+                        </label>
                         <label class="avail-type-option" data-value="0">
                             <input type="radio" name="slot_type_radio" value="0">
                             <svg class="avail-type-option__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -438,6 +475,9 @@ function fmt_time(string $time): string
 
                     if (val === '1') {
                         fieldDay.classList.remove('avail-field-hidden');
+                        fieldDate.classList.add('avail-field-hidden');
+                    } else if (val === '2') {
+                        fieldDay.classList.add('avail-field-hidden');
                         fieldDate.classList.add('avail-field-hidden');
                     } else {
                         fieldDay.classList.add('avail-field-hidden');
