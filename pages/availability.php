@@ -2,7 +2,7 @@
 session_start();
 require_once '../includes/db.php';
 
-/* ─── Auth & Role Guard ──────────────────────────────────────────── */
+/* ─── Auth & Role Guard ─*/
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
@@ -19,11 +19,11 @@ if ($user_role !== 'mentor') {
 $errors   = [];
 $successes = [];
 
-/* ─── Day-of-week helpers ────────────────────────────────────────── */
+/* ─── Day-of-week helpers ── */
 $day_names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 $day_short = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-/* ─── Handle POST Actions ────────────────────────────────────────── */
+/* ─── Handle POST Actions ─── */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-/* ─── Fetch All Recurring Slots ──────────────────────────────────── */
+/* ─── Fetch All Recurring Slots ──────── */
 $recurring_slots = [];
 try {
     $stmt = $pdo->prepare('
