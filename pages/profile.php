@@ -184,7 +184,31 @@ if ($user_role === 'student') {
 				$errors[] = 'Failed to remove pairing. Please try again.';
 			}
 		}
-	}
+		if ($action === 'rate_mentor') {
+			$rating_val = (int)($_POST['rating'] ?? 0);
+			if ($rating_val < 1 || $rating_val > 5) {
+				$errors[] = 'Please select a rating between 1 and 5.';
+			} else {
+				try {
+					$checkStmt = $pdo->prepare('SELECT student_id, mentor_id FROM students WHERE user_id = ? LIMIT 1');
+					$checkStmt->execute([$user_id]);
+					$checkRow = $checkStmt->fetch(PDO::FETCH_ASSOC);
+					if (!$checkRow || empty($checkRow['mentor_id'])) {
+						$errors[] = 'You must be paired with a mentor to rate them.';
+					} else {
+						$rateStmt = $pdo->prepare('
+							INSERT INTO mentor_ratings (student_id, mentor_id, rating)
+							VALUES (?, ?, ?)
+							ON DUPLICATE KEY UPDATE rating = VALUES(rating), updated_at = NOW()
+						');
+						$rateStmt->execute([(int)$checkRow['student_id'], (int)$checkRow['mentor_id'], $rating_val]);
+						$successes[] = 'Rating submitted successfully!';
+					}
+				} catch (PDOException $e) {
+					$errors[] = 'Failed to submit rating. Please try again.';
+				}
+			}
+		}	}
 
 	$user = null;
 	$studentProfile = null;
@@ -237,6 +261,24 @@ if ($user_role === 'student') {
 			$pairedMentor = $mentorStmt->fetch(PDO::FETCH_ASSOC);
 		} catch (PDOException $e) {
 			$pairedMentor = null;
+		}
+	}
+
+	$myRating = 0;
+	$mentorAvgRating = null;
+	if ($pairedMentor) {
+		try {
+			$sid = (int)($studentProfile['student_id'] ?? 0);
+			$mid = (int)($pairedMentor['mentor_id'] ?? 0);
+			$myRatingStmt = $pdo->prepare('SELECT rating FROM mentor_ratings WHERE student_id = ? AND mentor_id = ? LIMIT 1');
+			$myRatingStmt->execute([$sid, $mid]);
+			$myRating = (int)($myRatingStmt->fetchColumn() ?: 0);
+			$avgStmt = $pdo->prepare('SELECT ROUND(AVG(rating), 1) FROM mentor_ratings WHERE mentor_id = ?');
+			$avgStmt->execute([$mid]);
+			$mentorAvgRating = $avgStmt->fetchColumn();
+		} catch (PDOException $e) {
+			$myRating = 0;
+			$mentorAvgRating = null;
 		}
 	}
 
@@ -650,6 +692,25 @@ if ($user_role === 'mentor') {
 										<p class="mentor-meta"><strong>Subjects:</strong> <?php echo htmlspecialchars($pairedMentor['subjects']); ?></p>
 									<?php endif; ?>
 								</div>
+							</div>
+
+							<div class="mentor-rating-section">
+								<div class="mentor-rating-header">
+									<span class="mentor-rating-label">Rate your mentor</span>
+									<?php if ($mentorAvgRating !== null && (float)$mentorAvgRating > 0): ?>
+										<span class="mentor-avg-rating">Avg: <?php echo htmlspecialchars((string)$mentorAvgRating); ?>/5 &#9733;</span>
+									<?php endif; ?>
+								</div>
+								<form method="POST" class="rating-form" id="rating-form">
+									<input type="hidden" name="action" value="rate_mentor">
+									<div class="star-rating" role="group" aria-label="Rate your mentor">
+										<?php for ($i = 5; $i >= 1; $i--): ?>
+											<input type="radio" class="star-input" id="star<?php echo $i; ?>" name="rating" value="<?php echo $i; ?>" <?php echo ($myRating === $i) ? 'checked' : ''; ?>>
+											<label class="star-label" for="star<?php echo $i; ?>" title="<?php echo $i; ?> star<?php echo $i > 1 ? 's' : ''; ?>">&#9733;</label>
+										<?php endfor; ?>
+									</div>
+									<button type="submit" class="btn rating-submit-btn">Submit Rating</button>
+								</form>
 							</div>
 
 							<form method="POST" class="remove-form" onsubmit="return confirm('Remove your pairing with this mentor?');">

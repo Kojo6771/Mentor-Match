@@ -110,7 +110,10 @@ try {
             mp.experience_years,
             mp.linkedin,
             mp.github,
-            COALESCE(AVG(r.rating), 5) as rating,
+            COALESCE(
+                (SELECT ROUND(AVG(rating), 1) FROM mentor_ratings WHERE mentor_id = mp.mentor_id),
+                COALESCE(AVG(r.rating), 5)
+            ) as rating,
             GROUP_CONCAT(DISTINCT s.name SEPARATOR '|||') as subjects
         FROM users u
         INNER JOIN mentor_profiles mp ON mp.user_id = u.id AND mp.verified = 1
