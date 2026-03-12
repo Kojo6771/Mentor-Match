@@ -97,9 +97,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 // Include the swipe card component
 require_once '../components/swipe/swipe_card.php';
 
+// `mentor_ratings detect availability .
+$hasMentorRatingsTable = false;
+try {
+    $tableCheckStmt = $pdo->query("SHOW TABLES LIKE 'mentor_ratings'");
+    $hasMentorRatingsTable = (bool)$tableCheckStmt->fetchColumn();
+} catch (PDOException $e) {
+    $hasMentorRatingsTable = false;
+}
+
 // Fetch mentors that the student hasn't swiped on yet
 $mentors = [];
 try {
+    $ratingSql = $hasMentorRatingsTable
+        ? "COALESCE((SELECT ROUND(AVG(rating), 1) FROM mentor_ratings WHERE mentor_id = mp.mentor_id), COALESCE(AVG(r.rating), 5))"
+        : "COALESCE(AVG(r.rating), 5)";
+
     $sql = "
         SELECT 
             mp.mentor_id as id,
@@ -110,10 +123,7 @@ try {
             mp.experience_years,
             mp.linkedin,
             mp.github,
-            COALESCE(
-                (SELECT ROUND(AVG(rating), 1) FROM mentor_ratings WHERE mentor_id = mp.mentor_id),
-                COALESCE(AVG(r.rating), 5)
-            ) as rating,
+            {$ratingSql} as rating,
             GROUP_CONCAT(DISTINCT s.name SEPARATOR '|||') as subjects
         FROM users u
         INNER JOIN mentor_profiles mp ON mp.user_id = u.id AND mp.verified = 1
@@ -121,8 +131,11 @@ try {
         LEFT JOIN subjects s ON s.id = ms.subject_id
         LEFT JOIN reviews r ON r.mentor_id = mp.mentor_id
         WHERE u.role = 'mentor'
-        AND mp.mentor_id NOT IN (
-            SELECT mentor_id FROM mentor_requests WHERE student_id = ?
+        AND NOT EXISTS (
+            SELECT 1
+            FROM mentor_requests mr
+            WHERE mr.student_id = ?
+              AND mr.mentor_id = mp.mentor_id
         )
         GROUP BY mp.mentor_id
         ORDER BY rating DESC, u.first_name ASC
