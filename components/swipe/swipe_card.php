@@ -72,12 +72,29 @@ function render_swipe_card($mentor, $index = 0) {
                     <h3 class="swipe-card-course"><?php echo $course; ?></h3>
                     <?php if ($avg_rating !== null): ?>
                     <div class="swipe-card-rating">
-                        <?php for ($i = 1; $i <= 5; $i++): ?>
-                            <svg class="star-icon <?php echo $i <= floor($avg_rating) ? 'star-filled' : 'star-empty'; ?>" viewBox="0 0 24 24" width="24" height="24">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
+                        <?php for ($i = 1; $i <= 5; $i++):
+                            $fill = min(1, max(0, $avg_rating - ($i - 1)));
+                        ?>
+                            <?php if ($fill >= 1): ?>
+                                <svg class="star-icon star-filled" viewBox="0 0 24 24" width="24" height="24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            <?php elseif ($fill > 0): ?>
+                                <svg class="star-icon" viewBox="0 0 24 24" width="24" height="24">
+                                    <defs>
+                                        <clipPath id="half-<?= $mentor_id ?>-<?= $i ?>">
+                                            <rect x="0" y="0" width="<?= round($fill * 24, 2) ?>" height="24"/>
+                                        </clipPath>
+                                    </defs>
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="none" stroke="#d1d5db" stroke-width="1.5"/>
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#facc15" stroke="#facc15" clip-path="url(#half-<?= $mentor_id ?>-<?= $i ?>)"/>
+                                </svg>
+                            <?php else: ?>
+                                <svg class="star-icon star-empty" viewBox="0 0 24 24" width="24" height="24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            <?php endif; ?>
                         <?php endfor; ?>
-                        <span class="rating-number"><?php echo $avg_rating; ?></span>
                     </div>
                     <?php endif; ?>
                 </div>
