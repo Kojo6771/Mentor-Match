@@ -686,7 +686,12 @@ if ($user_role === 'mentor') {
 							<div class="mentor-summary">
 								<img src="<?php echo htmlspecialchars($mentor_avatar_url); ?>" alt="Mentor profile" class="mentor-avatar" data-fallback="<?php echo htmlspecialchars($mentor_fallback_avatar); ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;">
 								<div class="mentor-details">
-									<h3><?php echo htmlspecialchars(($pairedMentor['first_name'] ?? '') . ' ' . ($pairedMentor['last_name'] ?? '')); ?></h3>
+									<h3>
+										<?php echo htmlspecialchars(($pairedMentor['first_name'] ?? '') . ' ' . ($pairedMentor['last_name'] ?? '')); ?>
+										<?php if ($mentorAvgRating !== null && (float)$mentorAvgRating > 0): ?>
+											<span class="mentor-avg-rating" style="font-size:0.82rem;font-weight:600;vertical-align:middle;margin-left:6px">&#9733; <?php echo htmlspecialchars(number_format((float)$mentorAvgRating, 1)); ?></span>
+										<?php endif; ?>
+									</h3>
 									<p><?php echo htmlspecialchars($pairedMentor['email'] ?? ''); ?></p>
 									<?php if (!empty($pairedMentor['subjects'])): ?>
 										<p class="mentor-meta"><strong>Subjects:</strong> <?php echo htmlspecialchars($pairedMentor['subjects']); ?></p>
@@ -697,9 +702,6 @@ if ($user_role === 'mentor') {
 							<div class="mentor-rating-section">
 								<div class="mentor-rating-header">
 									<span class="mentor-rating-label">Rate your mentor</span>
-									<?php if ($mentorAvgRating !== null && (float)$mentorAvgRating > 0): ?>
-										<span class="mentor-avg-rating">Avg: <?php echo htmlspecialchars((string)$mentorAvgRating); ?>/5 &#9733;</span>
-									<?php endif; ?>
 								</div>
 								<form method="POST" class="rating-form" id="rating-form">
 									<input type="hidden" name="action" value="rate_mentor">
