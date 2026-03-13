@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 07, 2026 at 02:26 AM
+-- Generation Time: Mar 13, 2026 at 10:09 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -36,6 +36,24 @@ CREATE TABLE `availability` (
   `day_of_week` tinyint(4) DEFAULT NULL,
   `is_recurring` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `availability`
+--
+
+INSERT INTO `availability` (`id`, `mentor_id`, `available_date`, `start_time`, `end_time`, `day_of_week`, `is_recurring`) VALUES
+(2, 13, NULL, '13:00:00', '15:00:00', 1, 1),
+(3, 13, NULL, '13:00:00', '15:00:00', 2, 1),
+(4, 13, NULL, '13:00:00', '15:00:00', 3, 1),
+(5, 13, NULL, '13:00:00', '15:00:00', 4, 1),
+(6, 13, NULL, '13:00:00', '15:00:00', 5, 1),
+(8, 13, NULL, '15:30:00', '17:00:00', 0, 1),
+(9, 13, NULL, '15:30:00', '17:00:00', 1, 1),
+(10, 13, NULL, '15:30:00', '17:00:00', 2, 1),
+(11, 13, NULL, '15:30:00', '17:00:00', 3, 1),
+(12, 13, NULL, '15:30:00', '17:00:00', 4, 1),
+(13, 13, NULL, '15:30:00', '17:00:00', 5, 1),
+(14, 13, NULL, '15:30:00', '17:00:00', 6, 1);
 
 -- --------------------------------------------------------
 
@@ -110,6 +128,28 @@ INSERT INTO `mentor_profiles` (`mentor_id`, `bio`, `linkedin`, `github`, `experi
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `mentor_ratings`
+--
+
+CREATE TABLE `mentor_ratings` (
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `mentor_id` int(11) NOT NULL,
+  `rating` tinyint(4) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `mentor_ratings`
+--
+
+INSERT INTO `mentor_ratings` (`id`, `student_id`, `mentor_id`, `rating`, `created_at`, `updated_at`) VALUES
+(1, 15, 13, 4, '2026-03-12 18:33:15', '2026-03-12 18:33:15');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `mentor_requests`
 --
 
@@ -127,9 +167,9 @@ CREATE TABLE `mentor_requests` (
 --
 
 INSERT INTO `mentor_requests` (`id`, `student_id`, `mentor_id`, `status`, `requested_at`, `responded_at`) VALUES
-(10, 15, 13, 'pending', '2026-03-07 00:50:47', NULL),
+(10, 15, 13, 'accepted', '2026-03-07 00:50:47', '2026-03-12 18:23:05'),
 (11, 15, 14, 'cancelled', '2026-03-07 00:50:48', NULL),
-(12, 1, 13, 'pending', '2026-03-07 01:19:14', NULL),
+(12, 1, 13, 'accepted', '2026-03-07 01:19:14', '2026-03-12 18:23:07'),
 (13, 1, 14, 'cancelled', '2026-03-07 01:19:16', NULL);
 
 -- --------------------------------------------------------
@@ -145,6 +185,14 @@ CREATE TABLE `mentor_student_matches` (
   `matched_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `active` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `mentor_student_matches`
+--
+
+INSERT INTO `mentor_student_matches` (`id`, `mentor_id`, `student_id`, `matched_at`, `active`) VALUES
+(2, 13, 15, '2026-03-12 18:23:05', 1),
+(3, 13, 1, '2026-03-12 18:23:07', 1);
 
 -- --------------------------------------------------------
 
@@ -178,39 +226,6 @@ CREATE TABLE `messages` (
   `message` text NOT NULL,
   `sent_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `read_at` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `reviews`
---
-
-CREATE TABLE `reviews` (
-  `id` int(11) NOT NULL,
-  `session_id` int(11) NOT NULL,
-  `student_id` int(11) NOT NULL,
-  `mentor_id` int(11) NOT NULL,
-  `rating` int(11) DEFAULT NULL CHECK (`rating` between 1 and 5),
-  `comment` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `mentor_ratings`
---
-
-CREATE TABLE `mentor_ratings` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `student_id` int(11) NOT NULL,
-  `mentor_id` int(11) NOT NULL,
-  `rating` tinyint(4) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_student_mentor` (`student_id`,`mentor_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -257,9 +272,10 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`student_id`, `course`, `year_of_study`, `learning_preference`, `bio`, `created_at`, `user_id`, `mentor_id`) VALUES
-(1, 'Engineering', 1, 'In person sessions', '', '2026-02-20 23:39:36', 1, NULL),
+(1, 'Engineering', 1, 'In person sessions', '', '2026-02-20 23:39:36', 1, 13),
 (12, 'Computer science', 3, 'In person sessions', 'I want to be a software developer', '2026-02-11 01:23:13', 12, NULL),
-(15, 'Computer Science', 1, 'In person sessions', 'I am in my first year doing Object oriented programming', '2026-03-07 00:50:39', 15, NULL);
+(15, 'Computer Science', 1, 'In person sessions', 'I am in my first year doing Object oriented programming', '2026-03-07 00:50:39', 15, 13),
+(16, 'Computer Science', 1, 'In person sessions', 'I am an aspiring web developer', '2026-03-13 09:08:48', 16, NULL);
 
 -- --------------------------------------------------------
 
@@ -320,7 +336,8 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `phone`, `email`, `passwor
 (12, 'Kojo', 'Antwi', '07463885316', 'k_wad_wo@hotmail.co.uk', '$2y$10$OTVk1PW1CDgtXcTAeY4noO2ldiFhKRrTrM04Y6jWafZi/McHUHyzm', 'admin', '2026-02-11 01:22:41', 'uploads/profile_pictures/profile_698bd9e129821_1770772961.jpg'),
 (13, 'Jacob', 'Harvey', '07463885316', 'nyashdying@gmail.com', '$2y$10$5C4xySz9am0eWBQWf/BIQuDJ5tMdidEqTBxX2m7lSLG/qpmRNKJpS', 'mentor', '2026-02-11 01:35:51', 'uploads/profile_pictures/profile_698bdcf7225b2_1770773751.jpg'),
 (14, 'George', 'Burell', '07809639807', 'GJ@gmail.com', '$2y$10$mY9.9HyJju6ePXFPlwO/A.ykCpIHFusAqaqzfHK3njZkaoKDPCnv2', 'mentor', '2026-02-16 02:40:36', 'uploads/profile_pictures/profile_699283a3eb925_1771209635.JPG'),
-(15, 'Stacey', 'Slater', '07463885316', 'ST@gmail.com', '$2y$10$iV5yq/O/PX5tOIzCnyEzouc7p9KF5oz40tliUppJEtn7JulnHKF9e', 'student', '2026-03-07 00:49:00', 'uploads/profile_pictures/profile_69ab75fcd2b29_1772844540.webp');
+(15, 'Stacey', 'Slater', '07463885316', 'ST@gmail.com', '$2y$10$iV5yq/O/PX5tOIzCnyEzouc7p9KF5oz40tliUppJEtn7JulnHKF9e', 'student', '2026-03-07 00:49:00', 'uploads/profile_pictures/profile_69ab75fcd2b29_1772844540.webp'),
+(16, 'Phil', 'Mitchel', '07463885316', 'Phil123@gmail.com', '$2y$10$OcRXQbRwQ3D7hxXQzPHvnOi48dgNHKWI.DVtOIsrQ43OmLTGKPTs.', 'student', '2026-03-13 09:08:27', 'uploads/profile_pictures/profile_69b3d40bbdafd_1773392907.jpg');
 
 --
 -- Indexes for dumped tables
@@ -355,6 +372,13 @@ ALTER TABLE `mentor_profiles`
   ADD KEY `mentor_profiles_user_fk` (`user_id`);
 
 --
+-- Indexes for table `mentor_ratings`
+--
+ALTER TABLE `mentor_ratings`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_student_mentor` (`student_id`,`mentor_id`);
+
+--
 -- Indexes for table `mentor_requests`
 --
 ALTER TABLE `mentor_requests`
@@ -384,15 +408,6 @@ ALTER TABLE `messages`
   ADD PRIMARY KEY (`id`),
   ADD KEY `sender_id` (`sender_id`),
   ADD KEY `receiver_id` (`receiver_id`);
-
---
--- Indexes for table `reviews`
---
-ALTER TABLE `reviews`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `session_id` (`session_id`),
-  ADD KEY `student_id` (`student_id`),
-  ADD KEY `mentor_id` (`mentor_id`);
 
 --
 -- Indexes for table `sessions`
@@ -433,13 +448,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `availability`
 --
 ALTER TABLE `availability`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `mentor_applications`
 --
 ALTER TABLE `mentor_applications`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `mentor_ratings`
+--
+ALTER TABLE `mentor_ratings`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `mentor_requests`
@@ -451,18 +472,12 @@ ALTER TABLE `mentor_requests`
 -- AUTO_INCREMENT for table `mentor_student_matches`
 --
 ALTER TABLE `mentor_student_matches`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `reviews`
---
-ALTER TABLE `reviews`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -481,7 +496,7 @@ ALTER TABLE `subjects`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- Constraints for dumped tables
@@ -540,14 +555,6 @@ ALTER TABLE `mentor_subjects`
 ALTER TABLE `messages`
   ADD CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `messages_ibfk_2` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
---
--- Constraints for table `reviews`
---
-ALTER TABLE `reviews`
-  ADD CONSTRAINT `reviews_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `sessions` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `reviews_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `reviews_ibfk_3` FOREIGN KEY (`mentor_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `sessions`
