@@ -331,24 +331,34 @@ h1 {
     font-size: 2rem;
     color: #d1d5db;
     cursor: pointer;
-    transition: color 0.15s ease, transform 0.1s ease;
+    transition: color 0.15s ease, transform 0.1s ease, text-shadow 0.15s ease;
     line-height: 1;
+    -webkit-text-stroke: 1px #d1d5db;
+    text-shadow: none;
 }
 
-/* Highlight hovered star and all stars to its left (higher value) */
+/* On container hover, reset all stars to outline style */
 .star-rating:hover .star-label {
-    color: #d1d5db;
+    color: transparent;
+    -webkit-text-stroke: 1.5px #d1d5db;
+    text-shadow: none;
+    transform: scale(1);
 }
 
+/* Fill the hovered star and all stars to its left (higher value siblings) */
 .star-label:hover,
 .star-label:hover ~ .star-label {
     color: #f59e0b;
-    transform: scale(1.15);
+    -webkit-text-stroke: 0px transparent;
+    text-shadow: 0 0 4px rgba(245, 158, 11, 0.35);
+    transform: scale(1.18);
 }
 
 /* Highlight checked star and all higher stars */
 .star-input:checked ~ .star-label {
     color: #f59e0b;
+    -webkit-text-stroke: 0px transparent;
+    text-shadow: 0 0 2px rgba(245, 158, 11, 0.2);
 }
 
 .rating-submit-btn {
