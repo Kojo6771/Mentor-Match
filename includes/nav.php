@@ -36,7 +36,7 @@ if ($userRole === 'mentor') {
         ['name' => 'admin_dashboard', 'label' => 'Applications', 'path' => $navBasePath . 'users/admin/manage_applications.php', 'icon' => 'requests'],
         ['name' => 'admin_users', 'label' => 'Users', 'path' => $navBasePath . 'pages/admin_users.php', 'icon' => 'users'],
         ['name' => 'admin_sessions', 'label' => 'Sessions', 'path' => $navBasePath . 'pages/admin_sessions.php', 'icon' => 'calendar'],
-        ['name' => 'admin_reports', 'label' => 'Reports', 'path' => $navBasePath . 'pages/admin_reports.php', 'icon' => 'reports'],
+        ['name' => 'platform_report', 'label' => 'Reports', 'path' => $navBasePath . 'pages/platform_report.php', 'icon' => 'reports'],
     ];
 
 }

@@ -1,0 +1,580 @@
+/* ===== Platform Report Page ===== */
+
+/* ── Layout ── */
+.report-container {
+    padding: 16px;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-bottom: 100px;
+}
+
+.report-wrapper {
+    width: 100%;
+    max-width: 600px;
+    display: grid;
+    gap: 16px;
+}
+
+/* ── Page Header ── */
+.report-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.report-header h1 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin: 0;
+    color: #111827;
+}
+
+.report-header p {
+    margin: 2px 0 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.report-header__right {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* ── Stat Row ── */
+.report-stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.report-stat {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 14px 12px;
+    text-align: center;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+    border: 1px solid #e6e9ef;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.report-stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.1);
+}
+
+.report-stat__value {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.1;
+}
+
+.report-stat__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.report-stat--accent .report-stat__value {
+    color: var(--accent);
+}
+
+.report-stat--green .report-stat__value {
+    color: #059669;
+}
+
+.report-stat--amber .report-stat__value {
+    color: #d97706;
+}
+
+/* ── Cards ── */
+.report-card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+    border: 1px solid #e6e9ef;
+}
+
+.report-card__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.report-card__title svg {
+    width: 18px;
+    height: 18px;
+    color: var(--accent);
+}
+
+/* ── Pie Chart ── */
+.pie-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.pie-chart {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+}
+
+.pie-chart__center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+.pie-chart__center-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1;
+}
+
+.pie-chart__center-label {
+    font-size: 0.72rem;
+    color: var(--muted);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.pie-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pie-legend__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pie-legend__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.pie-legend__dot--students {
+    background: var(--accent);
+}
+
+.pie-legend__dot--mentors {
+    background: #06b6d4;
+}
+
+.pie-legend__dot--admins {
+    background: #f59e0b;
+}
+
+.pie-legend__text {
+    font-size: 0.88rem;
+    color: #374151;
+    font-weight: 500;
+}
+
+.pie-legend__count {
+    font-weight: 700;
+    color: #111827;
+}
+
+.pie-legend__pct {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-left: 2px;
+}
+
+/* ── Bar Chart (Top Mentors) ── */
+.bar-chart {
+    display: grid;
+    gap: 12px;
+}
+
+.bar-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+}
+
+.bar-rank {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent) 0%, #06b6d4 100%);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.bar-rank--1 {
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.bar-rank--2 {
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+}
+
+.bar-rank--3 {
+    background: linear-gradient(135deg, #d97706, #b45309);
+}
+
+.bar-info {
+    min-width: 0;
+}
+
+.bar-info__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.bar-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #111827;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.bar-count {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.bar-track {
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), #06b6d4);
+    transition: width 0.6s ease;
+}
+
+.bar-fill--gold {
+    background: linear-gradient(90deg, #f59e0b, #f97316);
+}
+
+.bar-sessions {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #111827;
+    min-width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* ── Subject Breakdown ── */
+.subject-list {
+    display: grid;
+    gap: 8px;
+}
+
+.subject-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.subject-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.subject-name {
+    flex: 1;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #374151;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.subject-count {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #111827;
+    flex-shrink: 0;
+}
+
+/* ── Session Status Mini Cards ── */
+.status-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.status-card {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #e6e9ef;
+    text-align: center;
+}
+
+.status-card__value {
+    font-size: 1.3rem;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.status-card__label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-top: 3px;
+}
+
+.status-card--pending {
+    background: #fffbeb;
+    border-color: #fde68a;
+}
+
+.status-card--pending .status-card__value { color: #92400e; }
+.status-card--pending .status-card__label { color: #b45309; }
+
+.status-card--confirmed {
+    background: #ecfdf5;
+    border-color: #a7f3d0;
+}
+
+.status-card--confirmed .status-card__value { color: #065f46; }
+.status-card--confirmed .status-card__label { color: #059669; }
+
+.status-card--completed {
+    background: #f0f9ff;
+    border-color: #bae6fd;
+}
+
+.status-card--completed .status-card__value { color: #0c4a6e; }
+.status-card--completed .status-card__label { color: #0369a1; }
+
+.status-card--cancelled {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.status-card--cancelled .status-card__value { color: #991b1b; }
+.status-card--cancelled .status-card__label { color: #b91c1c; }
+
+/* ── Empty State ── */
+.report-empty {
+    text-align: center;
+    padding: 24px 14px;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+/* ── Recent Activity ── */
+.activity-list {
+    display: grid;
+    gap: 10px;
+}
+
+.activity-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f9fafb;
+    border: 1px solid #f1f5f9;
+    transition: background 0.15s;
+}
+
+.activity-item:hover {
+    background: #f1f5f9;
+}
+
+.activity-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.activity-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.activity-icon--user {
+    background: #dbeafe;
+    color: var(--accent);
+}
+
+.activity-icon--session {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.activity-icon--match {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.activity-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-text {
+    font-size: 0.85rem;
+    color: #374151;
+    margin: 0;
+    line-height: 1.35;
+}
+
+.activity-text strong {
+    color: #111827;
+    font-weight: 600;
+}
+
+.activity-time {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 520px) {
+    .report-container {
+        padding: 12px 10px 100px;
+    }
+
+    .report-header h1 {
+        font-size: 1.15rem;
+    }
+
+    .report-stat-row {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .report-stat {
+        padding: 10px 8px;
+    }
+
+    .report-stat__value {
+        font-size: 1.3rem;
+    }
+
+    .report-stat__label {
+        font-size: 0.68rem;
+    }
+
+    .report-card {
+        padding: 14px 12px;
+    }
+
+    .pie-wrapper {
+        gap: 16px;
+    }
+
+    .pie-chart {
+        width: 150px;
+        height: 150px;
+    }
+
+    .pie-chart__center-value {
+        font-size: 1.25rem;
+    }
+
+    .pie-legend__text {
+        font-size: 0.82rem;
+    }
+
+    .bar-name {
+        font-size: 0.82rem;
+    }
+
+    .status-grid {
+        gap: 8px;
+    }
+
+    .status-card {
+        padding: 10px 8px;
+    }
+
+    .status-card__value {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 380px) {
+    .report-stat-row {
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 6px;
+    }
+
+    .report-stat__value {
+        font-size: 1.1rem;
+    }
+
+    .pie-chart {
+        width: 130px;
+        height: 130px;
+    }
+
+    .pie-chart__center-value {
+        font-size: 1.1rem;
+    }
+
+    .bar-row {
+        gap: 8px;
+    }
+
+    .bar-rank {
+        width: 22px;
+        height: 22px;
+        font-size: 0.68rem;
+    }
+}
