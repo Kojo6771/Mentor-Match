@@ -2,15 +2,13 @@
 session_start();
 require_once '../includes/db.php';
 
-/* ── Guard: admin only ── */
+/* ── admin only ── */
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     header('Location: login.php');
     exit;
 }
 
-/* ================================================================
-   DATA QUERIES
-   ================================================================ */
+
 
 /* ── 1. User counts by role ── */
 $roleCounts = ['student' => 0, 'mentor' => 0, 'admin' => 0];
