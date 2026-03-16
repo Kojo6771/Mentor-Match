@@ -300,6 +300,39 @@
     height: 16px;
 }
 
+/* ── Mentor Match Tag ── */
+.mu-mentor-match {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    color: #0f766e;
+    background: #ccfbf1;
+    padding: 3px 9px;
+    border-radius: 20px;
+    width: fit-content;
+}
+
+.mu-mentor-match svg {
+    flex-shrink: 0;
+    color: #0f766e;
+}
+
+.mu-mentor-match strong {
+    font-weight: 700;
+}
+
+/* Unmatched variant */
+.mu-mentor-match:has(circle) {
+    background: #f1f5f9;
+    color: #9ca3af;
+}
+
+.mu-mentor-match:has(circle) svg {
+    color: #9ca3af;
+}
+
 /* ── Empty State ── */
 .mu-empty {
     text-align: center;

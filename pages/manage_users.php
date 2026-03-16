@@ -81,6 +81,20 @@ try {
     }
 } catch (PDOException $e) { /* silent */ }
 
+/* ── Build a map of student_id → mentor name for active matches ── */
+$studentMentorMap = [];
+try {
+    $stmt = $pdo->query("
+        SELECT msm.student_id, u.first_name, u.last_name
+        FROM mentor_student_matches msm
+        JOIN users u ON u.id = msm.mentor_id
+        WHERE msm.active = 1
+    ");
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $studentMentorMap[(int)$row['student_id']] = $row['first_name'] . ' ' . $row['last_name'];
+    }
+} catch (PDOException $e) { /* silent */ }
+
 /* Helper: human-readable joined date */
 function joinedLabel(string $dt): string {
     $ts = strtotime($dt);
@@ -165,6 +179,17 @@ function joinedLabel(string $dt): string {
                             <span class="mu-role mu-role--<?php echo $role; ?>" data-role-badge><?php echo ucfirst($role); ?></span>
                             <span class="mu-joined">Joined <?php echo $joinedStr; ?></span>
                         </div>
+                        <?php if ($role === 'student'): ?>
+                        <div class="mu-mentor-match">
+                            <?php if (!empty($studentMentorMap[$uid])): ?>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                <span>Mentor: <strong><?php echo htmlspecialchars($studentMentorMap[$uid]); ?></strong></span>
+                            <?php else: ?>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                <span>No mentor matched</span>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
                     </div>
                     <div class="mu-actions">
                         <?php if (!$isSelf): ?>
