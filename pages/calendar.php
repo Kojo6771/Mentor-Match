@@ -15,6 +15,32 @@ if (!in_array($user_role, ['student', 'mentor'], true)) {
     exit;
 }
 
+function get_session_end_datetime(array $session): ?DateTimeImmutable
+{
+    $sessionDate = trim((string)($session['session_date'] ?? ''));
+    $endTime = trim((string)($session['end_time'] ?? ''));
+
+    if ($sessionDate === '' || $endTime === '') {
+        return null;
+    }
+
+    try {
+        return new DateTimeImmutable($sessionDate . ' ' . $endTime);
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+function session_has_ended(array $session): bool
+{
+    $sessionEnd = get_session_end_datetime($session);
+    if ($sessionEnd === null) {
+        return false;
+    }
+
+    return $sessionEnd <= new DateTimeImmutable();
+}
+
 // ─── AJAX: Return mentor availability for a given date ────────────
 if (isset($_GET['get_availability']) && isset($_GET['date'])) {
     header('Content-Type: application/json');
@@ -238,7 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $session_id = (int)($_POST['session_id'] ?? 0);
         $new_status = $_POST['new_status'] ?? '';
 
-        if (!in_array($new_status, ['confirmed', 'cancelled'], true)) {
+        if (!in_array($new_status, ['confirmed', 'completed', 'cancelled'], true)) {
             $errors[] = 'Invalid status.';
         } elseif ($session_id <= 0) {
             $errors[] = 'Invalid session.';
@@ -256,11 +282,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             if (!$allowed) {
                 $errors[] = 'You do not have permission to update this session.';
-            } else {
+            } elseif ($new_status === 'completed') {
+                if ($user_role !== 'mentor' || (int)$sess['mentor_id'] !== $mentor_db_id) {
+                    $errors[] = 'Only the assigned mentor can complete this session.';
+                } elseif (($sess['status'] ?? '') !== 'confirmed') {
+                    $errors[] = 'Only confirmed sessions can be marked as completed.';
+                } elseif (!session_has_ended($sess)) {
+                    $errors[] = 'This session can only be completed after its end time has passed.';
+                }
+            }
+
+            if (empty($errors)) {
                 $stmt = $pdo->prepare('UPDATE sessions SET status = ? WHERE id = ?');
                 $stmt->execute([$new_status, $session_id]);
-                $label = $new_status === 'confirmed' ? 'accepted' : 'cancelled';
-                $successes[] = "Session $label.";
+
+                if ($new_status === 'confirmed') {
+                    $successes[] = 'Session accepted.';
+                } elseif ($new_status === 'completed') {
+                    $successes[] = 'Session marked as completed.';
+                } else {
+                    $successes[] = 'Session cancelled.';
+                }
+            } else {
+                // Keep the POST handler structure predictable for the page renderer.
             }
         }
     }
@@ -400,6 +444,7 @@ function render_session_card(array $s, int $user_id, string $user_role): string
     $is_pending   = $s['status'] === 'pending';
     $is_confirmed = $s['status'] === 'confirmed';
     $is_future    = $s['session_date'] >= date('Y-m-d');
+    $has_ended    = session_has_ended($s);
 
     $actions = '';
 
@@ -439,6 +484,21 @@ function render_session_card(array $s, int $user_id, string $user_role): string
                 <button type="submit" class="btn-sm btn-cancel">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                     Cancel Session
+                </button>
+            </form>
+        </div>';
+    }
+
+    if ($user_role === 'mentor' && $is_confirmed && $has_ended) {
+        $actions .= '
+        <div class="session-actions">
+            <form method="POST" style="display:inline" onsubmit="return confirm(\'Mark this session as completed?\')">
+                <input type="hidden" name="action" value="update_session">
+                <input type="hidden" name="session_id" value="' . (int)$s['id'] . '">
+                <input type="hidden" name="new_status" value="completed">
+                <button type="submit" class="btn-sm btn-complete">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+                    Mark Completed
                 </button>
             </form>
         </div>';

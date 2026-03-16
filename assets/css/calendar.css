@@ -384,6 +384,16 @@
     background: #f9fafb;
 }
 
+.btn-complete {
+    background: #ecfdf5;
+    color: #047857;
+    border-color: #6ee7b7;
+}
+
+.btn-complete:hover {
+    background: #d1fae5;
+}
+
 /* ---- Empty States ---- */
 .cal-empty {
     background: #f9fafb;
