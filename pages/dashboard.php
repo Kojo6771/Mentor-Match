@@ -359,7 +359,7 @@ if ($user_role === 'admin') {
                             <div class="action-desc">Monitor mentoring sessions</div>
                         </div>
                     </a>
-                    <a href="platform_reports.php" class="action-card white">
+                    <a href="platform_report.php" class="action-card white">
                         <div class="action-icon">📊</div>
                         <div>
                             <div class="action-title">Reports</div>
