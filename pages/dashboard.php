@@ -345,7 +345,7 @@ if ($user_role === 'admin') {
                             <div class="action-desc">Review pending mentor applications</div>
                         </div>
                     </a>
-                    <a href="admin_users.php" class="action-card white">
+                    <a href="manage_users.php" class="action-card white">
                         <div class="action-icon">👥</div>
                         <div>
                             <div class="action-title">Manage Users</div>
