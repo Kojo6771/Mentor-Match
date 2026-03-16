@@ -93,9 +93,24 @@ try {
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $studentMentorMap[(int)$row['student_id']] = $row['first_name'] . ' ' . $row['last_name'];
     }
+} catch (PDOException $e) {  }
+
+/* ── Build a map of mentor_id → array of student names for active matches ── */
+$mentorStudentsMap = [];
+try {
+    $stmt = $pdo->query("
+        SELECT msm.mentor_id, u.first_name, u.last_name
+        FROM mentor_student_matches msm
+        JOIN users u ON u.id = msm.student_id
+        WHERE msm.active = 1
+        ORDER BY u.first_name
+    ");
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $mentorStudentsMap[(int)$row['mentor_id']][] = $row['first_name'] . ' ' . $row['last_name'];
+    }
 } catch (PDOException $e) { /* silent */ }
 
-/* Helper: human-readable joined date */
+/*  joined date */
 function joinedLabel(string $dt): string {
     $ts = strtotime($dt);
     $diff = time() - $ts;
@@ -170,6 +185,8 @@ function joinedLabel(string $dt): string {
                         $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($u['first_name'] . ' ' . $u['last_name']) . '&background=3b82f6&color=fff&size=88';
                     }
                 ?>
+
+                <!-- Each user card has data attributes for filtering/searching and action buttons for edit/delete -->
                 <div class="mu-card" data-uid="<?php echo $uid; ?>" data-role="<?php echo $role; ?>" data-name="<?php echo strtolower($name); ?>" data-email="<?php echo strtolower($email); ?>">
                     <img class="mu-avatar" src="<?php echo $avatarUrl; ?>" alt="" loading="lazy">
                     <div class="mu-info">
@@ -187,6 +204,26 @@ function joinedLabel(string $dt): string {
                             <?php else: ?>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                                 <span>No mentor matched</span>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Mentor → students list -->
+                        <?php if ($role === 'mentor'): ?>
+                        <div class="mu-mentor-match mu-mentor-match--mentor mu-mentor-match--list">
+                            <?php if (!empty($mentorStudentsMap[$uid])): ?>
+                                <div class="mu-students-header">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    <span>Students (<?php echo count($mentorStudentsMap[$uid]); ?>)</span>
+                                </div>
+                                <ul class="mu-students-list">
+                                    <?php foreach ($mentorStudentsMap[$uid] as $studentName): ?>
+                                    <li><?php echo htmlspecialchars($studentName); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            <?php else: ?>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                <span>No students matched</span>
                             <?php endif; ?>
                         </div>
                         <?php endif; ?>

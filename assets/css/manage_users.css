@@ -333,6 +333,55 @@
     color: #9ca3af;
 }
 
+/* Mentor → Students variant (blue) */
+.mu-mentor-match--mentor {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.mu-mentor-match--mentor svg {
+    color: #1e40af;
+}
+
+.mu-mentor-match--mentor:has(circle) {
+    background: #f1f5f9;
+    color: #9ca3af;
+}
+
+.mu-mentor-match--mentor:has(circle) svg {
+    color: #9ca3af;
+}
+
+/* List layout for mentor students */
+.mu-mentor-match--list:not(:has(circle)) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 6px 10px;
+}
+
+.mu-students-header {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+}
+
+.mu-students-list {
+    margin: 0;
+    padding: 0 0 0 18px;
+    list-style: disc;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.mu-students-list li {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #1e3a5f;
+}
+
 /* ── Empty State ── */
 .mu-empty {
     text-align: center;
