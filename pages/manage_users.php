@@ -491,8 +491,8 @@ function updateFilterCounts() {
 }
 </script>
 
-<div style="text-align:center; padding:32px 0 100px;">
-    <a href="login.php?logout=1" style="display:inline-block; padding:12px 32px; background:#ef4444; color:#fff; border-radius:8px; font-size:1rem; font-weight:600; text-decoration:none; transition:background .2s;" onmouseover="this.style.background='#dc2626'" onmouseout="this.style.background='#ef4444'">Log Out</a>
+<div class="mu-logout-wrap">
+    <a href="login.php?logout=1" class="mu-logout-btn">Log Out</a>
 </div>
 
 </body>

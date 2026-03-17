@@ -660,6 +660,46 @@
     background: #dc2626;
 }
 
+/* ── Logout Button ── */
+.mu-logout-wrap {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px 16px 100px;
+}
+
+.mu-logout-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    background: #ef4444;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.mu-logout-btn:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.28);
+}
+
+.mu-logout-btn:active {
+    background: #b91c1c;
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(185, 28, 28, 0.2);
+}
+
+.mu-logout-btn:focus-visible {
+    outline: 2px solid rgba(220, 38, 38, 0.35);
+    outline-offset: 2px;
+}
+
 /* ── Responsive ── */
 @media (max-width: 520px) {
     .mu-container {
@@ -704,6 +744,10 @@
     .mu-filter-btn {
         padding: 6px 11px;
         font-size: 0.75rem;
+    }
+
+    .mu-logout-wrap {
+        padding: 16px 10px 100px;
     }
 }
 
