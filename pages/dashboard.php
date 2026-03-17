@@ -352,7 +352,7 @@ if ($user_role === 'admin') {
                             <div class="action-desc">View platform analytics</div>
                         </div>
                     </a>
-                    <a href="admin_sessions.php" class="action-card white">
+                    <a href="session_monitor.php" class="action-card white">
                         <div class="action-icon">📅</div>
                         <div>
                             <div class="action-title">Sessions</div>

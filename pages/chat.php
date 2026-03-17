@@ -241,6 +241,38 @@ if ($chat_partner_user_id) {
 	}
 }
 
+/* ── Fetch admin warning messages for mentors ── */
+$admin_notices = [];
+$admin_user_ids = [];
+if ($user_role === 'mentor') {
+	try {
+		$adminStmt = $pdo->prepare('
+			SELECT m.id, m.sender_id, m.message, m.sent_at, m.read_at,
+			       CONCAT(u.first_name, \' \', u.last_name) AS admin_name
+			FROM messages m
+			JOIN users u ON u.id = m.sender_id AND u.role = \'admin\'
+			WHERE m.receiver_id = ?
+			ORDER BY m.sent_at DESC
+			LIMIT 10
+		');
+		$adminStmt->execute([$user_id]);
+		$admin_notices = $adminStmt->fetchAll(PDO::FETCH_ASSOC);
+
+		/* Collect admin user IDs for sender detection */
+		foreach ($admin_notices as $an) {
+			$admin_user_ids[(int)$an['sender_id']] = true;
+		}
+
+		/* Mark admin notices as read */
+		if (!empty($admin_notices)) {
+			$pdo->prepare('UPDATE messages SET read_at = NOW() WHERE receiver_id = ? AND read_at IS NULL AND sender_id IN (SELECT id FROM users WHERE role = \'admin\')')
+				->execute([$user_id]);
+		}
+	} catch (PDOException $e) {
+		$admin_notices = [];
+	}
+}
+
 $partner_name = '';
 $partner_email = '';
 $partner_meta = '';
@@ -383,8 +415,36 @@ if ($chat_partner) {
 				<?php if (empty($student_options)): ?>
 					<p class="empty-state">You do not have any matched students yet.</p>
 				<?php else: ?>
-					<!-- Students List -->
+					<!-- Conversations List -->
 					<div class="conversations-list">
+						<?php if (!empty($admin_notices)): ?>
+							<?php
+								$latestNotice = $admin_notices[0];
+								$adminPreview = $latestNotice['message'];
+								if (strlen($adminPreview) > 50) $adminPreview = substr($adminPreview, 0, 50) . '...';
+								$adminLastTime = strtotime($latestNotice['sent_at']);
+								$adminDiff = time() - $adminLastTime;
+								if ($adminDiff < 60) { $adminTimeStr = 'Just now'; }
+								elseif ($adminDiff < 3600) { $adminTimeStr = floor($adminDiff / 60) . 'm'; }
+								elseif ($adminDiff < 86400) { $adminTimeStr = floor($adminDiff / 3600) . 'h'; }
+								elseif ($adminDiff < 604800) { $adminTimeStr = floor($adminDiff / 86400) . 'd'; }
+								else { $adminTimeStr = date('M j', $adminLastTime); }
+								$hasUnread = false;
+								foreach ($admin_notices as $an) { if (empty($an['read_at'])) { $hasUnread = true; break; } }
+							?>
+							<a href="#" class="conversation-item conversation-item--admin" id="adminConvoBtn">
+								<div class="conversation-avatar conversation-avatar--admin">
+									<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+								</div>
+								<div class="conversation-details">
+									<div class="conversation-header">
+										<h3 class="conversation-name conversation-name--admin">Admin Messages <?php if ($hasUnread): ?><span class="admin-unread-dot"></span><?php endif; ?></h3>
+										<span class="conversation-time"><?php echo htmlspecialchars($adminTimeStr); ?></span>
+									</div>
+									<p class="conversation-preview conversation-preview--admin"><?php echo htmlspecialchars($adminPreview); ?></p>
+								</div>
+							</a>
+						<?php endif; ?>
 						<?php foreach ($student_options as $student): ?>
 							<?php
 								$student_name = trim(($student['first_name'] ?? '') . ' ' . ($student['last_name'] ?? ''));
@@ -436,6 +496,39 @@ if ($chat_partner) {
 					</div>
 				<?php endif; ?>
 			</section>
+
+			<!-- Admin Messages Modal -->
+			<?php if (!empty($admin_notices)): ?>
+				<div class="chat-modal" id="adminModal">
+					<div class="chat-modal__backdrop"></div>
+					<div class="chat-modal__panel">
+						<div class="chat-modal__header">
+							<div class="chat-modal__partner">
+								<div class="conversation-avatar conversation-avatar--admin" style="width:48px;height:48px;">
+									<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+								</div>
+								<div>
+									<h2 class="chat-modal__name">Admin Messages</h2>
+									<p class="chat-modal__meta">Warnings &amp; notifications from platform admin</p>
+								</div>
+							</div>
+							<button type="button" class="chat-modal__close" id="adminModalClose" aria-label="Close">&times;</button>
+						</div>
+
+						<div class="chat-modal__messages">
+							<?php foreach (array_reverse($admin_notices) as $notice): ?>
+								<?php $isRecent = (time() - strtotime($notice['sent_at'])) < 86400 * 3; ?>
+								<article class="message-bubble is-other is-admin-msg <?php echo $isRecent ? 'is-admin-msg--recent' : ''; ?>">
+									<p><?php echo nl2br(htmlspecialchars($notice['message'])); ?></p>
+									<time datetime="<?php echo htmlspecialchars($notice['sent_at']); ?>">
+										<?php echo htmlspecialchars($notice['admin_name']); ?> &middot; <?php echo htmlspecialchars(date('M j, g:i a', strtotime($notice['sent_at']))); ?>
+									</time>
+								</article>
+							<?php endforeach; ?>
+						</div>
+					</div>
+				</div>
+			<?php endif; ?>
 
 			<!-- Chat Modal -->
 			<?php if ($chat_partner_user_id): ?>
@@ -495,8 +588,8 @@ if ($chat_partner) {
 
 			// Handle chat modal close button
 			const chatModal = document.getElementById('chatModal');
-			const closeBtn = document.querySelector('.chat-modal__close');
-			const backdrop = document.querySelector('.chat-modal__backdrop');
+			const closeBtn = chatModal ? chatModal.querySelector('.chat-modal__close') : null;
+			const backdrop = chatModal ? chatModal.querySelector('.chat-modal__backdrop') : null;
 
 			if (closeBtn && chatModal) {
 				closeBtn.addEventListener('click', function () {
@@ -515,6 +608,40 @@ if ($chat_partner) {
 				document.addEventListener('keydown', function (e) {
 					if (e.key === 'Escape' && chatModal.classList.contains('is-open')) {
 						window.history.back();
+					}
+				});
+			}
+
+			// Admin Messages Modal
+			var adminBtn = document.getElementById('adminConvoBtn');
+			var adminModal = document.getElementById('adminModal');
+			var adminClose = document.getElementById('adminModalClose');
+
+			function closeAdminModal() {
+				if (adminModal) adminModal.classList.remove('is-open');
+			}
+
+			if (adminBtn && adminModal) {
+				adminBtn.addEventListener('click', function (e) {
+					e.preventDefault();
+					adminModal.classList.add('is-open');
+					var msgs = adminModal.querySelector('.chat-modal__messages');
+					if (msgs) msgs.scrollTop = msgs.scrollHeight;
+				});
+			}
+
+			if (adminClose) {
+				adminClose.addEventListener('click', closeAdminModal);
+			}
+
+			if (adminModal) {
+				var adminBackdrop = adminModal.querySelector('.chat-modal__backdrop');
+				if (adminBackdrop) {
+					adminBackdrop.addEventListener('click', closeAdminModal);
+				}
+				document.addEventListener('keydown', function (e) {
+					if (e.key === 'Escape' && adminModal.classList.contains('is-open')) {
+						closeAdminModal();
 					}
 				});
 			}
