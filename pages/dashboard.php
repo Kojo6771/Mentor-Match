@@ -345,11 +345,11 @@ if ($user_role === 'admin') {
                             <div class="action-desc">Review pending mentor applications</div>
                         </div>
                     </a>
-                    <a href="manage_users.php" class="action-card white">
-                        <div class="action-icon">👥</div>
+                    <a href="platform_report.php" class="action-card white">
+                        <div class="action-icon">📊</div>
                         <div>
-                            <div class="action-title">Manage Users</div>
-                            <div class="action-desc">View and manage all users</div>
+                            <div class="action-title">Reports</div>
+                            <div class="action-desc">View platform analytics</div>
                         </div>
                     </a>
                     <a href="admin_sessions.php" class="action-card white">
@@ -359,11 +359,11 @@ if ($user_role === 'admin') {
                             <div class="action-desc">Monitor mentoring sessions</div>
                         </div>
                     </a>
-                    <a href="platform_report.php" class="action-card white">
-                        <div class="action-icon">📊</div>
+                    <a href="manage_users.php" class="action-card white">
+                        <div class="action-icon">👥</div>
                         <div>
-                            <div class="action-title">Reports</div>
-                            <div class="action-desc">View platform analytics</div>
+                            <div class="action-title">Manage Users</div>
+                            <div class="action-desc">View and manage all users</div>
                         </div>
                     </a>
                 </div>
