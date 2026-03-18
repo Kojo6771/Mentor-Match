@@ -131,7 +131,40 @@ try {
     $overdueAlerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { $overdueAlerts = []; }
 
-$totalAlerts = count($noSessionAlerts) + count($overdueAlerts);
+/* Alert C: Matches ≥ 3 days with no pending/confirmed session */
+$noPendingAlerts = [];
+try {
+    $stmt = $pdo->query("
+        SELECT msm.id AS match_id, msm.matched_at,
+               msm.mentor_id, msm.student_id,
+               CONCAT(um.first_name, ' ', um.last_name) AS mentor_name,
+               um.id AS mentor_user_id,
+               um.profile_picture AS mentor_picture,
+               CONCAT(us.first_name, ' ', us.last_name) AS student_name
+        FROM mentor_student_matches msm
+        JOIN users um ON um.id = msm.mentor_id
+        JOIN users us ON us.id = msm.student_id
+        WHERE msm.active = 1
+          AND msm.matched_at <= DATE_SUB(NOW(), INTERVAL 3 DAY)
+          AND NOT EXISTS (
+              SELECT 1 FROM sessions ses
+              WHERE ses.mentor_id = msm.mentor_id
+                AND ses.student_id = msm.student_id
+                AND ses.status IN ('pending', 'confirmed', 'completed')
+          )
+        ORDER BY msm.matched_at ASC
+    ");
+    $noPendingAlerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) { $noPendingAlerts = []; }
+
+/* Remove duplicates: exclude matches already covered by the 7-day no-session alert */
+$noSessionMatchIds = array_column($noSessionAlerts, 'match_id');
+$noPendingAlerts = array_filter($noPendingAlerts, function ($a) use ($noSessionMatchIds) {
+    return !in_array($a['match_id'], $noSessionMatchIds);
+});
+$noPendingAlerts = array_values($noPendingAlerts);
+
+$totalAlerts = count($noSessionAlerts) + count($overdueAlerts) + count($noPendingAlerts);
 
 /* ── 5. Mentor lookup for warning modal (all mentors with profile pictures) ── */
 $mentors = [];
@@ -152,6 +185,7 @@ $warningMessages = [
     'Reminder: Regular sessions are key to student progress. Please stay engaged.',
     'A scheduled session appears overdue. Please mark it as completed or reschedule.',
     'Please ensure you are actively communicating with your assigned student(s).',
+    'You currently have no upcoming sessions. Please propose a session with your student soon.',
 ];
 ?>
 <!DOCTYPE html>
@@ -238,6 +272,38 @@ $warningMessages = [
                                     data-mentor-name="<?php echo htmlspecialchars($alert['mentor_name']); ?>"
                                     data-mentor-avatar="<?php echo htmlspecialchars($mentorAvatar); ?>"
                                     data-preselect="0">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+                                Send Warning
+                            </button>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+
+                <?php foreach ($noPendingAlerts as $alert): ?>
+                    <?php
+                        $days = (int)round((time() - strtotime($alert['matched_at'])) / 86400);
+                        $mentorAvatar = !empty($alert['mentor_picture'])
+                            ? '../' . htmlspecialchars($alert['mentor_picture'])
+                            : 'https://ui-avatars.com/api/?name=' . urlencode($alert['mentor_name']) . '&background=3b82f6&color=fff&size=64';
+                    ?>
+                    <div class="sm-alert sm-alert--nopending">
+                        <div class="sm-alert__icon">📭</div>
+                        <div class="sm-alert__body">
+                            <p class="sm-alert__title">No upcoming session proposed</p>
+                            <p class="sm-alert__desc">
+                                <strong><?php echo htmlspecialchars($alert['mentor_name']); ?></strong> &amp;
+                                <strong><?php echo htmlspecialchars($alert['student_name']); ?></strong>
+                                have been matched for <?php echo $days; ?> day<?php echo $days !== 1 ? 's' : ''; ?> with no pending or confirmed session.
+                            </p>
+                            <div class="sm-alert__meta">
+                                <span class="sm-alert__tag">Matched <?php echo date('M j', strtotime($alert['matched_at'])); ?></span>
+                                <span class="sm-alert__tag">No upcoming</span>
+                            </div>
+                            <button type="button" class="sm-alert__btn js-warn-btn"
+                                    data-mentor-id="<?php echo (int)$alert['mentor_user_id']; ?>"
+                                    data-mentor-name="<?php echo htmlspecialchars($alert['mentor_name']); ?>"
+                                    data-mentor-avatar="<?php echo htmlspecialchars($mentorAvatar); ?>"
+                                    data-preselect="5">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
                                 Send Warning
                             </button>
