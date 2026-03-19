@@ -179,16 +179,17 @@ function joinedLabel(string $dt): string {
                     $isSelf = ($uid === $adminId);
 
                     /* Avatar */
+                    $fallbackAvatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($u['first_name'] . ' ' . $u['last_name']) . '&background=3b82f6&color=fff&size=88';
                     if (!empty($u['profile_picture'])) {
-                        $avatarUrl = '../' . htmlspecialchars($u['profile_picture']);
+                        $avatarUrl = '../' . ltrim($u['profile_picture'], '/');
                     } else {
-                        $avatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($u['first_name'] . ' ' . $u['last_name']) . '&background=3b82f6&color=fff&size=88';
+                        $avatarUrl = $fallbackAvatarUrl;
                     }
                 ?>
 
                 <!-- Each user card has data attributes for filtering/searching and action buttons for edit/delete -->
                 <div class="mu-card" data-uid="<?php echo $uid; ?>" data-role="<?php echo $role; ?>" data-name="<?php echo strtolower($name); ?>" data-email="<?php echo strtolower($email); ?>">
-                    <img class="mu-avatar" src="<?php echo $avatarUrl; ?>" alt="" loading="lazy">
+                    <img class="mu-avatar" src="<?php echo htmlspecialchars($avatarUrl); ?>" alt="<?php echo $name; ?>" loading="lazy" data-fallback="<?php echo htmlspecialchars($fallbackAvatarUrl); ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;">
                     <div class="mu-info">
                         <p class="mu-name"><?php echo $name; ?><?php if ($isSelf): ?> <span style="font-size:0.72rem;color:var(--accent);font-weight:700;">(you)</span><?php endif; ?></p>
                         <p class="mu-email"><?php echo $email; ?></p>
