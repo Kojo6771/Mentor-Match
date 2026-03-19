@@ -491,9 +491,5 @@ function updateFilterCounts() {
 }
 </script>
 
-<div class="mu-logout-wrap">
-    <a href="login.php?logout=1" class="mu-logout-btn">Log Out</a>
-</div>
-
 </body>
 </html>

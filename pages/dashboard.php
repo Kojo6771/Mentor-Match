@@ -352,18 +352,18 @@ if ($user_role === 'admin') {
                             <div class="action-desc">View platform analytics</div>
                         </div>
                     </a>
-                    <a href="session_monitor.php" class="action-card white">
-                        <div class="action-icon">📅</div>
-                        <div>
-                            <div class="action-title">Sessions</div>
-                            <div class="action-desc">Monitor mentoring sessions</div>
-                        </div>
-                    </a>
                     <a href="manage_users.php" class="action-card white">
                         <div class="action-icon">👥</div>
                         <div>
                             <div class="action-title">Manage Users</div>
                             <div class="action-desc">View and manage all users</div>
+                        </div>
+                    </a>
+                    <a href="session_monitor.php" class="action-card white">
+                        <div class="action-icon">📅</div>
+                        <div>
+                            <div class="action-title">Sessions</div>
+                            <div class="action-desc">Monitor mentoring sessions</div>
                         </div>
                     </a>
                 </div>
