@@ -229,7 +229,7 @@ if ($user_role === 'admin') {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Dashboard — Mentor Match</title>
+    <title>Dashboard | Mentor Match</title>
     <meta name="description" content="Your dashboard for Mentor Match.">
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
