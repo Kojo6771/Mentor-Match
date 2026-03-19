@@ -180,12 +180,12 @@ try {
 
 /* Pre-selected warning messages */
 $warningMessages = [
-    'Please schedule a session with your matched student as soon as possible.',
-    'Your session has passed and hasn\'t been marked as completed. Please update its status.',
-    'Reminder: Regular sessions are key to student progress. Please stay engaged.',
-    'A scheduled session appears overdue. Please mark it as completed or reschedule.',
-    'Please ensure you are actively communicating with your assigned student(s).',
-    'You currently have no upcoming sessions. Please propose a session with your student soon.',
+    'Please schedule a session with your matched student, {student}, as soon as possible.',
+    'Your session with {student} has passed and hasn\'t been marked as completed. Please update its status.',
+    'Reminder: Regular sessions are key to {student}\'s progress. Please stay engaged.',
+    'A scheduled session with {student} appears overdue. Please mark it as completed or reschedule.',
+    'Please ensure you are actively communicating with {student}.',
+    'You currently have no upcoming sessions with {student}. Please propose a session soon.',
 ];
 ?>
 
@@ -272,6 +272,7 @@ $warningMessages = [
                                     data-mentor-id="<?php echo (int)$alert['mentor_user_id']; ?>"
                                     data-mentor-name="<?php echo htmlspecialchars($alert['mentor_name']); ?>"
                                     data-mentor-avatar="<?php echo htmlspecialchars($mentorAvatar); ?>"
+                                    data-student-name="<?php echo htmlspecialchars($alert['student_name']); ?>"
                                     data-preselect="0">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
                                 Send Warning
@@ -304,6 +305,7 @@ $warningMessages = [
                                     data-mentor-id="<?php echo (int)$alert['mentor_user_id']; ?>"
                                     data-mentor-name="<?php echo htmlspecialchars($alert['mentor_name']); ?>"
                                     data-mentor-avatar="<?php echo htmlspecialchars($mentorAvatar); ?>"
+                                    data-student-name="<?php echo htmlspecialchars($alert['student_name']); ?>"
                                     data-preselect="5">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
                                 Send Warning
@@ -338,6 +340,7 @@ $warningMessages = [
                                     data-mentor-id="<?php echo (int)$alert['mentor_user_id']; ?>"
                                     data-mentor-name="<?php echo htmlspecialchars($alert['mentor_name']); ?>"
                                     data-mentor-avatar="<?php echo htmlspecialchars($mentorAvatar); ?>"
+                                    data-student-name="<?php echo htmlspecialchars($alert['student_name']); ?>"
                                     data-preselect="1">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
                                 Send Warning
@@ -524,17 +527,38 @@ $warningMessages = [
 
     let selectedMentorId = 0;
     let selectedMsgIndex = -1;
+    let currentStudentName = '';
 
-    /* Pre-selected warning messages from PHP */
-    const warningMessages = <?php echo json_encode($warningMessages); ?>;
+    /* Pre-selected warning message templates from PHP */
+    const warningTemplates = <?php echo json_encode($warningMessages); ?>;
+
+    /* Replace {student} placeholder with actual student name */
+    function resolveMsg(template, studentName) {
+        return template.replace(/\{student\}/g, studentName || 'your student');
+    }
+
+    /* Update displayed message text in options */
+    function updateMsgTexts(studentName) {
+        msgOptions.forEach(function (opt) {
+            var idx = parseInt(opt.dataset.index, 10);
+            var textEl = opt.querySelector('.sm-modal__msg-text');
+            if (textEl && warningTemplates[idx] !== undefined) {
+                textEl.textContent = resolveMsg(warningTemplates[idx], studentName);
+            }
+        });
+    }
 
     /* Open modal */
     document.querySelectorAll('.js-warn-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             selectedMentorId = parseInt(btn.dataset.mentorId, 10);
+            currentStudentName = btn.dataset.studentName || '';
             modalName.textContent = btn.dataset.mentorName;
             modalAvatar.src = btn.dataset.mentorAvatar;
             modalAvatar.alt = btn.dataset.mentorName;
+
+            /* Update message options with the student name */
+            updateMsgTexts(currentStudentName);
 
             /* Pre-select relevant message based on alert type */
             var preselect = parseInt(btn.dataset.preselect, 10);
@@ -560,6 +584,7 @@ $warningMessages = [
         modal.classList.remove('is-open');
         selectedMentorId = 0;
         selectedMsgIndex = -1;
+        currentStudentName = '';
         customTA.value = '';
         msgOptions.forEach(function (opt) { opt.classList.remove('selected'); });
         updateSendBtn();
@@ -602,7 +627,7 @@ $warningMessages = [
 
         var message = '';
         if (selectedMsgIndex >= 0) {
-            message = warningMessages[selectedMsgIndex];
+            message = resolveMsg(warningTemplates[selectedMsgIndex], currentStudentName);
         } else {
             message = customTA.value.trim();
         }
