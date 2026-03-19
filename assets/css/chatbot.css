@@ -7,7 +7,7 @@
     height: var(--cb-vh, 100vh);
     max-width: 820px;
     margin: 0 auto;
-    padding-bottom: 72px; /* Leave room for the fixed bottom nav. */
+    padding-bottom: 90px; 
     background: var(--bg);
     overflow: hidden;
 }
