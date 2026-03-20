@@ -185,7 +185,7 @@ function timeAgo(string $datetime): string {
         <div class="report-header">
             <div>
                 <h1>Platform Report</h1>
-                <p>At-a-glance platform health &amp; insights</p>
+                <p>At a glance platform health &amp; insights</p>
             </div>
             <div class="report-header__right">
                 <?php echo date('M j, Y'); ?><br>
