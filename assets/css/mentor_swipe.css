@@ -79,11 +79,26 @@
 
             .page-header,
             .swipe-wrapper {
-                max-width: 760px;
+                max-width: 920px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                padding: 30px 28px 110px;
             }
 
-            .page-header {
-                text-align: left;
+            .page-header,
+            .swipe-wrapper {
+                max-width: 1060px;
+            }
+
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .page-header p {
+                font-size: 0.95rem;
             }
         }
 

@@ -67,7 +67,8 @@ $icons = [
     z-index: 1000;
 }
 .bottom-nav-inner {
-    max-width: 480px;
+    width: min(100%, 1100px);
+    max-width: 1100px;
     margin: 0 auto;
     display: flex;
     justify-content: space-around;
@@ -104,6 +105,12 @@ $icons = [
 }
 body {
     padding-bottom: 80px;
+}
+@media (min-width: 1024px) {
+    .bottom-nav { border-top-width: 4px; }
+    .bottom-nav-inner { height: 82px; }
+    .nav-item svg { width: 30px; height: 30px; }
+    .nav-label { font-size: 0.8rem; }
 }
 </style>
 

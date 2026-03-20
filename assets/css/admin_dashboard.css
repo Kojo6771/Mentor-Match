@@ -780,17 +780,33 @@
 @media (min-width: 1024px) {
     .admin-header-inner,
     .admin-content {
-        max-width: 1100px;
+        max-width: 1150px;
+    }
+
+    .admin-header {
+        padding: 30px 20px;
+    }
+
+    .admin-header h1 {
+        font-size: 2.1rem;
+    }
+
+    .admin-header p {
+        font-size: 1.05rem;
     }
 
     .admin-content {
-        padding: 28px 24px;
+        padding: 30px 28px;
+    }
+
+    .application-card-content {
+        padding: 28px;
     }
 }
 
 @media (min-width: 1280px) {
     .admin-header-inner,
     .admin-content {
-        max-width: 1200px;
+        max-width: 1340px;
     }
 }

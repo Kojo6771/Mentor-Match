@@ -754,15 +754,28 @@
 
 @media (min-width: 1024px) {
     .cal-container {
-        padding: 24px 20px 100px;
+        padding: 30px 28px 110px;
     }
 
     .cal-wrapper {
-        max-width: 980px;
-        gap: 20px;
+        max-width: 1150px;
+        gap: 24px;
+    }
+
+    .cal-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .cal-header p {
+        font-size: 1rem;
     }
 
     .cal-card {
-        padding: 20px;
+        padding: 26px;
+    }
+
+    .btn-new-session {
+        padding: 12px 20px;
+        font-size: 0.95rem;
     }
 }

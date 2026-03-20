@@ -782,16 +782,24 @@
 
 @media (min-width: 1024px) {
     .mu-container {
-        padding: 24px 20px 100px;
+        padding: 30px 28px 110px;
     }
 
     .mu-wrapper,
     .mu-logout-wrap {
-        max-width: 1100px;
+        max-width: 1260px;
+    }
+
+    .mu-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .mu-header p {
+        font-size: 1rem;
     }
 
     .mu-list {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
+        gap: 16px;
     }
 }
