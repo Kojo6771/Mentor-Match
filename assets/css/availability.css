@@ -772,3 +772,34 @@
         gap: 8px;
     }
 }
+
+@media (max-width: 420px) {
+    .avail-header {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .btn-add-slot {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .avail-overview__day-label {
+        font-size: 0.64rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .avail-container {
+        padding: 24px 20px 100px;
+    }
+
+    .avail-wrapper {
+        max-width: 980px;
+        gap: 20px;
+    }
+
+    .avail-card {
+        padding: 20px;
+    }
+}

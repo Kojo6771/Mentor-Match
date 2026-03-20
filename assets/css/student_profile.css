@@ -475,3 +475,28 @@ body.mentor-modal-open {
         max-height: calc(100vh - 110px);
     }
 }
+
+@media (max-width: 420px) {
+    .rating-form {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .rating-submit-btn {
+        width: 100%;
+    }
+}
+
+@media (min-width: 1024px) {
+    .container {
+        padding: 24px 20px 100px;
+    }
+
+    .profile-page {
+        max-width: 900px;
+    }
+
+    .mentor-modal__panel {
+        max-width: 760px;
+    }
+}
