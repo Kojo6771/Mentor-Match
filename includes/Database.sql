@@ -339,6 +339,23 @@ INSERT INTO `users` (`id`, `first_name`, `last_name`, `phone`, `email`, `passwor
 (15, 'Stacey', 'Slater', '07463885316', 'ST@gmail.com', '$2y$10$iV5yq/O/PX5tOIzCnyEzouc7p9KF5oz40tliUppJEtn7JulnHKF9e', 'student', '2026-03-07 00:49:00', 'uploads/profile_pictures/profile_69ab75fcd2b29_1772844540.webp'),
 (16, 'Phil', 'Mitchel', '07463885316', 'Phil123@gmail.com', '$2y$10$OcRXQbRwQ3D7hxXQzPHvnOi48dgNHKWI.DVtOIsrQ43OmLTGKPTs.', 'student', '2026-03-13 09:08:27', 'uploads/profile_pictures/profile_69b3d40bbdafd_1773392907.jpg');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `password_resets`
+--
+
+CREATE TABLE `password_resets` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `email` varchar(150) NOT NULL,
+  `code_hash` varchar(255) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `verified_at` datetime DEFAULT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Indexes for dumped tables
 --
@@ -393,6 +410,14 @@ ALTER TABLE `mentor_student_matches`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_active_match` (`student_id`),
   ADD KEY `fk_match_mentor` (`mentor_id`);
+
+--
+-- Indexes for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `email` (`email`);
 
 --
 -- Indexes for table `mentor_subjects`
@@ -475,6 +500,12 @@ ALTER TABLE `mentor_student_matches`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
@@ -541,6 +572,12 @@ ALTER TABLE `mentor_requests`
 ALTER TABLE `mentor_student_matches`
   ADD CONSTRAINT `fk_match_mentor` FOREIGN KEY (`mentor_id`) REFERENCES `mentor_profiles` (`mentor_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_match_student` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `password_resets`
+--
+ALTER TABLE `password_resets`
+  ADD CONSTRAINT `password_resets_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `mentor_subjects`
