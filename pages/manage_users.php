@@ -2,7 +2,7 @@
 session_start();
 require_once '../includes/db.php';
 
-/* ──admin only accsess── */
+// Restrict this page to admins.
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     header('Location: login.php');
     exit;
@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
 $adminId = (int)$_SESSION['user_id'];
 
 
-/* ── Update Role ── */
+// Process AJAX requests for role changes.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_role') {
     header('Content-Type: application/json');
     $targetId = (int)($_POST['user_id'] ?? 0);
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
     exit;
 }
 
-/* ── Delete User ── */
+// Process AJAX requests to permanently remove a user.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete_user') {
     header('Content-Type: application/json');
     $targetId = (int)($_POST['user_id'] ?? 0);
@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
     }
 
     try {
-        /* Remove related rows first (cascade may not cover everything) */
+        // Clean up related records first in case foreign key cascades do not cover every table.
         $pdo->prepare('DELETE FROM messages WHERE sender_id = ? OR receiver_id = ?')->execute([$targetId, $targetId]);
         $pdo->prepare('DELETE FROM sessions WHERE student_id = ? OR mentor_id = ?')->execute([$targetId, $targetId]);
         $pdo->prepare('DELETE FROM mentor_ratings WHERE student_id = ? OR mentor_id = ?')->execute([$targetId, $targetId]);
@@ -67,9 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
     exit;
 }
 
-/* ========
-   FETCH ALL USERS
-   ======== */
+// Load users for the list and build quick totals for the filter bar.
 $users = [];
 $roleTotals = ['all' => 0, 'student' => 0, 'mentor' => 0, 'admin' => 0];
 try {
@@ -81,7 +79,7 @@ try {
     }
 } catch (PDOException $e) { /* silent */ }
 
-/* ── Build a map of student_id → mentor name for active matches ── */
+// Map each matched student to their current mentor name.
 $studentMentorMap = [];
 try {
     $stmt = $pdo->query("
@@ -95,7 +93,7 @@ try {
     }
 } catch (PDOException $e) {  }
 
-/* ── Build a map of mentor_id → array of student names for active matches ── */
+// Map each mentor to the list of students currently matched to them.
 $mentorStudentsMap = [];
 try {
     $stmt = $pdo->query("
@@ -110,7 +108,7 @@ try {
     }
 } catch (PDOException $e) { /* silent */ }
 
-/*  joined date */
+// Format join dates into short labels for the UI.
 function joinedLabel(string $dt): string {
     $ts = strtotime($dt);
     $diff = time() - $ts;
@@ -134,7 +132,7 @@ function joinedLabel(string $dt): string {
 <div class="mu-container">
     <div class="mu-wrapper">
 
-        <!-- ═══════ Header ═══════ -->
+        <!-- Page header -->
         <div class="mu-header">
             <div>
                 <h1>Manage Users</h1>
@@ -143,7 +141,7 @@ function joinedLabel(string $dt): string {
             <span class="mu-user-count"><strong><?php echo $roleTotals['all']; ?></strong> users</span>
         </div>
 
-        <!-- ═══════ Toolbar ═══════ -->
+        <!-- Search and role filters -->
         <div class="mu-toolbar">
             <div class="mu-search">
                 <span class="mu-search__icon">
@@ -159,7 +157,7 @@ function joinedLabel(string $dt): string {
             </div>
         </div>
 
-        <!-- ═══════ User List ═══════ -->
+        <!-- User cards -->
         <div class="mu-list" id="userList">
             <?php if (empty($users)): ?>
                 <div class="mu-empty">
@@ -178,7 +176,7 @@ function joinedLabel(string $dt): string {
                     $joinedStr = joinedLabel($u['created_at']);
                     $isSelf = ($uid === $adminId);
 
-                    /* Avatar */
+                    // Use the uploaded avatar when available, otherwise fall back to initials.
                     $fallbackAvatarUrl = 'https://ui-avatars.com/api/?name=' . urlencode($u['first_name'] . ' ' . $u['last_name']) . '&background=3b82f6&color=fff&size=88';
                     if (!empty($u['profile_picture'])) {
                         $avatarUrl = '../' . ltrim($u['profile_picture'], '/');
@@ -187,7 +185,7 @@ function joinedLabel(string $dt): string {
                     }
                 ?>
 
-                <!-- Each user card has data attributes for filtering/searching and action buttons for edit/delete -->
+                <!-- Data attributes are used by the search and filter controls. -->
                 <div class="mu-card" data-uid="<?php echo $uid; ?>" data-role="<?php echo $role; ?>" data-name="<?php echo strtolower($name); ?>" data-email="<?php echo strtolower($email); ?>">
                     <img class="mu-avatar" src="<?php echo htmlspecialchars($avatarUrl); ?>" alt="<?php echo $name; ?>" loading="lazy" data-fallback="<?php echo htmlspecialchars($fallbackAvatarUrl); ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;">
                     <div class="mu-info">
@@ -209,7 +207,7 @@ function joinedLabel(string $dt): string {
                         </div>
                         <?php endif; ?>
 
-                        <!-- Mentor → students list -->
+                        <!-- Show the mentor's matched students -->
                         <?php if ($role === 'mentor'): ?>
                         <div class="mu-mentor-match mu-mentor-match--mentor mu-mentor-match--list">
                             <?php if (!empty($mentorStudentsMap[$uid])): ?>
@@ -244,7 +242,7 @@ function joinedLabel(string $dt): string {
             <?php endif; ?>
         </div>
 
-        <!-- ═══════ No-Results (hidden by default) ═══════ -->
+        <!-- Empty state shown when the current search/filter returns nothing -->
         <div class="mu-empty" id="noResults" style="display:none;">
             <div class="mu-empty__icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -256,7 +254,7 @@ function joinedLabel(string $dt): string {
     </div><!-- /.mu-wrapper -->
 </div><!-- /.mu-container -->
 
-<!-- ═══════ Edit Role Modal ═══════ -->
+<!-- Modal for changing a user's role -->
 <div class="mu-overlay" id="editOverlay">
     <div class="mu-modal">
         <div class="mu-modal__header">
@@ -292,7 +290,7 @@ function joinedLabel(string $dt): string {
     </div>
 </div>
 
-<!-- ═══════ Delete Confirmation Modal ═══════ -->
+<!-- Modal for confirming account deletion -->
 <div class="mu-overlay" id="deleteOverlay">
     <div class="mu-modal">
         <div class="mu-modal__header">
@@ -314,18 +312,18 @@ function joinedLabel(string $dt): string {
     </div>
 </div>
 
-<!-- ═══════ Toast ═══════ -->
+<!-- Toast message area -->
 <div class="mu-toast" id="toast"></div>
 
 <?php include '../includes/nav.php'; ?>
 
 <script>
-/* ── State ── */
+// State used by the modals and search/filter controls.
 let editUid = null, editOrigRole = null, editNewRole = null;
 let deleteUid = null;
 const currentFilter = { role: 'all', search: '' };
 
-/* ── Search & Filter ── */
+// Search input and role filter buttons.
 const searchInput = document.getElementById('searchInput');
 const filterBar   = document.getElementById('filterBar');
 const userList    = document.getElementById('userList');
@@ -360,7 +358,7 @@ function applyFilters() {
     noResults.style.display = visible === 0 && cards.length > 0 ? '' : 'none';
 }
 
-/* ── Edit Modal ── */
+// Open the role editor and preload the current role.
 function openEditModal(uid, currentRole, name) {
     editUid = uid;
     editOrigRole = currentRole;
@@ -380,6 +378,7 @@ function selectRole(el) {
     document.getElementById('saveRoleBtn').disabled = (editNewRole === editOrigRole);
 }
 
+// Save the selected role and update the card without reloading the page.
 function saveRole() {
     const btn = document.getElementById('saveRoleBtn');
     btn.disabled = true;
@@ -394,7 +393,7 @@ function saveRole() {
         .then(r => r.json())
         .then(res => {
             if (res.ok) {
-                /* Update card in-place */
+                // Refresh the role badge and filter data on the existing card.
                 const card = userList.querySelector(`.mu-card[data-uid="${editUid}"]`);
                 if (card) {
                     card.dataset.role = editNewRole;
@@ -415,13 +414,14 @@ function saveRole() {
         .finally(() => { btn.disabled = false; btn.textContent = 'Save'; });
 }
 
-/* ── Delete Modal ── */
+// Open the delete confirmation modal.
 function openDeleteModal(uid, name) {
     deleteUid = uid;
     document.getElementById('deleteUserName').textContent = name;
     document.getElementById('deleteOverlay').classList.add('visible');
 }
 
+// Delete the selected user and remove their card from the UI.
 function confirmDelete() {
     const btn = document.getElementById('confirmDeleteBtn');
     btn.disabled = true;
@@ -442,7 +442,7 @@ function confirmDelete() {
                 }
                 closeModals();
                 showToast(res.msg, 'success');
-                /* Update header total */
+                // Keep the total user count in the header in sync.
                 const countEl = document.querySelector('.mu-user-count strong');
                 if (countEl) countEl.textContent = parseInt(countEl.textContent) - 1;
             } else {
@@ -453,24 +453,24 @@ function confirmDelete() {
         .finally(() => { btn.disabled = false; btn.textContent = 'Delete'; });
 }
 
-/* ── Close Modals ── */
+// Close any open modal overlay.
 function closeModals() {
     document.querySelectorAll('.mu-overlay').forEach(o => o.classList.remove('visible'));
 }
 
-/* Close on overlay click */
+// Close the modal when the dimmed backdrop is clicked.
 document.querySelectorAll('.mu-overlay').forEach(overlay => {
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) closeModals();
     });
 });
 
-/* Close on Escape */
+// Let the Escape key dismiss any open modal.
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeModals();
 });
 
-/* ── Toast ── */
+// Show a short-lived status message.
 function showToast(msg, type) {
     const t = document.getElementById('toast');
     t.textContent = msg;
@@ -479,7 +479,7 @@ function showToast(msg, type) {
     t._timer = setTimeout(() => t.classList.remove('visible'), 2800);
 }
 
-/* ── Update filter counts after role change or delete ── */
+// Recalculate counts after a role change or deletion.
 function updateFilterCounts() {
     const cards = userList.querySelectorAll('.mu-card');
     const counts = { all: 0, student: 0, mentor: 0, admin: 0 };
