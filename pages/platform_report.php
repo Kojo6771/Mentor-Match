@@ -2,15 +2,12 @@
 session_start();
 require_once '../includes/db.php';
 
-/* ── admin only ── */
+// Only admins should be able to view platform-wide reports.
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     header('Location: login.php');
     exit;
 }
-
-
-
-/* ── 1. User counts by role ── */
+// Count users by role for the summary cards and distribution chart.
 $roleCounts = ['student' => 0, 'mentor' => 0, 'admin' => 0];
 try {
     $stmt = $pdo->query("SELECT role, COUNT(*) AS cnt FROM users GROUP BY role");
@@ -28,12 +25,12 @@ $studentPct = $totalUsers ? round($studentCount / $totalUsers * 100, 1) : 0;
 $mentorPct  = $totalUsers ? round($mentorCount  / $totalUsers * 100, 1) : 0;
 $adminPct   = $totalUsers ? round(100 - $studentPct - $mentorPct, 1) : 0;
 
-/* Conic-gradient for the donut chart */
+// Build the donut chart segments from the role percentages.
 $seg1End = $studentPct;
 $seg2End = $seg1End + $mentorPct;
 $conicGradient = "conic-gradient(var(--accent) 0% {$seg1End}%, #06b6d4 {$seg1End}% {$seg2End}%, #f59e0b {$seg2End}% 100%)";
 
-/* ── 2. Session counts by status ── */
+// Count sessions by status for the breakdown cards.
 $sessionStatuses = ['pending' => 0, 'confirmed' => 0, 'completed' => 0, 'cancelled' => 0];
 try {
     $stmt = $pdo->query("SELECT status, COUNT(*) AS cnt FROM sessions GROUP BY status");
@@ -43,19 +40,19 @@ try {
 } catch (PDOException $e) { /* silent */ }
 $totalSessions = array_sum($sessionStatuses);
 
-/* ── 3. Total messages ── */
+// Total messages sent across the platform.
 $totalMessages = 0;
 try {
     $totalMessages = (int)$pdo->query("SELECT COUNT(*) FROM messages")->fetchColumn();
 } catch (PDOException $e) { /* silent */ }
 
-/* ── 4. Active matches ── */
+// Total number of active mentor-student matches.
 $activeMatches = 0;
 try {
     $activeMatches = (int)$pdo->query("SELECT COUNT(*) FROM mentor_student_matches WHERE active = 1")->fetchColumn();
 } catch (PDOException $e) { /* silent */ }
 
-/* ── 5. Top performing mentors (by confirmed + completed sessions) ── */
+// Rank mentors by confirmed and completed sessions.
 $topMentors = [];
 try {
     $stmt = $pdo->query("
@@ -71,9 +68,10 @@ try {
     $topMentors = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { /* silent */ }
 
+// Used to scale the bar chart widths.
 $maxMentorSessions = !empty($topMentors) ? (int)$topMentors[0]['session_count'] : 1;
 
-/* ── 6. Popular subjects (by session count) ── */
+// Find the subjects that appear most often in sessions.
 $popularSubjects = [];
 try {
     $stmt = $pdo->query("
@@ -87,20 +85,20 @@ try {
     $popularSubjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { /* silent */ }
 
-/* Subject dot colours (cycle) */
+// Reuse a small color palette for subject markers.
 $subjectColors = ['#3b82f6','#06b6d4','#8b5cf6','#f59e0b','#ef4444','#10b981'];
 
-/* ── 7. Average mentor rating ── */
+// Average mentor rating across all submitted ratings.
 $avgRating = 0;
 try {
     $val = $pdo->query("SELECT AVG(rating) FROM mentor_ratings")->fetchColumn();
     $avgRating = $val ? round((float)$val, 1) : 0;
 } catch (PDOException $e) { /* silent */ }
 
-/* ── 8. Recent activity feed (last 8 events) ── */
+// Build a recent activity feed from new users, sessions, and matches.
 $activities = [];
 try {
-    /* New users */
+    // Recently registered users.
     $stmt = $pdo->query("
         SELECT 'user' AS type, CONCAT(first_name, ' ', last_name) AS who, role, created_at
         FROM users ORDER BY created_at DESC LIMIT 4
@@ -113,7 +111,7 @@ try {
         ];
     }
 
-    /* Recent sessions */
+    // Recently created sessions.
     $stmt = $pdo->query("
         SELECT s.status, s.created_at,
                u1.first_name AS s_fn, u1.last_name AS s_ln,
@@ -134,7 +132,7 @@ try {
         ];
     }
 
-    /* Recent matches */
+    // Recently created mentor-student matches.
     $stmt = $pdo->query("
         SELECT msm.matched_at,
                u1.first_name AS s_fn, u1.last_name AS s_ln,
@@ -156,11 +154,11 @@ try {
     }
 } catch (PDOException $e) { /* silent */ }
 
-/* Sort by newest first, take only 8 */
+// Show the newest items first and keep the list short.
 usort($activities, fn($a, $b) => strtotime($b['time']) - strtotime($a['time']));
 $activities = array_slice($activities, 0, 8);
 
-/* ── Helper: human time-ago ── */
+// Convert timestamps into short labels like "2h ago".
 function timeAgo(string $datetime): string {
     $diff = time() - strtotime($datetime);
     if ($diff < 60)   return 'just now';
@@ -183,7 +181,7 @@ function timeAgo(string $datetime): string {
 <div class="report-container">
     <div class="report-wrapper">
 
-        <!-- ═══════ Header ═══════ -->
+        <!-- Page header -->
         <div class="report-header">
             <div>
                 <h1>Platform Report</h1>
@@ -195,7 +193,7 @@ function timeAgo(string $datetime): string {
             </div>
         </div>
 
-        <!-- ═══════ Quick Stats ═══════ -->
+        <!-- Top-level summary stats -->
         <div class="report-stat-row">
             <div class="report-stat report-stat--accent">
                 <div class="report-stat__value"><?php echo $totalUsers; ?></div>
@@ -211,7 +209,7 @@ function timeAgo(string $datetime): string {
             </div>
         </div>
 
-        <!-- ═══════ Pie Chart – User Distribution ═══════ -->
+        <!-- User distribution chart -->
         <div class="report-card">
             <div class="report-card__title">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
@@ -220,7 +218,7 @@ function timeAgo(string $datetime): string {
 
             <?php if ($totalUsers > 0): ?>
             <div class="pie-wrapper">
-                <!-- Donut -->
+                <!-- Donut chart -->
                 <div class="pie-chart" style="background: <?php echo $conicGradient; ?>;">
                     <div class="pie-chart__center" style="background: var(--card); width: 60%; height: 60%; border-radius: 50%; position: absolute; top: 20%; left: 20%;">
                         <span class="pie-chart__center-value"><?php echo $totalUsers; ?></span>
@@ -258,7 +256,7 @@ function timeAgo(string $datetime): string {
             <?php endif; ?>
         </div>
 
-        <!-- ═══════ Top Performing Mentors ═══════ -->
+        <!-- Top mentors by session volume -->
         <div class="report-card">
             <div class="report-card__title">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
@@ -294,7 +292,7 @@ function timeAgo(string $datetime): string {
             <?php endif; ?>
         </div>
 
-        <!-- ═══════ Session Status Breakdown ═══════ -->
+        <!-- Session status breakdown -->
         <div class="report-card">
             <div class="report-card__title">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -321,7 +319,7 @@ function timeAgo(string $datetime): string {
             </div>
         </div>
 
-        <!-- ═══════ Extra Stats Row ═══════ -->
+        <!-- Secondary summary stats -->
         <div class="report-stat-row">
             <div class="report-stat">
                 <div class="report-stat__value" style="color:#8b5cf6;"><?php echo $activeMatches; ?></div>
@@ -339,7 +337,7 @@ function timeAgo(string $datetime): string {
             </div>
         </div>
 
-        <!-- ═══════ Popular Subjects ═══════ -->
+        <!-- Most active subjects -->
         <?php if (!empty($popularSubjects)): ?>
         <div class="report-card">
             <div class="report-card__title">
@@ -359,7 +357,7 @@ function timeAgo(string $datetime): string {
         </div>
         <?php endif; ?>
 
-        <!-- ═══════ Recent Activity ═══════ -->
+        <!-- Recent activity feed -->
         <?php if (!empty($activities)): ?>
         <div class="report-card">
             <div class="report-card__title">

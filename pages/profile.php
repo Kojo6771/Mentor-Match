@@ -1,30 +1,41 @@
 ﻿<?php
+// Start session and load database connection
 session_start();
 require_once '../includes/db.php';
 
+// Ensure user is logged in; redirect to login if not
 if (!isset($_SESSION['user_id'])) {
 	header('Location: login.php');
 	exit;
 }
 
+// Get the logged-in user's ID and role (student or mentor)
 $user_id = (int)($_SESSION['user_id'] ?? 0);
 $user_role = $_SESSION['role'] ?? 'student';
 
+// Only allow student and mentor roles on this page
 if (!in_array($user_role, ['student', 'mentor'], true)) {
 	header('Location: dashboard.php');
 	exit;
 }
 
+// Arrays to store form validation errors and success messages
 $errors = [];
 $successes = [];
 
+// ==== STUDENT PROFILE HANDLING ====
 if ($user_role === 'student') {
+	// Define valid learning preferences for students
 	$allowed_preferences = ['Videos', 'In person sessions', 'Quizzes'];
 
+	// Handle POST requests for profile updates, photo uploads, and pairing removal
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+		// Determine which action the student is performing
 		$action = $_POST['action'] ?? '';
 
+		// Save profile action: update student details (name, phone, course, etc.)
 		if ($action === 'save_profile') {
+			// Collect form data from the profile form
 			$first_name = trim($_POST['first_name'] ?? '');
 			$last_name = trim($_POST['last_name'] ?? '');
 			$phone = trim($_POST['phone'] ?? '');
@@ -33,6 +44,7 @@ if ($user_role === 'student') {
 			$learning_preference = $_POST['learning_preference'] ?? '';
 			$bio = trim($_POST['bio'] ?? '');
 
+			// Validate all required fields
 			if ($first_name === '') {
 				$errors[] = 'First name is required.';
 			}
@@ -45,29 +57,37 @@ if ($user_role === 'student') {
 				$errors[] = 'Please choose your course.';
 			}
 
+			// Year of study must be a valid number between 1 and 10
 			if ($year_of_study === '' || !ctype_digit($year_of_study) || (int)$year_of_study < 1 || (int)$year_of_study > 10) {
 				$errors[] = 'Year of study must be between 1 and 10.';
 			}
 
+			// Learning preference must be one of the predefined options
 			if (!in_array($learning_preference, $allowed_preferences, true)) {
 				$errors[] = 'Please select a valid learning preference.';
 			}
 
+			// Bio has a 1000 character limit for brevity
 			if (strlen($bio) > 1000) {
 				$errors[] = 'Bio must be 1000 characters or fewer.';
 			}
 
+			// If no validation errors, save the profile to database
 			if (empty($errors)) {
 				try {
+					// Start transaction to ensure atomicity of updates
 					$pdo->beginTransaction();
 
+					// Update user table with basic info (name, phone)
 					$userStmt = $pdo->prepare('UPDATE users SET first_name = ?, last_name = ?, phone = ? WHERE id = ?');
 					$userStmt->execute([$first_name, $last_name, $phone !== '' ? $phone : null, $user_id]);
 
+					// Check if student profile already exists
 					$studentCheckStmt = $pdo->prepare('SELECT student_id FROM students WHERE user_id = ? LIMIT 1');
 					$studentCheckStmt->execute([$user_id]);
 					$student_id = $studentCheckStmt->fetchColumn();
 
+					// Update existing student profile, or create new one if not exists
 					if ($student_id) {
 						$studentStmt = $pdo->prepare('UPDATE students SET course = ?, year_of_study = ?, learning_preference = ?, bio = ? WHERE student_id = ?');
 						$studentStmt->execute([$course, (int)$year_of_study, $learning_preference, $bio !== '' ? $bio : null, $student_id]);
@@ -76,13 +96,16 @@ if ($user_role === 'student') {
 						$studentStmt->execute([$user_id, $course, (int)$year_of_study, $learning_preference, $bio !== '' ? $bio : null, $user_id]);
 					}
 
+					// Commit all changes to database
 					$pdo->commit();
 
+					// Update session with new name and phone
 					$_SESSION['first_name'] = $first_name;
 					$_SESSION['last_name'] = $last_name;
 					$_SESSION['phone'] = $phone;
 					$successes[] = 'Profile updated successfully.';
 				} catch (PDOException $e) {
+					// Rollback transaction if any error occurs
 					if ($pdo->inTransaction()) {
 						$pdo->rollBack();
 					}
@@ -152,8 +175,10 @@ if ($user_role === 'student') {
 			}
 		}
 
+		// Remove pairing action: allow student to disconnect from their assigned mentor
 		if ($action === 'remove_pairing') {
 			try {
+				// Get the student's current mentor assignment
 				$studentStmt = $pdo->prepare('SELECT student_id, mentor_id FROM students WHERE user_id = ? LIMIT 1');
 				$studentStmt->execute([$user_id]);
 				$studentRow = $studentStmt->fetch(PDO::FETCH_ASSOC);
@@ -163,39 +188,49 @@ if ($user_role === 'student') {
 				} elseif (empty($studentRow['mentor_id'])) {
 					$successes[] = 'No mentor pairing to remove.';
 				} else {
+					// Extract mentor and student IDs
 					$mentor_id = (int)$studentRow['mentor_id'];
 					$student_id = (int)$studentRow['student_id'];
 
+					// Start transaction for atomicity
 					$pdo->beginTransaction();
 
+					// Clear the mentor assignment in the students table
 					$clearPairStmt = $pdo->prepare('UPDATE students SET mentor_id = NULL WHERE student_id = ?');
 					$clearPairStmt->execute([$student_id]);
 
+					// Deactivate the match record to preserve history
 					$matchStmt = $pdo->prepare('UPDATE mentor_student_matches SET active = 0 WHERE student_id = ? AND mentor_id = ? AND active = 1');
 					$matchStmt->execute([$student_id, $mentor_id]);
 
+					// Commit the transaction
 					$pdo->commit();
 					$successes[] = 'Mentor pairing removed successfully.';
 				}
 			} catch (PDOException $e) {
+				// Rollback if anything fails
 				if ($pdo->inTransaction()) {
 					$pdo->rollBack();
 				}
 				$errors[] = 'Failed to remove pairing. Please try again.';
 			}
 		}
+		// Rate mentor action: allow student to submit or update their mentor rating
 		if ($action === 'rate_mentor') {
+			// Validate rating is between 1 and 5
 			$rating_val = (int)($_POST['rating'] ?? 0);
 			if ($rating_val < 1 || $rating_val > 5) {
 				$errors[] = 'Please select a rating between 1 and 5.';
 			} else {
 				try {
+					// Check if student is paired with a mentor
 					$checkStmt = $pdo->prepare('SELECT student_id, mentor_id FROM students WHERE user_id = ? LIMIT 1');
 					$checkStmt->execute([$user_id]);
 					$checkRow = $checkStmt->fetch(PDO::FETCH_ASSOC);
 					if (!$checkRow || empty($checkRow['mentor_id'])) {
 						$errors[] = 'You must be paired with a mentor to rate them.';
 					} else {
+						// Insert new rating or update existing one
 						$rateStmt = $pdo->prepare('
 							INSERT INTO mentor_ratings (student_id, mentor_id, rating)
 							VALUES (?, ?, ?)
@@ -210,11 +245,13 @@ if ($user_role === 'student') {
 			}
 		}	}
 
+	// Initialize variables for student data retrieval
 	$user = null;
 	$studentProfile = null;
 	$subjects = [];
 	$pairedMentor = null;
 
+	// Fetch user record from database
 	try {
 		$userStmt = $pdo->prepare('SELECT id, first_name, last_name, email, phone, profile_picture FROM users WHERE id = ? LIMIT 1');
 		$userStmt->execute([$user_id]);
@@ -223,6 +260,7 @@ if ($user_role === 'student') {
 		$user = null;
 	}
 
+	// Fetch list of all available subjects for course dropdown
 	try {
 		$subjectsStmt = $pdo->query('SELECT name FROM subjects ORDER BY name');
 		$subjects = $subjectsStmt->fetchAll(PDO::FETCH_COLUMN);
@@ -230,6 +268,7 @@ if ($user_role === 'student') {
 		$subjects = [];
 	}
 
+	// Fetch student profile details
 	try {
 		$studentStmt = $pdo->prepare('SELECT student_id, course, year_of_study, learning_preference, bio, mentor_id FROM students WHERE user_id = ? LIMIT 1');
 		$studentStmt->execute([$user_id]);
@@ -238,8 +277,10 @@ if ($user_role === 'student') {
 		$studentProfile = null;
 	}
 
+	// If student is paired with a mentor, fetch the mentor's full profile
 	if ($studentProfile && !empty($studentProfile['mentor_id'])) {
 		try {
+			// Fetch mentor details with their taught subjects
 			$mentorStmt = $pdo->prepare('
 				SELECT
 					mp.mentor_id,
@@ -264,15 +305,19 @@ if ($user_role === 'student') {
 		}
 	}
 
+	// Fetch the student's own rating and the mentor's average rating
 	$myRating = 0;
 	$mentorAvgRating = null;
 	if ($pairedMentor) {
 		try {
+			// Get the student's current rating for their mentor
 			$sid = (int)($studentProfile['student_id'] ?? 0);
 			$mid = (int)($pairedMentor['mentor_id'] ?? 0);
 			$myRatingStmt = $pdo->prepare('SELECT rating FROM mentor_ratings WHERE student_id = ? AND mentor_id = ? LIMIT 1');
 			$myRatingStmt->execute([$sid, $mid]);
 			$myRating = (int)($myRatingStmt->fetchColumn() ?: 0);
+
+			// Get the mentor's average rating from all students
 			$avgStmt = $pdo->prepare('SELECT ROUND(AVG(rating), 1) FROM mentor_ratings WHERE mentor_id = ?');
 			$avgStmt->execute([$mid]);
 			$mentorAvgRating = $avgStmt->fetchColumn();
@@ -282,6 +327,7 @@ if ($user_role === 'student') {
 		}
 	}
 
+	// Extract student profile fields for use in the form
 	$first_name = $user['first_name'] ?? '';
 	$last_name = $user['last_name'] ?? '';
 	$email = $user['email'] ?? '';
@@ -291,11 +337,13 @@ if ($user_role === 'student') {
 	$learning_preference = $studentProfile['learning_preference'] ?? '';
 	$bio = $studentProfile['bio'] ?? '';
 
+	// If student's course is not in the subjects list, add it (for custom courses)
 	if ($course !== '' && !in_array($course, $subjects, true)) {
 		$subjects[] = $course;
 		sort($subjects);
 	}
 
+	// Generate default avatar using initials if no profile picture is set
 	$fallback_name = trim($first_name . ' ' . $last_name);
 	if ($fallback_name === '') {
 		$fallback_name = 'Student';
@@ -303,18 +351,25 @@ if ($user_role === 'student') {
 	$fallback_avatar = 'https://ui-avatars.com/api/?name=' . urlencode($fallback_name) . '&background=3b82f6&color=fff&size=192';
 	$avatar_url = !empty($user['profile_picture']) ? '../' . $user['profile_picture'] : $fallback_avatar;
 
+	// Generate default avatar for paired mentor
 	$mentor_fallback_name = $pairedMentor ? trim(($pairedMentor['first_name'] ?? '') . ' ' . ($pairedMentor['last_name'] ?? '')) : 'Mentor';
 	$mentor_fallback_avatar = 'https://ui-avatars.com/api/?name=' . urlencode($mentor_fallback_name) . '&background=06b6d4&color=fff&size=192';
 	$mentor_avatar_url = ($pairedMentor && !empty($pairedMentor['profile_picture']))
 		? '../' . $pairedMentor['profile_picture']
 		: $mentor_fallback_avatar;
 }
+// End of student profile handling
 
+// ==== MENTOR PROFILE HANDLING ====
 if ($user_role === 'mentor') {
+	// Handle POST requests for mentor profile updates, photo uploads, and student pairing removal
 	if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+		// Determine which action the mentor is performing
 		$action = $_POST['action'] ?? '';
 
+		// Save profile action: update mentor details (name, phone, bio, experience, social links)
 		if ($action === 'save_profile') {
+			// Collect all form data for mentor profile
 			$first_name = trim($_POST['first_name'] ?? '');
 			$last_name = trim($_POST['last_name'] ?? '');
 			$phone = trim($_POST['phone'] ?? '');
@@ -323,6 +378,7 @@ if ($user_role === 'mentor') {
 			$linkedin = trim($_POST['linkedin'] ?? '');
 			$github = trim($_POST['github'] ?? '');
 
+			// Validate all required fields
 			if ($first_name === '') {
 				$errors[] = 'First name is required.';
 			}
@@ -331,33 +387,42 @@ if ($user_role === 'mentor') {
 				$errors[] = 'Last name is required.';
 			}
 
+			// Years of experience must be a valid number between 0 and 70
 			if ($experience_years === '' || !ctype_digit($experience_years) || (int)$experience_years < 0 || (int)$experience_years > 70) {
 				$errors[] = 'Years of experience must be between 0 and 70.';
 			}
 
+			// Bio has a 1000 character limit for brevity
 			if (strlen($bio) > 1000) {
 				$errors[] = 'Bio must be 1000 characters or fewer.';
 			}
 
+			// If LinkedIn URL provided, it must be valid
 			if ($linkedin !== '' && !filter_var($linkedin, FILTER_VALIDATE_URL)) {
 				$errors[] = 'Please enter a valid LinkedIn URL.';
 			}
 
+			// If GitHub URL provided, it must be valid
 			if ($github !== '' && !filter_var($github, FILTER_VALIDATE_URL)) {
 				$errors[] = 'Please enter a valid GitHub URL.';
 			}
 
+			// If no validation errors, save the mentor profile to database
 			if (empty($errors)) {
 				try {
+					// Start transaction to ensure atomicity of updates
 					$pdo->beginTransaction();
 
+					// Update user table with basic info (name, phone)
 					$userStmt = $pdo->prepare('UPDATE users SET first_name = ?, last_name = ?, phone = ? WHERE id = ?');
 					$userStmt->execute([$first_name, $last_name, $phone !== '' ? $phone : null, $user_id]);
 
+					// Check if mentor profile already exists
 					$mentorCheckStmt = $pdo->prepare('SELECT mentor_id FROM mentor_profiles WHERE user_id = ? LIMIT 1');
 					$mentorCheckStmt->execute([$user_id]);
 					$mentor_id = $mentorCheckStmt->fetchColumn();
 
+					// Update existing mentor profile, or create new one if not exists
 					if ($mentor_id) {
 						$mentorStmt = $pdo->prepare('UPDATE mentor_profiles SET bio = ?, linkedin = ?, github = ?, experience_years = ? WHERE mentor_id = ?');
 						$mentorStmt->execute([
@@ -379,13 +444,16 @@ if ($user_role === 'mentor') {
 						]);
 					}
 
+					// Commit all changes to database
 					$pdo->commit();
 
+					// Update session with new name and phone
 					$_SESSION['first_name'] = $first_name;
 					$_SESSION['last_name'] = $last_name;
 					$_SESSION['phone'] = $phone;
 					$successes[] = 'Profile updated successfully.';
 				} catch (PDOException $e) {
+					// Rollback transaction if any error occurs
 					if ($pdo->inTransaction()) {
 						$pdo->rollBack();
 					}
@@ -455,17 +523,21 @@ if ($user_role === 'mentor') {
 			}
 		}
 
+		// Remove pairing action: allow mentor to disconnect from a student
 		if ($action === 'remove_pairing') {
+			// Get the student ID from the form
 			$student_id = (int)($_POST['student_id'] ?? 0);
 
 			if ($student_id <= 0) {
 				$errors[] = 'Invalid student selection.';
 			} else {
 				try {
+					// Get the current mentor's ID
 					$mentorIdStmt = $pdo->prepare('SELECT mentor_id FROM mentor_profiles WHERE user_id = ? LIMIT 1');
 					$mentorIdStmt->execute([$user_id]);
 					$current_mentor_id = (int)($mentorIdStmt->fetchColumn() ?: $user_id);
 
+					// Verify that the student belongs to this mentor (security check)
 					$ownershipStmt = $pdo->prepare('SELECT student_id FROM students WHERE student_id = ? AND mentor_id = ? LIMIT 1');
 					$ownershipStmt->execute([$student_id, $current_mentor_id]);
 					$belongs_to_mentor = $ownershipStmt->fetchColumn();
@@ -473,18 +545,23 @@ if ($user_role === 'mentor') {
 					if (!$belongs_to_mentor) {
 						$errors[] = 'You can only remove your own student pairings.';
 					} else {
+						// Start transaction for atomicity
 						$pdo->beginTransaction();
 
+						// Clear the mentor assignment in the students table
 						$clearStudentStmt = $pdo->prepare('UPDATE students SET mentor_id = NULL WHERE student_id = ? AND mentor_id = ?');
 						$clearStudentStmt->execute([$student_id, $current_mentor_id]);
 
+						// Deactivate the match record to preserve history
 						$deactivateMatchStmt = $pdo->prepare('UPDATE mentor_student_matches SET active = 0 WHERE student_id = ? AND mentor_id = ? AND active = 1');
 						$deactivateMatchStmt->execute([$student_id, $current_mentor_id]);
 
+						// Commit the transaction
 						$pdo->commit();
 						$successes[] = 'Student pairing removed successfully.';
 					}
 				} catch (PDOException $e) {
+					// Rollback if anything fails
 					if ($pdo->inTransaction()) {
 						$pdo->rollBack();
 					}
@@ -494,10 +571,12 @@ if ($user_role === 'mentor') {
 		}
 	}
 
+	// Initialize variables for mentor data retrieval
 	$user = null;
 	$mentorProfile = null;
 	$students = [];
 
+	// Fetch user record from database
 	try {
 		$userStmt = $pdo->prepare('SELECT id, first_name, last_name, email, phone, profile_picture FROM users WHERE id = ? LIMIT 1');
 		$userStmt->execute([$user_id]);
@@ -506,6 +585,7 @@ if ($user_role === 'mentor') {
 		$user = null;
 	}
 
+	// Fetch mentor profile details
 	try {
 		$mentorStmt = $pdo->prepare('SELECT mentor_id, bio, linkedin, github, experience_years, verified FROM mentor_profiles WHERE user_id = ? LIMIT 1');
 		$mentorStmt->execute([$user_id]);
@@ -514,8 +594,10 @@ if ($user_role === 'mentor') {
 		$mentorProfile = null;
 	}
 
+	// Get the mentor's ID from profile, or use user_id if profile doesn't exist yet
 	$mentor_id = $mentorProfile['mentor_id'] ?? $user_id;
 
+	// Fetch all students assigned to this mentor
 	try {
 		$studentsStmt = $pdo->prepare('
 			SELECT
@@ -542,6 +624,7 @@ if ($user_role === 'mentor') {
 		$students = [];
 	}
 
+	// Extract mentor profile fields for use in the form
 	$first_name = $user['first_name'] ?? '';
 	$last_name = $user['last_name'] ?? '';
 	$email = $user['email'] ?? '';
@@ -551,6 +634,7 @@ if ($user_role === 'mentor') {
 	$github = $mentorProfile['github'] ?? '';
 	$experience_years = $mentorProfile['experience_years'] ?? '';
 
+	// Generate default avatar using initials if no profile picture is set
 	$fallback_name = trim($first_name . ' ' . $last_name);
 	if ($fallback_name === '') {
 		$fallback_name = 'Mentor';
@@ -558,7 +642,8 @@ if ($user_role === 'mentor') {
 
 	$fallback_avatar = 'https://ui-avatars.com/api/?name=' . urlencode($fallback_name) . '&background=06b6d4&color=fff&size=192';
 	$avatar_url = !empty($user['profile_picture']) ? '../' . $user['profile_picture'] : $fallback_avatar;
- }
+}
+// End of mentor profile handling
  ?>
 
 <!DOCTYPE html>
@@ -884,13 +969,17 @@ if ($user_role === 'mentor') {
 	<?php include '../includes/nav.php'; ?>
 
 	<script>
+		// Initialize page interactivity for mentor/student modals and carousels
 		(function () {
+			// STUDENT MODAL FUNCTIONALITY: Handle mentor profile viewing modal
 			<?php if ($user_role === 'student'): ?>
+			// Get references to modal element and trigger buttons
 			const mentorModal = document.getElementById('mentor-modal');
 			const openMentorBtn = document.getElementById('open-mentor-modal');
 			const closeMentorBtn = document.getElementById('close-mentor-modal');
 			const closeMentorBackdrop = mentorModal ? mentorModal.querySelector('[data-close-mentor]') : null;
 
+			// Open the mentor modal and update accessibility attributes
 			function openMentorModal() {
 				if (!mentorModal) {
 					return;
@@ -900,6 +989,7 @@ if ($user_role === 'mentor') {
 				document.body.classList.add('mentor-modal-open');
 			}
 
+			// Close the mentor modal and restore accessibility attributes
 			function closeMentorModal() {
 				if (!mentorModal) {
 					return;
@@ -909,25 +999,30 @@ if ($user_role === 'mentor') {
 				document.body.classList.remove('mentor-modal-open');
 			}
 
+			// Bind open button to open the modal
 			if (openMentorBtn) {
 				openMentorBtn.addEventListener('click', openMentorModal);
 			}
 
+			// Bind close button to close the modal
 			if (closeMentorBtn) {
 				closeMentorBtn.addEventListener('click', closeMentorModal);
 			}
 
+			// Allow closing by clicking on the backdrop
 			if (closeMentorBackdrop) {
 				closeMentorBackdrop.addEventListener('click', closeMentorModal);
 			}
 			<?php endif; ?>
 
 			<?php if ($user_role === 'mentor'): ?>
+			// Get references to students modal and buttons
 			const studentsModal = document.getElementById('students-modal');
 			const openStudentsBtn = document.getElementById('open-students-modal');
 			const closeStudentsBtn = document.getElementById('close-students-modal');
 			const closeStudentsBackdrop = studentsModal ? studentsModal.querySelector('[data-close-students]') : null;
 
+			// Open the students modal and update accessibility attributes
 			function openStudentsModal() {
 				if (!studentsModal) {
 					return;
@@ -937,6 +1032,7 @@ if ($user_role === 'mentor') {
 				document.body.classList.add('students-modal-open');
 			}
 
+			// Close the students modal and restore accessibility attributes
 			function closeStudentsModal() {
 				if (!studentsModal) {
 					return;
@@ -946,18 +1042,22 @@ if ($user_role === 'mentor') {
 				document.body.classList.remove('students-modal-open');
 			}
 
+			// Bind open button to open the modal
 			if (openStudentsBtn) {
 				openStudentsBtn.addEventListener('click', openStudentsModal);
 			}
 
+			// Bind close button to close the modal
 			if (closeStudentsBtn) {
 				closeStudentsBtn.addEventListener('click', closeStudentsModal);
 			}
 
+			// Allow closing by clicking on the backdrop
 			if (closeStudentsBackdrop) {
 				closeStudentsBackdrop.addEventListener('click', closeStudentsModal);
 			}
 
+			// Get all student cards and navigation elements
 			const cards = Array.from(document.querySelectorAll('.student-card'));
 			const total = cards.length;
 			const prevBtn = document.getElementById('student-prev');
@@ -965,34 +1065,42 @@ if ($user_role === 'mentor') {
 			const positionEl = document.getElementById('student-position');
 			let currentIndex = 0;
 
+			// Display the student card at the given index and update position counter
 			function renderCard(index) {
 				cards.forEach((card, cardIndex) => {
 					card.classList.toggle('is-active', cardIndex === index);
 					card.classList.toggle('is-hidden', cardIndex !== index);
 				});
 
+				// Update the position indicator (e.g., "1 / 5")
 				if (positionEl) {
 					positionEl.textContent = String(index + 1);
 				}
 			}
 
+			// Set up carousel navigation if there are multiple students
 			if (total > 0 && prevBtn && nextBtn) {
+				// Previous button cycles backward through students
 				prevBtn.addEventListener('click', function () {
 					currentIndex = (currentIndex - 1 + total) % total;
 					renderCard(currentIndex);
 				});
 
+				// Next button cycles forward through students
 				nextBtn.addEventListener('click', function () {
 					currentIndex = (currentIndex + 1) % total;
 					renderCard(currentIndex);
 				});
 
+				// Render the first student on load
 				renderCard(currentIndex);
 			}
 			<?php endif; ?>
 
+			// Global keyboard handler: allow Escape key to close any open modal
 			document.addEventListener('keydown', function (event) {
 				if (event.key === 'Escape') {
+					// Close the student's mentor modal if open
 					const mentorModal = document.getElementById('mentor-modal');
 					if (mentorModal && mentorModal.classList.contains('is-open')) {
 						mentorModal.classList.remove('is-open');
@@ -1000,6 +1108,7 @@ if ($user_role === 'mentor') {
 						document.body.classList.remove('mentor-modal-open');
 					}
 
+					// Close the mentor's students modal if open
 					const studentsModal = document.getElementById('students-modal');
 					if (studentsModal && studentsModal.classList.contains('is-open')) {
 						studentsModal.classList.remove('is-open');

@@ -2,6 +2,7 @@
 session_start();
 require_once '../includes/db.php';
 
+// Only students and mentors can access the calendar page.
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
@@ -15,6 +16,7 @@ if (!in_array($user_role, ['student', 'mentor'], true)) {
     exit;
 }
 
+// Helper functions for session time checks.
 function get_session_end_datetime(array $session): ?DateTimeImmutable
 {
     $sessionDate = trim((string)($session['session_date'] ?? ''));
@@ -31,6 +33,7 @@ function get_session_end_datetime(array $session): ?DateTimeImmutable
     }
 }
 
+// Check if a session has ended based on its date and end time.
 function session_has_ended(array $session): bool
 {
     $sessionEnd = get_session_end_datetime($session);
@@ -41,7 +44,7 @@ function session_has_ended(array $session): bool
     return $sessionEnd <= new DateTimeImmutable();
 }
 
-// ─── AJAX: Return mentor availability for a given date ────────────
+// AJAX endpoint: return mentor availability for a specific date.
 if (isset($_GET['get_availability']) && isset($_GET['date'])) {
     header('Content-Type: application/json');
     $req_date   = trim($_GET['date']);
@@ -55,7 +58,7 @@ if (isset($_GET['get_availability']) && isset($_GET['date'])) {
     $dow = (int)date('w', strtotime($req_date));
     $slots = [];
 
-    // Recurring weekly slots for that day-of-week
+    // Weekly recurring slots for that weekday.
     $stmt = $pdo->prepare('
         SELECT start_time, end_time FROM availability
         WHERE mentor_id = ? AND is_recurring = 1 AND day_of_week = ?
@@ -71,7 +74,7 @@ if (isset($_GET['get_availability']) && isset($_GET['date'])) {
         ];
     }
 
-    // Specific date slots
+    // One-off slots created for this exact date.
     $stmt = $pdo->prepare('
         SELECT start_time, end_time FROM availability
         WHERE mentor_id = ? AND is_recurring = 0 AND available_date = ?
@@ -94,14 +97,14 @@ if (isset($_GET['get_availability']) && isset($_GET['date'])) {
 $errors   = [];
 $successes = [];
 
-// ─── Resolve the paired partner ───────────────────────────────────
+// Work out who the current user is paired with.
 $partner       = null;   // assoc: user_id, first_name, last_name, profile_picture, subjects
 $mentor_db_id  = null;   // mentor_profiles.mentor_id  (FK used in sessions)
 $student_db_id = null;   // students.student_id        (FK used in sessions)
 $subjects      = [];     // mentor's subjects for the booking form
 
 if ($user_role === 'student') {
-    // Get student row + paired mentor
+    // Load the student record and the assigned mentor.
     $stmt = $pdo->prepare('SELECT student_id, mentor_id FROM students WHERE user_id = ? LIMIT 1');
     $stmt->execute([$user_id]);
     $studentRow = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -124,7 +127,7 @@ if ($user_role === 'student') {
             $stmt->execute([$mentor_db_id]);
             $partner = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            // Fetch subject list for the booking form
+            // Subjects available for the booking form.
             $stmt = $pdo->prepare('
                 SELECT s.id, s.name
                 FROM mentor_subjects ms
@@ -137,12 +140,12 @@ if ($user_role === 'student') {
         }
     }
 } else {
-    // Mentor: get mentor_profiles row — partner list comes from sessions
+    // Mentors need their mentor profile id; student partners are loaded separately below.
     $stmt = $pdo->prepare('SELECT mentor_id FROM mentor_profiles WHERE user_id = ? LIMIT 1');
     $stmt->execute([$user_id]);
     $mentor_db_id = (int)($stmt->fetchColumn() ?: 0);
 
-    // Mentor's own subjects
+    // Load the mentor's subjects for the session form.
     if ($mentor_db_id > 0) {
         $stmt = $pdo->prepare('
             SELECT s.id, s.name
@@ -156,11 +159,11 @@ if ($user_role === 'student') {
     }
 }
 
-// ─── Handle POST Actions ──────────────────────────────────────────
+// Handle form submissions for booking and updating sessions.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
-    // ── Book / Propose a new session ──
+    // Create a new proposed session.
     if ($action === 'book_session') {
         $subject_id  = (int)($_POST['subject_id'] ?? 0);
         $title       = trim($_POST['title'] ?? '');
@@ -185,7 +188,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errors[] = 'End time must be after start time.';
         }
         if (!$mentor_db_id || !$student_db_id) {
-            // Mentor creating for a specific student
+            // Mentors choose which paired student this session is for.
             if ($user_role === 'mentor') {
                 $target_student = (int)($_POST['student_id'] ?? 0);
                 if ($target_student > 0) {
@@ -198,12 +201,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // Validate against mentor availability
+        // Check that the chosen time fits within the mentor's availability.
         if (empty($errors) && $mentor_db_id && $date && $start && $end) {
             $dow = (int)date('w', strtotime($date));
             $within_avail = false;
 
-            // Check recurring weekly slots
+            // First look at recurring weekly availability.
             $stmt = $pdo->prepare('
                 SELECT COUNT(*) FROM availability
                 WHERE mentor_id = ? AND is_recurring = 1 AND day_of_week = ?
@@ -212,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$mentor_db_id, $dow, $start, $end]);
             if ($stmt->fetchColumn() > 0) $within_avail = true;
 
-            // Check specific date slots
+            // Then check one-off date slots.
             if (!$within_avail) {
                 $stmt = $pdo->prepare('
                     SELECT COUNT(*) FROM availability
@@ -223,7 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($stmt->fetchColumn() > 0) $within_avail = true;
             }
 
-            // Check if mentor has ANY availability set
+            // If availability exists but this time does not fit, show a helpful error.
             if (!$within_avail) {
                 $stmt = $pdo->prepare('SELECT COUNT(*) FROM availability WHERE mentor_id = ?');
                 $stmt->execute([$mentor_db_id]);
@@ -259,7 +262,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // ── Accept / Decline / Cancel ──
+    // Update an existing session status.
     if ($action === 'update_session') {
         $session_id = (int)($_POST['session_id'] ?? 0);
         $new_status = $_POST['new_status'] ?? '';
@@ -269,7 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($session_id <= 0) {
             $errors[] = 'Invalid session.';
         } else {
-            // Verify ownership
+            // Make sure this user is allowed to act on the session.
             $stmt = $pdo->prepare('SELECT * FROM sessions WHERE id = ? LIMIT 1');
             $stmt->execute([$session_id]);
             $sess = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -304,13 +307,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $successes[] = 'Session cancelled.';
                 }
             } else {
-                // Keep the POST handler structure predictable for the page renderer.
+                // Leave errors in place for the page to render normally.
             }
         }
     }
 }
 
-// ─── Calendar Navigation ──────────────────────────────────────────
+// Work out which month the calendar should show.
 $cal_month = (int)($_GET['month'] ?? date('n'));
 $cal_year  = (int)($_GET['year'] ?? date('Y'));
 $selected_day = ($_GET['day'] ?? null);
@@ -333,7 +336,7 @@ if ($next_month > 12) { $next_month = 1; $next_year++; }
 
 $today_str = date('Y-m-d');
 
-// ─── Fetch All Sessions this Month ────────────────────────────────
+// Load all sessions for the current month.
 $month_start = sprintf('%04d-%02d-01', $cal_year, $cal_month);
 $month_end   = sprintf('%04d-%02d-%02d', $cal_year, $cal_month, $days_in_month);
 
@@ -372,20 +375,20 @@ try {
     $sessions = [];
 }
 
-// Index sessions by date
+// Group sessions by date for the calendar grid.
 $sessions_by_date = [];
 foreach ($sessions as $s) {
     $sessions_by_date[$s['session_date']][] = $s;
 }
 
-// ── Selected date sessions ──
+// Sessions for the currently selected date.
 $selected_date_sessions = [];
 if ($selected_day !== null) {
     $sel_date_str = sprintf('%04d-%02d-%02d', $cal_year, $cal_month, (int)$selected_day);
     $selected_date_sessions = $sessions_by_date[$sel_date_str] ?? [];
 }
 
-// ── Upcoming confirmed (exclude the selected date to avoid duplicates) ──
+// Upcoming confirmed sessions, excluding the selected day to avoid duplicates.
 $sel_date_for_filter = $selected_day !== null ? sprintf('%04d-%02d-%02d', $cal_year, $cal_month, (int)$selected_day) : null;
 $upcoming = array_filter($sessions, function ($s) use ($today_str, $sel_date_for_filter) {
     return $s['session_date'] >= $today_str
@@ -395,12 +398,12 @@ $upcoming = array_filter($sessions, function ($s) use ($today_str, $sel_date_for
 usort($upcoming, fn($a, $b) => strcmp($a['session_date'] . $a['start_time'], $b['session_date'] . $b['start_time']));
 $upcoming = array_slice($upcoming, 0, 5);
 
-// ── Pending proposals (where I'm NOT the proposer) ──
+// Pending proposals waiting on the current user.
 $pending = array_filter($sessions, function ($s) use ($user_id) {
     return $s['status'] === 'pending' && (int)($s['proposed_by'] ?? 0) !== $user_id;
 });
 
-// ── Mentor: get paired students for booking form ──
+// Mentors need a list of paired students for the booking form.
 $paired_students = [];
 if ($user_role === 'mentor' && $mentor_db_id > 0) {
     try {
@@ -418,7 +421,7 @@ if ($user_role === 'mentor' && $mentor_db_id > 0) {
     }
 }
 
-// ─── Helper: render a session card ────────────────────────────────
+// Render a session card shared by the selected-day, upcoming, and pending lists.
 function render_session_card(array $s, int $user_id, string $user_role): string
 {
     $name = trim(($s['first_name'] ?? '') . ' ' . ($s['last_name'] ?? ''));
@@ -448,7 +451,7 @@ function render_session_card(array $s, int $user_id, string $user_role): string
 
     $actions = '';
 
-    // Accept / Decline buttons for the OTHER party
+    // Show accept/decline only to the person who did not propose the session.
     if ($is_pending && !$is_proposer) {
         $actions .= '
         <div class="session-actions">
@@ -473,7 +476,7 @@ function render_session_card(array $s, int $user_id, string $user_role): string
         </div>';
     }
 
-    // Cancel button for confirmed future sessions
+    // Confirmed future sessions can still be cancelled.
     if ($is_confirmed && $is_future) {
         $actions .= '
         <div class="session-actions">
@@ -543,7 +546,7 @@ function render_session_card(array $s, int $user_id, string $user_role): string
     </div>';
 }
 
-// Build query string helper
+// Small helper for calendar navigation links.
 function cal_url(array $params): string
 {
     return 'calendar.php?' . http_build_query($params);
@@ -563,7 +566,7 @@ function cal_url(array $params): string
     <main class="cal-container">
         <div class="cal-wrapper">
 
-            <!-- ── Page Header ── -->
+            <!-- Page header -->
             <div class="cal-header">
                 <div>
                     <h1>Calendar</h1>
@@ -585,7 +588,7 @@ function cal_url(array $params): string
                 </div>
             </div>
 
-            <!-- ── Alerts ── -->
+            <!-- Success and error messages -->
             <?php foreach ($errors as $e): ?>
                 <div class="cal-alert cal-alert--error"><?php echo htmlspecialchars($e); ?></div>
             <?php endforeach; ?>
@@ -593,7 +596,7 @@ function cal_url(array $params): string
                 <div class="cal-alert cal-alert--success"><?php echo htmlspecialchars($s); ?></div>
             <?php endforeach; ?>
 
-            <!-- ── Calendar Grid ── -->
+            <!-- Monthly calendar grid -->
             <div class="cal-card">
                 <div class="cal-nav">
                     <a href="<?php echo cal_url(['month' => $prev_month, 'year' => $prev_year]); ?>" class="cal-nav-btn" aria-label="Previous month">
@@ -642,7 +645,7 @@ function cal_url(array $params): string
                 </div>
             </div>
 
-            <!-- ── Sessions for Selected Date ── -->
+            <!-- Sessions for the selected date -->
             <?php if ($selected_day !== null): ?>
                 <?php
                     $sel_ts = mktime(0, 0, 0, $cal_month, (int)$selected_day, $cal_year);
@@ -665,7 +668,7 @@ function cal_url(array $params): string
                 <?php endif; ?>
             <?php endif; ?>
 
-            <!-- ── Upcoming Confirmed Sessions ── -->
+            <!-- Upcoming confirmed sessions -->
             <?php if ($selected_date_sessions == null): ?>
                 <h3 class="cal-section-title">Upcoming Sessions</h3>
                 <?php if (empty($upcoming)): ?>
@@ -679,7 +682,7 @@ function cal_url(array $params): string
                 <?php endif; ?>
             <?php endif; ?>
 
-            <!-- ── Pending Proposals ── -->
+            <!-- Pending proposals awaiting a response -->
             <?php if (!empty($pending)): ?>
                 <h3 class="cal-section-title">Pending Proposals</h3>
                 <?php foreach ($pending as $sess): ?>
@@ -689,7 +692,7 @@ function cal_url(array $params): string
         </div>
     </main>
 
-    <!-- ── New Session Modal ── -->
+    <!-- Modal for proposing a new session -->
     <div class="session-modal-backdrop" id="sessionModal" style="display:none">
         <div class="session-modal">
             <div class="session-modal__header">
@@ -771,7 +774,7 @@ function cal_url(array $params): string
 
     <script>
     (function () {
-        /* ── Modal open / close ── */
+        // Open and close the new-session modal.
         const modal     = document.getElementById('sessionModal');
         const openBtn   = document.getElementById('openModalBtn');
         const closeBtn  = document.getElementById('closeModalBtn');
@@ -794,7 +797,7 @@ function cal_url(array $params): string
             if (e.key === 'Escape') closeModal();
         });
 
-        /* ── Availability enforcement ── */
+        // Student bookings must stay inside the mentor's available time windows.
         var mentorId       = <?php echo json_encode($mentor_db_id ?: 0); ?>;
         var isStudent      = <?php echo json_encode($user_role === 'student'); ?>;
         var availableSlots = [];
@@ -803,14 +806,14 @@ function cal_url(array $params): string
         var endInput       = document.getElementById('end_time');
         var submitBtn      = document.getElementById('submitBtn');
 
-        // Students: disable time inputs until a date with availability is chosen
+        // Students cannot pick times until availability is loaded for a date.
         if (isStudent && mentorId) {
             if (startInput) startInput.disabled = true;
             if (endInput)   endInput.disabled   = true;
             if (submitBtn)  submitBtn.disabled  = true;
         }
 
-        // Pre-fill date if a day is selected in the calendar URL
+        // Pre-fill the modal date when a day is selected in the calendar.
         var params   = new URLSearchParams(window.location.search);
         var urlDay   = params.get('day');
         var urlMonth = params.get('month');
@@ -834,12 +837,13 @@ function cal_url(array $params): string
             endInput.addEventListener('input',  validateTimes);
         }
 
+        // Load available slots for the chosen date and show them as clickable chips.
         function fetchAvailability(dateVal) {
             var hint    = document.getElementById('availabilityHint');
             var slotsEl = document.getElementById('availabilitySlots');
             if (!hint || !slotsEl) return;
 
-            // Clear times & validation whenever the date changes
+            // Reset time inputs and validation whenever the date changes.
             if (startInput) startInput.value = '';
             if (endInput)   endInput.value   = '';
             clearTimeValidation();
@@ -897,6 +901,7 @@ function cal_url(array $params): string
                 .catch(function () { hint.style.display = 'none'; availableSlots = []; });
         }
 
+            // Check that the chosen times fit inside one of the available windows.
         function validateTimes() {
             if (!isStudent || availableSlots.length === 0) return;
             var warnEl = document.getElementById('timeValidationMsg');
@@ -921,6 +926,7 @@ function cal_url(array $params): string
             }
         }
 
+        // Reset validation state when no valid availability has been selected yet.
         function clearTimeValidation() {
             var warnEl = document.getElementById('timeValidationMsg');
             if (warnEl) warnEl.style.display = 'none';

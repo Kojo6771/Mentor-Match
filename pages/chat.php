@@ -2,6 +2,7 @@
 session_start();
 require_once '../includes/db.php';
 
+// Only students and mentors can access the chat page.
 if (!isset($_SESSION['user_id'])) {
 	header('Location: login.php');
 	exit;
@@ -16,12 +17,12 @@ if (!in_array($user_role, ['student', 'mentor'], true)) {
 }
 
 if ($user_role === 'student') {
-	// Mark all incoming messages as read
+	// Students should not keep unread counters for messages already opened here.
 	try {
 		$markRead = $pdo->prepare('UPDATE messages SET read_at = NOW() WHERE receiver_id = ? AND read_at IS NULL');
 		$markRead->execute([$user_id]);
 	} catch (PDOException $e) {
-		// silent
+		// Ignore read-status failures and keep the page usable.
 	}
 }
 
@@ -76,6 +77,7 @@ if ($user_role === 'student') {
 	}
 }
 
+// Mentors can have multiple student conversations.
 if ($user_role === 'mentor') {
 	$mentor_id = null;
 
@@ -106,7 +108,7 @@ if ($user_role === 'mentor') {
 			$studentsStmt->execute([$mentor_id]);
 			$student_options = $studentsStmt->fetchAll(PDO::FETCH_ASSOC);
 
-			// Get last message for each student
+			// Add the latest message preview for each student conversation.
 			foreach ($student_options as &$student) {
 				try {
 					$lastMsgStmt = $pdo->prepare('
@@ -163,7 +165,7 @@ if ($user_role === 'mentor') {
 		}
 	}
 
-	// Handle selected student for chat modal
+	// Open the requested student conversation when the student id is in the query string.
 	$requested_student = (int)($_GET['student'] ?? 0);
 	if (!empty($student_options) && $requested_student > 0) {
 		$allowed_user_ids = array_map(static function ($student) {
@@ -241,7 +243,7 @@ if ($chat_partner_user_id) {
 	}
 }
 
-/* ── Fetch admin warning messages for mentors ── */
+// Mentors also receive admin warning messages, shown as a pinned conversation.
 $admin_notices = [];
 $admin_user_ids = [];
 if ($user_role === 'mentor') {
@@ -258,12 +260,12 @@ if ($user_role === 'mentor') {
 		$adminStmt->execute([$user_id]);
 		$admin_notices = $adminStmt->fetchAll(PDO::FETCH_ASSOC);
 
-		/* Collect admin user IDs for sender detection */
+		// Keep track of which senders are admins.
 		foreach ($admin_notices as $an) {
 			$admin_user_ids[(int)$an['sender_id']] = true;
 		}
 
-		/* Mark admin notices as read */
+		// Mark admin notices as read once they have been loaded here.
 		if (!empty($admin_notices)) {
 			$pdo->prepare('UPDATE messages SET read_at = NOW() WHERE receiver_id = ? AND read_at IS NULL AND sender_id IN (SELECT id FROM users WHERE role = \'admin\')')
 				->execute([$user_id]);
@@ -279,6 +281,7 @@ $partner_meta = '';
 $partner_avatar = '';
 $partner_avatar_fallback = '';
 
+// Prepare chat partner details for display in the header of the conversation.
 if ($chat_partner) {
 	$partner_name = trim(($chat_partner['first_name'] ?? '') . ' ' . ($chat_partner['last_name'] ?? ''));
 	$partner_email = $chat_partner['email'] ?? '';
@@ -328,7 +331,7 @@ if ($chat_partner) {
 <body>
 	<main class="container">
 		<?php if ($user_role === 'student'): ?>
-			<!-- Student View: Direct Chat with Mentor -->
+			<!-- Student view: a direct chat with the assigned mentor -->
 			<section class="chat-page chat-page--student card" aria-labelledby="chat-heading">
 				<h1 id="chat-heading">Chatroom</h1>
 				<p class="lead">Chat directly with your mentor.</p>
@@ -392,7 +395,7 @@ if ($chat_partner) {
 			</section>
 
 		<?php else: ?>
-			<!-- Mentor View: Student List with Chat Modal -->
+			<!-- Mentor view: conversation list with modal chat windows -->
 			<section class="chat-page card" aria-labelledby="chat-heading">
 				<h1 id="chat-heading">Messages</h1>
 
@@ -415,7 +418,7 @@ if ($chat_partner) {
 				<?php if (empty($student_options)): ?>
 					<p class="empty-state">You do not have any matched students yet.</p>
 				<?php else: ?>
-					<!-- Conversations List -->
+					<!-- Conversation list -->
 					<div class="conversations-list">
 						<?php if (!empty($admin_notices)): ?>
 							<?php
@@ -497,7 +500,7 @@ if ($chat_partner) {
 				<?php endif; ?>
 			</section>
 
-			<!-- Admin Messages Modal -->
+			<!-- Modal showing admin messages -->
 			<?php if (!empty($admin_notices)): ?>
 				<div class="chat-modal" id="adminModal">
 					<div class="chat-modal__backdrop"></div>
@@ -530,7 +533,7 @@ if ($chat_partner) {
 				</div>
 			<?php endif; ?>
 
-			<!-- Chat Modal -->
+			<!-- Modal showing the active student conversation -->
 			<?php if ($chat_partner_user_id): ?>
 				<div class="chat-modal is-open" id="chatModal">
 					<div class="chat-modal__backdrop"></div>
@@ -586,7 +589,7 @@ if ($chat_partner) {
 				container.scrollTop = container.scrollHeight;
 			}
 
-			// Handle chat modal close button
+			// Close the open chat modal by returning to the conversation list.
 			const chatModal = document.getElementById('chatModal');
 			const closeBtn = chatModal ? chatModal.querySelector('.chat-modal__close') : null;
 			const backdrop = chatModal ? chatModal.querySelector('.chat-modal__backdrop') : null;
@@ -603,7 +606,7 @@ if ($chat_partner) {
 				});
 			}
 
-			// Handle escape key to close modal
+			// Let Escape close the active chat modal.
 			if (chatModal) {
 				document.addEventListener('keydown', function (e) {
 					if (e.key === 'Escape' && chatModal.classList.contains('is-open')) {
@@ -612,7 +615,7 @@ if ($chat_partner) {
 				});
 			}
 
-			// Admin Messages Modal
+			// Separate modal for admin warning messages.
 			var adminBtn = document.getElementById('adminConvoBtn');
 			var adminModal = document.getElementById('adminModal');
 			var adminClose = document.getElementById('adminModalClose');

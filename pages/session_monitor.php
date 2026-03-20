@@ -2,7 +2,7 @@
 session_start();
 require_once '../includes/db.php';
 
-/* ── Admin only ── */
+// This page is only available to admins.
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
     header('Location: login.php');
     exit;
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
         exit;
     }
 
-    // Verify recipient exists and is a mentor
+    // Make sure the warning is being sent to a valid mentor account.
     try {
         $chk = $pdo->prepare('SELECT id FROM users WHERE id = ? AND role = ?');
         $chk->execute([$receiver_id, 'mentor']);
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
         exit;
     }
 
-    // Insert admin message
+    // Store the warning as a normal message from the admin.
     try {
         $ins = $pdo->prepare('INSERT INTO messages (sender_id, receiver_id, message, sent_at) VALUES (?, ?, ?, NOW())');
         $ins->execute([$admin_id, $receiver_id, $message]);
@@ -46,11 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
     exit;
 }
 
-/* ================================================================
-   DATA QUERIES
-   ================================================================ */
-
-/* ── 1. All sessions with participant names ── */
+// Load all sessions with mentor, student, and subject details.
 $sessions = [];
 try {
     $stmt = $pdo->query("
@@ -70,7 +66,7 @@ try {
     $sessions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { $sessions = []; }
 
-/* ── 2. Session counts by status ── */
+// Count sessions by status for the dashboard cards and tabs.
 $statusCounts = ['pending' => 0, 'confirmed' => 0, 'completed' => 0, 'cancelled' => 0];
 foreach ($sessions as $s) {
     $st = $s['status'] ?? '';
@@ -78,15 +74,13 @@ foreach ($sessions as $s) {
 }
 $totalSessions = count($sessions);
 
-/* ── 3. Active matches ── */
+// Count active mentor-student matches.
 $activeMatches = 0;
 try {
     $activeMatches = (int)$pdo->query("SELECT COUNT(*) FROM mentor_student_matches WHERE active = 1")->fetchColumn();
 } catch (PDOException $e) { /* silent */ }
 
-/* ── 4. Smart Alerts ── */
-
-/* Alert A: Matches with no scheduled session (matched ≥ 7 days ago) */
+// Alert A: long-running matches with no session created.
 $noSessionAlerts = [];
 try {
     $stmt = $pdo->query("
@@ -112,7 +106,7 @@ try {
     $noSessionAlerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { $noSessionAlerts = []; }
 
-/* Alert B: Overdue sessions (date+time has passed, still pending/confirmed) */
+// Alert B: sessions that should have happened already but are still open.
 $overdueAlerts = [];
 try {
     $stmt = $pdo->query("
@@ -131,7 +125,7 @@ try {
     $overdueAlerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { $overdueAlerts = []; }
 
-/* Alert C: Matches ≥ 3 days with no pending/confirmed session */
+// Alert C: newer matches with no upcoming session proposed yet.
 $noPendingAlerts = [];
 try {
     $stmt = $pdo->query("
@@ -157,7 +151,7 @@ try {
     $noPendingAlerts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { $noPendingAlerts = []; }
 
-/* Remove duplicates: exclude matches already covered by the 7-day no-session alert */
+// Avoid showing the same match in both no-session alert groups.
 $noSessionMatchIds = array_column($noSessionAlerts, 'match_id');
 $noPendingAlerts = array_filter($noPendingAlerts, function ($a) use ($noSessionMatchIds) {
     return !in_array($a['match_id'], $noSessionMatchIds);
@@ -166,7 +160,7 @@ $noPendingAlerts = array_values($noPendingAlerts);
 
 $totalAlerts = count($noSessionAlerts) + count($overdueAlerts) + count($noPendingAlerts);
 
-//  Mentor lookup for warning modal (all mentors with profile pictures) 
+// Load mentors for the warning modal, including profile pictures when available.
 $mentors = [];
 try {
     $stmt = $pdo->query("
@@ -178,7 +172,7 @@ try {
     $mentors = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) { $mentors = []; }
 
-/* Pre-selected warning messages */
+// Ready-made warning templates used in the modal.
 $warningMessages = [
     'Please schedule a session with your matched student, {student}, as soon as possible.',
     'Your session with {student} has passed and hasn\'t been marked as completed. Please update its status.',
@@ -202,7 +196,7 @@ $warningMessages = [
 <main class="sm-container">
 <div class="sm-wrapper">
 
-    <!-- ─ ─ Header ─ ─ -->
+    <!-- Page header -->
     <div class="sm-header">
         <h1>Session Monitor</h1>
         <span class="sm-header__badge">
@@ -211,7 +205,7 @@ $warningMessages = [
         <p>Track sessions, spot issues, and keep mentors accountable.</p>
     </div>
 
-    <!--  Stats Row  -->
+    <!-- Summary stats -->
     <div class="sm-stats">
         <div class="sm-stat sm-stat--accent">
             <div class="sm-stat__value"><?php echo $activeMatches; ?></div>
@@ -231,7 +225,7 @@ $warningMessages = [
         </div>
     </div>
 
-    <!-- Smart Alerts ─── -->
+    <!-- Alert list -->
     <div class="sm-card">
         <h2 class="sm-card__title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -353,14 +347,14 @@ $warningMessages = [
         <?php endif; ?>
     </div>
 
-    <!-- ─── All Sessions ─── -->
+    <!-- Full session list -->
     <div class="sm-card">
         <h2 class="sm-card__title">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             All Sessions
         </h2>
 
-        <!-- Filter Tabs -->
+        <!-- Status filter tabs -->
         <div class="sm-tabs" id="sessionTabs">
             <button class="sm-tab active" data-filter="all">
                 All <span class="sm-tab__badge"><?php echo $totalSessions; ?></span>
@@ -379,7 +373,7 @@ $warningMessages = [
             </button>
         </div>
 
-        <!-- Sessions List -->
+        <!-- Session cards -->
         <div class="sm-sessions-list" id="sessionsList" style="margin-top: 12px;">
             <?php if (empty($sessions)): ?>
                 <div class="sm-no-sessions">
@@ -435,13 +429,13 @@ $warningMessages = [
         </div>
     </div>
 
-    <!-- ─── Logout ─── -->
+    <!-- Logout link -->
     <a href="login.php?logout=1" class="sm-logout-btn">Log Out</a>
 
 </div>
 </main>
 
-<!-- ─── Warning Modal ─── -->
+<!-- Modal used to send a warning to a mentor -->
 <div class="sm-modal" id="warnModal">
     <div class="sm-modal__backdrop"></div>
     <div class="sm-modal__panel">
@@ -453,7 +447,7 @@ $warningMessages = [
             <button type="button" class="sm-modal__close" aria-label="Close">&times;</button>
         </div>
         <div class="sm-modal__body">
-            <!-- Recipient -->
+            <!-- Selected mentor -->
             <div class="sm-modal__recipient">
                 <img src="" alt="" class="sm-modal__recipient-avatar" id="modalAvatar">
                 <div>
@@ -462,7 +456,7 @@ $warningMessages = [
                 </div>
             </div>
 
-            <!-- Pre-selected messages -->
+            <!-- Suggested warning messages -->
             <p class="sm-modal__label">Choose a warning message</p>
             <div class="sm-modal__messages" id="modalMessages">
                 <?php foreach ($warningMessages as $i => $msg): ?>
@@ -473,13 +467,13 @@ $warningMessages = [
                 <?php endforeach; ?>
             </div>
 
-            <!-- Custom message -->
+            <!-- Custom message box -->
             <div class="sm-modal__custom">
                 <p class="sm-modal__label" style="margin-top:0;">Or write a custom message</p>
                 <textarea id="customMessage" placeholder="Type a custom warning message…" maxlength="1000"></textarea>
             </div>
 
-            <!-- Send button -->
+            <!-- Submit button -->
             <button type="button" class="sm-modal__send" id="sendWarningBtn" disabled>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
                 Send Warning Message
@@ -488,14 +482,14 @@ $warningMessages = [
     </div>
 </div>
 
-<!-- ─── Toast ─── -->
+<!-- Toast message area -->
 <div class="sm-toast" id="smToast"></div>
 
 <?php include '../includes/nav.php'; ?>
 
 <script>
 (function () {
-    /* ── Filter Tabs ── */
+    // Filter the session list by status.
     const tabs = document.querySelectorAll('.sm-tab');
     const sessionItems = document.querySelectorAll('.sm-session');
 
@@ -515,7 +509,7 @@ $warningMessages = [
         });
     });
 
-    /* ── Warning Modal ── */
+    // Modal state and UI references for sending mentor warnings.
     const modal       = document.getElementById('warnModal');
     const backdrop     = modal.querySelector('.sm-modal__backdrop');
     const closeBtn     = modal.querySelector('.sm-modal__close');
@@ -529,15 +523,15 @@ $warningMessages = [
     let selectedMsgIndex = -1;
     let currentStudentName = '';
 
-    /* Pre-selected warning message templates from PHP */
+    // Message templates provided by PHP.
     const warningTemplates = <?php echo json_encode($warningMessages); ?>;
 
-    /* Replace {student} placeholder with actual student name */
+    // Replace the {student} placeholder before showing or sending a message.
     function resolveMsg(template, studentName) {
         return template.replace(/\{student\}/g, studentName || 'your student');
     }
 
-    /* Update displayed message text in options */
+    // Refresh the visible option text with the selected student's name.
     function updateMsgTexts(studentName) {
         msgOptions.forEach(function (opt) {
             var idx = parseInt(opt.dataset.index, 10);
@@ -548,7 +542,7 @@ $warningMessages = [
         });
     }
 
-    /* Open modal */
+    // Open the warning modal for the selected mentor.
     document.querySelectorAll('.js-warn-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
             selectedMentorId = parseInt(btn.dataset.mentorId, 10);
@@ -557,18 +551,18 @@ $warningMessages = [
             modalAvatar.src = btn.dataset.mentorAvatar;
             modalAvatar.alt = btn.dataset.mentorName;
 
-            /* Update message options with the student name */
+            // Personalize the preset messages with the student's name.
             updateMsgTexts(currentStudentName);
 
-            /* Pre-select relevant message based on alert type */
+            // Preselect the most relevant template for the alert type.
             var preselect = parseInt(btn.dataset.preselect, 10);
 
-            /* Reset selections */
+            // Reset previous selections.
             msgOptions.forEach(function (opt) { opt.classList.remove('selected'); });
             customTA.value = '';
             selectedMsgIndex = -1;
 
-            /* Auto-select the relevant pre-selected message */
+            // Auto-select a template when one is supplied.
             if (preselect >= 0 && preselect < msgOptions.length) {
                 msgOptions[preselect].classList.add('selected');
                 selectedMsgIndex = preselect;
@@ -579,7 +573,7 @@ $warningMessages = [
         });
     });
 
-    /* Close modal */
+    // Reset modal state and close it.
     function closeModal() {
         modal.classList.remove('is-open');
         selectedMentorId = 0;
@@ -596,7 +590,7 @@ $warningMessages = [
         if (e.key === 'Escape' && modal.classList.contains('is-open')) closeModal();
     });
 
-    /* Select pre-set message */
+    // Choose one of the preset messages.
     msgOptions.forEach(function (opt) {
         opt.addEventListener('click', function () {
             msgOptions.forEach(function (o) { o.classList.remove('selected'); });
@@ -607,7 +601,7 @@ $warningMessages = [
         });
     });
 
-    /* Custom message input */
+    // Switch to custom mode when the textarea has content.
     customTA.addEventListener('input', function () {
         if (customTA.value.trim() !== '') {
             msgOptions.forEach(function (o) { o.classList.remove('selected'); });
@@ -616,12 +610,13 @@ $warningMessages = [
         updateSendBtn();
     });
 
+    // Enable sending only when a mentor and a message are selected.
     function updateSendBtn() {
         var hasMsg = selectedMsgIndex >= 0 || customTA.value.trim() !== '';
         sendBtn.disabled = !hasMsg || selectedMentorId <= 0;
     }
 
-    /* Send warning */
+    // Send the warning through the AJAX endpoint at the top of this file.
     sendBtn.addEventListener('click', function () {
         if (sendBtn.disabled) return;
 
@@ -665,7 +660,7 @@ $warningMessages = [
         });
     });
 
-    /* ── Toast ── */
+    // Toast helper used for success and error feedback.
     var toastEl = document.getElementById('smToast');
     var toastTimeout;
 

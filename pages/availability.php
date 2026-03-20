@@ -2,7 +2,7 @@
 session_start();
 require_once '../includes/db.php';
 
-/* ─── Auth & Role Guard ─*/
+// Only logged-in mentors should be able to manage availability.
 if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
@@ -19,15 +19,15 @@ if ($user_role !== 'mentor') {
 $errors   = [];
 $successes = [];
 
-/* ─── Day-of-week helpers ── */
+// Day labels used in the form and weekly overview.
 $day_names = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 $day_short = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-/* ─── Handle POST Actions ─── */
+// Handle form submissions for adding and removing slots.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
-    /* ── Add a new time slot ── */
+    // Add a new availability slot.
     if ($action === 'add_slot') {
         $is_recurring_raw = trim($_POST['is_recurring'] ?? '1');
         $is_everyday      = ($is_recurring_raw === '2');
@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $start            = trim($_POST['start_time'] ?? '');
         $end              = trim($_POST['end_time'] ?? '');
 
-        // Validate common fields
+        // Check the shared time fields first.
         if ($start === '' || $end === '') {
             $errors[] = 'Start and end times are required.';
         } elseif ($start >= $end) {
@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($is_everyday) {
-            // Check for overlapping recurring slot on every day
+            // Make sure the everyday slot does not clash with existing recurring slots.
             if (empty($errors)) {
                 $overlap_days = [];
                 for ($d = 0; $d < 7; $d++) {
@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($day_of_week === null || $day_of_week < 0 || $day_of_week > 6) {
                 $errors[] = 'Please select a day of the week.';
             }
-            // Check for overlapping recurring slot
+            // Make sure this weekly slot does not overlap with another slot on the same day.
             if (empty($errors)) {
                 $stmt = $pdo->prepare('
                     SELECT COUNT(*) FROM availability
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } elseif ($avail_date < date('Y-m-d')) {
                 $errors[] = 'Date cannot be in the past.';
             }
-            // Check for overlapping specific-date slot
+            // Check for conflicts with other one-off date slots.
             if (empty($errors)) {
                 $stmt = $pdo->prepare('
                     SELECT COUNT(*) FROM availability
@@ -101,6 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($errors)) {
             try {
+                // Everyday mode creates one recurring slot for each day of the week.
                 if ($is_everyday) {
                     $stmt = $pdo->prepare('
                         INSERT INTO availability (mentor_id, available_date, start_time, end_time, day_of_week, is_recurring)
@@ -131,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    /* ── Remove a time slot ── */
+    // Remove a slot that belongs to the logged-in mentor.
     if ($action === 'remove_slot') {
         $slot_id = (int)($_POST['slot_id'] ?? 0);
         if ($slot_id > 0) {
@@ -146,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-/* ─── Fetch All Recurring Slots ──────── */
+// Load all recurring slots for the weekly schedule.
 $recurring_slots = [];
 try {
     $stmt = $pdo->prepare('
@@ -160,7 +161,7 @@ try {
     $recurring_slots = [];
 }
 
-// Group by day
+// Group recurring slots by day of week for display.
 $slots_by_day = [];
 for ($i = 0; $i < 7; $i++) {
     $slots_by_day[$i] = [];
@@ -169,14 +170,14 @@ foreach ($recurring_slots as $slot) {
     $slots_by_day[(int)$slot['day_of_week']][] = $slot;
 }
 
-// Total recurring count per day (for overview)
+// Count how many recurring slots each day has for the overview strip.
 $day_counts = [];
 for ($i = 0; $i < 7; $i++) {
     $day_counts[$i] = count($slots_by_day[$i]);
 }
 $has_any_recurring = array_sum($day_counts) > 0;
 
-/* ─── Fetch Specific Date Slots ──────────────────────────────────── */
+// Load upcoming one-off slots for specific dates.
 $date_slots = [];
 try {
     $stmt = $pdo->prepare('
@@ -191,16 +192,16 @@ try {
     $date_slots = [];
 }
 
-// Group specific date slots by date
+// Group one-off slots by date for easier rendering.
 $date_slots_grouped = [];
 foreach ($date_slots as $ds) {
     $date_slots_grouped[$ds['available_date']][] = $ds;
 }
 
-/* ─── Order days starting from Monday ────────────────────────────── */
+// Display the week starting on Monday.
 $day_order = [1, 2, 3, 4, 5, 6, 0]; // Mon – Sun
 
-/* ─── Helper: format time ────────────────────────────────────────── */
+// Format times in a friendlier 12-hour format.
 function fmt_time(string $time): string
 {
     return date('g:i A', strtotime($time));
@@ -220,13 +221,13 @@ function fmt_time(string $time): string
     <main class="avail-container">
         <div class="avail-wrapper">
 
-            <!-- ── Back Link ── -->
+            <!-- Back link -->
             <a href="calendar.php" class="avail-back">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
                 Back to Calendar
             </a>
 
-            <!-- ── Page Header ── -->
+            <!-- Page header -->
             <div class="avail-header">
                 <div>
                     <h1>My Availability</h1>
@@ -238,7 +239,7 @@ function fmt_time(string $time): string
                 </button>
             </div>
 
-            <!-- ── Alerts ── -->
+            <!-- Success and error messages -->
             <?php foreach ($errors as $e): ?>
                 <div class="avail-alert avail-alert--error"><?php echo htmlspecialchars($e); ?></div>
             <?php endforeach; ?>
@@ -246,7 +247,7 @@ function fmt_time(string $time): string
                 <div class="avail-alert avail-alert--success"><?php echo htmlspecialchars($s); ?></div>
             <?php endforeach; ?>
 
-            <!-- ── Week Overview Strip ── -->
+            <!-- Weekly overview strip -->
             <div class="avail-overview">
                 <p class="avail-overview__title">Weekly Overview</p>
                 <div class="avail-overview__days">
@@ -263,7 +264,7 @@ function fmt_time(string $time): string
                 </div>
             </div>
 
-            <!-- ── Weekly Schedule ── -->
+            <!-- Recurring weekly schedule -->
             <div class="avail-card">
                 <h2 class="avail-card__title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -322,7 +323,7 @@ function fmt_time(string $time): string
                 <?php endif; ?>
             </div>
 
-            <!-- ── Specific Date Slots ── -->
+            <!-- One-off date-based availability -->
             <?php if (!empty($date_slots_grouped)): ?>
                 <h3 class="avail-section-title">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -359,7 +360,7 @@ function fmt_time(string $time): string
         </div>
     </main>
 
-    <!-- ── Add Time Slot Modal ── -->
+    <!-- Modal for adding a new availability slot -->
     <div class="avail-modal-backdrop" id="slotModal" style="display:none">
         <div class="avail-modal">
             <div class="avail-modal__header">
@@ -370,7 +371,7 @@ function fmt_time(string $time): string
                 <input type="hidden" name="action" value="add_slot">
                 <input type="hidden" name="is_recurring" id="isRecurring" value="1">
 
-                <!-- Type Toggle -->
+                <!-- Slot type selector -->
                 <div>
                     <label>Slot Type</label>
                     <div class="avail-type-toggle" id="typeToggle">
@@ -392,7 +393,7 @@ function fmt_time(string $time): string
                     </div>
                 </div>
 
-                <!-- Day of Week (for recurring) -->
+                <!-- Day picker for weekly recurring slots -->
                 <div id="fieldDayOfWeek">
                     <label for="day_of_week">Day of Week</label>
                     <select name="day_of_week" id="day_of_week" class="input">
@@ -403,13 +404,13 @@ function fmt_time(string $time): string
                     </select>
                 </div>
 
-                <!-- Specific Date (for one-off) -->
+                <!-- Date picker for one-off availability -->
                 <div id="fieldDate" class="avail-field-hidden">
                     <label for="available_date">Date</label>
                     <input type="date" name="available_date" id="available_date" class="input" min="<?php echo date('Y-m-d'); ?>">
                 </div>
 
-                <!-- Times -->
+                <!-- Start and end times -->
                 <div class="avail-time-row">
                     <div>
                         <label for="start_time">Start Time</label>
@@ -433,7 +434,7 @@ function fmt_time(string $time): string
 
     <script>
     (function () {
-        /* ── Modal open / close ── */
+        // Open and close the add-slot modal.
         const modal     = document.getElementById('slotModal');
         const openBtn   = document.getElementById('openModalBtn');
         const closeBtn  = document.getElementById('closeModalBtn');
@@ -456,7 +457,7 @@ function fmt_time(string $time): string
             if (e.key === 'Escape') closeModal();
         });
 
-        /* ── Type Toggle (Weekly / Specific Date) ── */
+        // Switch between weekly, everyday, and one-off slot modes.
         const typeToggle    = document.getElementById('typeToggle');
         const isRecurring   = document.getElementById('isRecurring');
         const fieldDay      = document.getElementById('fieldDayOfWeek');
@@ -487,12 +488,12 @@ function fmt_time(string $time): string
             });
         }
 
-        /* ── Per-day Add Slot buttons ── */
+        // Let each day row open the modal with that day preselected.
         document.querySelectorAll('.btn-add-day-slot').forEach(function (btn) {
             btn.addEventListener('click', function () {
                 var day = btn.getAttribute('data-day');
 
-                // Switch to "Every Week" mode
+                // Force the modal into weekly mode.
                 if (typeToggle) {
                     typeToggle.querySelectorAll('.avail-type-option').forEach(function (o) {
                         o.classList.remove('selected');
@@ -504,7 +505,7 @@ function fmt_time(string $time): string
                 if (fieldDay)  fieldDay.classList.remove('avail-field-hidden');
                 if (fieldDate) fieldDate.classList.add('avail-field-hidden');
 
-                // Pre-select the day
+                // Preselect the clicked day.
                 var daySelect = document.getElementById('day_of_week');
                 if (daySelect && day !== null) daySelect.value = day;
 
@@ -512,7 +513,7 @@ function fmt_time(string $time): string
             });
         });
 
-        /* ── Auto-dismiss alerts after 4s ── */
+        // Fade alerts out automatically after a short delay.
         document.querySelectorAll('.avail-alert').forEach(function (el) {
             setTimeout(function () {
                 el.style.transition = 'opacity 0.3s, transform 0.3s';
