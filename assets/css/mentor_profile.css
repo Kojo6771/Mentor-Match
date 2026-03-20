@@ -203,19 +203,3 @@ body.students-modal-open {
         max-height: calc(100vh - 110px);
     }
 }
-
-@media (max-width: 420px) {
-    .students-counter {
-        font-size: 0.76rem;
-    }
-
-    .carousel-controls {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (min-width: 1024px) {
-    .students-modal__panel {
-        max-width: 760px;
-    }
-}

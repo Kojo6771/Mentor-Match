@@ -1,9 +1,8 @@
 :root{ --accent:#3b82f6; --muted:#6b7280; --bg:#f8fafc; --card:#ffffff; }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial; background:var(--bg); color:#111827;overflow-x:hidden}
-img,svg,video{max-width:100%;height:auto}
-.container{width:100%;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.card{width:100%;max-width:520px;background:var(--card);border-radius:14px;padding:20px 18px;box-shadow:0 6px 18px rgba(15,23,42,0.08);}
+html,body{height:100%;margin:0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial; background:var(--bg); color:#111827}
+.container{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:100%;max-width:480px;background:var(--card);border-radius:14px;padding:20px 18px;box-shadow:0 6px 18px rgba(15,23,42,0.08);}
 .logo{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .logo .brand{font-weight:700;font-size:1.1rem}
 h1{font-size:1.25rem;margin:6px 0 14px}
@@ -26,5 +25,3 @@ label{font-size:0.85rem;color:var(--muted);display:block;margin-bottom:6px}
 input[type="file"]{cursor:pointer}
 input[type="file"]::file-selector-button{background:var(--accent);color:#fff;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.9rem}
 @media (min-width:520px){ .card{padding:28px} h1{font-size:1.4rem} }
-@media (min-width:900px){ .card{max-width:600px} }
-@media (min-width:1200px){ .card{max-width:680px} }
