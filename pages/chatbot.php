@@ -118,7 +118,7 @@ if (strpos($cl, 'computer') !== false || strpos($cl, 'software') !== false || st
 // Friendly intro text shown before the first message.
 $welcomeText = "I'm your AI study assistant on MentorMatch.";
 if ($student_course && $student_year) {
-    $welcomeText .= " I know you're studying <strong>{$student_course}</strong> in <strong>Year&nbsp;{$student_year}</strong> ask me anything about your course!";
+    $welcomeText .= " I know you're studying <strong>{$student_course}</strong> in <strong>Year&nbsp;{$student_year}</strong> — ask me anything about your course!";
 } else {
     $welcomeText .= " Ask me anything about your studies — concepts, exam prep, essay help, and more.";
 }
