@@ -449,7 +449,10 @@ $warningMessages = [
         <div class="sm-modal__body">
             <!-- Selected mentor -->
             <div class="sm-modal__recipient">
-                <img src="" alt="" class="sm-modal__recipient-avatar" id="modalAvatar">
+                <div class="sm-modal__avatar-wrapper">
+                    <img src="" alt="" class="sm-modal__recipient-avatar" id="modalAvatar">
+                    <div class="sm-modal__recipient-fallback" id="modalAvatarFallback"></div>
+                </div>
                 <div>
                     <div class="sm-modal__recipient-name" id="modalName"></div>
                     <div class="sm-modal__recipient-role">Mentor</div>
@@ -514,6 +517,7 @@ $warningMessages = [
     const backdrop     = modal.querySelector('.sm-modal__backdrop');
     const closeBtn     = modal.querySelector('.sm-modal__close');
     const modalAvatar  = document.getElementById('modalAvatar');
+    const modalFallback = document.getElementById('modalAvatarFallback');
     const modalName    = document.getElementById('modalName');
     const msgOptions   = document.querySelectorAll('.sm-modal__msg-option');
     const customTA     = document.getElementById('customMessage');
@@ -525,6 +529,15 @@ $warningMessages = [
 
     // Message templates provided by PHP.
     const warningTemplates = <?php echo json_encode($warningMessages); ?>;
+
+    // Generate initials from mentor name
+    function getInitials(name) {
+        return name
+            .split(' ')
+            .map(function (n) { return n.charAt(0).toUpperCase(); })
+            .join('')
+            .slice(0, 2);
+    }
 
     // Replace the {student} placeholder before showing or sending a message.
     function resolveMsg(template, studentName) {
@@ -547,9 +560,24 @@ $warningMessages = [
         btn.addEventListener('click', function () {
             selectedMentorId = parseInt(btn.dataset.mentorId, 10);
             currentStudentName = btn.dataset.studentName || '';
-            modalName.textContent = btn.dataset.mentorName;
+            var mentorName = btn.dataset.mentorName;
+            modalName.textContent = mentorName;
             modalAvatar.src = btn.dataset.mentorAvatar;
-            modalAvatar.alt = btn.dataset.mentorName;
+            modalAvatar.alt = mentorName;
+            
+            // Show fallback with initials
+            modalFallback.textContent = getInitials(mentorName);
+            modalAvatar.classList.remove('loaded');
+            
+            // Load image and show it if successful
+            var img = new Image();
+            img.onload = function () {
+                modalAvatar.classList.add('loaded');
+            };
+            img.onerror = function () {
+                modalAvatar.classList.remove('loaded');
+            };
+            img.src = btn.dataset.mentorAvatar;
 
             // Personalize the preset messages with the student's name.
             updateMsgTexts(currentStudentName);
