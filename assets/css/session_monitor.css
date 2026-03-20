@@ -959,23 +959,11 @@
 
 @media (min-width: 1024px) {
     .sm-container {
-        padding: 30px 28px 110px;
+        padding: 24px 20px 100px;
     }
 
     .sm-wrapper {
-        max-width: 1360px;
-        gap: 24px;
-    }
-
-    .sm-header h1 {
-        font-size: 1.6rem;
-    }
-
-    .sm-header p {
-        font-size: 1rem;
-    }
-
-    .sm-stat__value {
-        font-size: 1.85rem;
+        max-width: 1100px;
+        gap: 20px;
     }
 }

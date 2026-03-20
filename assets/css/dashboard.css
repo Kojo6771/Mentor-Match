@@ -52,17 +52,3 @@ h1{font-size:1.25rem;margin:0 0 4px;}
             color: var(--muted);
             margin: 0;
         }
-
-@media (min-width: 1024px) {
-    .container { padding: 30px 28px 110px; }
-    .card { max-width: 1040px; padding: 32px 30px; }
-    h1 { font-size: 1.55rem; }
-    .lead { font-size: 1.05rem; }
-    .stat-value { font-size: 1.85rem; }
-    .stat-label { font-size: 0.9rem; }
-    .stat-card { padding: 22px 16px; }
-    .action-title { font-size: 1.05rem; }
-    .action-desc { font-size: 0.9rem; }
-    .action-card { padding: 18px 16px; }
-    .action-icon { width: 42px; height: 42px; font-size: 1.35rem; }
-}

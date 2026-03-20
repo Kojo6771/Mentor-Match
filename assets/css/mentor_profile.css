@@ -216,6 +216,6 @@ body.students-modal-open {
 
 @media (min-width: 1024px) {
     .students-modal__panel {
-        max-width: 900px;
+        max-width: 760px;
     }
 }

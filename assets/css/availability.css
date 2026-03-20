@@ -791,28 +791,15 @@
 
 @media (min-width: 1024px) {
     .avail-container {
-        padding: 30px 28px 110px;
+        padding: 24px 20px 100px;
     }
 
     .avail-wrapper {
-        max-width: 1150px;
-        gap: 24px;
-    }
-
-    .avail-header h1 {
-        font-size: 1.6rem;
-    }
-
-    .avail-header p {
-        font-size: 1rem;
+        max-width: 980px;
+        gap: 20px;
     }
 
     .avail-card {
-        padding: 26px;
-    }
-
-    .btn-add-slot {
-        padding: 12px 20px;
-        font-size: 0.95rem;
+        padding: 20px;
     }
 }

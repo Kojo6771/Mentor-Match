@@ -607,35 +607,15 @@
 
 @media (min-width: 1024px) {
     .report-container {
-        padding: 30px 28px 110px;
+        padding: 24px 20px 100px;
     }
 
     .report-wrapper {
-        max-width: 1260px;
-        gap: 24px;
-    }
-
-    .report-header h1 {
-        font-size: 1.6rem;
-    }
-
-    .report-header p {
-        font-size: 1rem;
-    }
-
-    .report-stat__value {
-        font-size: 2rem;
-    }
-
-    .report-stat__label {
-        font-size: 0.85rem;
-    }
-
-    .report-stat {
-        padding: 20px 16px;
+        max-width: 1050px;
+        gap: 20px;
     }
 
     .report-card {
-        padding: 26px;
+        padding: 20px;
     }
 }
