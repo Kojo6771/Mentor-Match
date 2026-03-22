@@ -2,7 +2,7 @@
 session_start();
 require_once '..\includes\db.php';
 
-
+// Time before code resets variable
 const RESET_CODE_EXPIRY_MINUTES = 15;
 
 
