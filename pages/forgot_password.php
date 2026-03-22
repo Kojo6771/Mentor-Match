@@ -2,13 +2,10 @@
 session_start();
 require_once '..\includes\db.php';
 
-// Configuration for the forgot password flow. 
-const RESET_MAIL_FROM = 'kwadwo1092@gmail.com';
+
 const RESET_CODE_EXPIRY_MINUTES = 15;
 
-ini_set('SMTP', 'smtp.gmail.com');
-ini_set('smtp_port', '587');
-ini_set('sendmail_from', RESET_MAIL_FROM);
+
 
 // Page state used by the UI.
 $errors = [];
@@ -50,7 +47,7 @@ function sendResetCodeEmail(string $email, string $firstName, string $code): boo
 	$headers = [];
 	$headers[] = 'MIME-Version: 1.0';
 	$headers[] = 'Content-type: text/plain; charset=UTF-8';
-	$headers[] = 'From: Mentor Match (No Reply) <' . RESET_MAIL_FROM . '>';
+	$headers[] = 'From: Mentor Match (No Reply) ';
 	$headers[] = 'X-Mailer: PHP/' . phpversion();
 
 	return @mail($email, $subject, $message, implode("\r\n", $headers));
