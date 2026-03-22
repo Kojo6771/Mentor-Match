@@ -2,6 +2,7 @@
 session_start();
 require_once '..\includes\db.php';
 
+// Configuration for the forgot password flow. 
 const RESET_MAIL_FROM = 'kwadwo1092@gmail.com';
 const RESET_MAIL_REPLY_TO = 'kwadwo1092@gmail.com';
 const RESET_CODE_EXPIRY_MINUTES = 15;
@@ -10,11 +11,13 @@ ini_set('SMTP', 'smtp.gmail.com');
 ini_set('smtp_port', '587');
 ini_set('sendmail_from', RESET_MAIL_FROM);
 
+// Page state used by the UI.
 $errors = [];
 $notice = '';
 $step = 'email';
 $email = trim($_SESSION['forgot_password_email'] ?? '');
 
+// Clears the reset flow from session.
 function clearForgotPasswordState(): void
 {
 	unset(
@@ -53,6 +56,7 @@ function sendResetCodeEmail(string $email, string $firstName, string $code): boo
 	return @mail($email, $subject, $message, implode("\r\n", $headers));
 }
 
+// Creates a fresh code and expires older active ones.
 function createPasswordResetCode(PDO $pdo, array $user, string $email): bool
 {
 	$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE email = ? AND used_at IS NULL')->execute([$email]);
@@ -87,6 +91,7 @@ if (!empty($_SESSION['forgot_password_verified']) && $email !== '') {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$action = $_POST['action'] ?? '';
 
+	// Step 1: Request code.
 	if ($action === 'request_code') {
 		$email = trim($_POST['email'] ?? '');
 		$step = 'email';
@@ -117,6 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		}
 	}
 
+	// Optional: Resend a fresh code.
 	if ($action === 'resend_code') {
 		$email = getForgotPasswordEmail();
 		$step = 'verify';
@@ -146,6 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		}
 	}
 
+	// Step 2: Verify code.
 	if ($action === 'verify_code') {
 		$email = getForgotPasswordEmail();
 		$code = preg_replace('/\D/', '', $_POST['verification_code'] ?? '');
@@ -182,6 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		}
 	}
 
+	// Step 3: Save the new password.
 	if ($action === 'reset_password') {
 		$email = getForgotPasswordEmail();
 		$password = $_POST['password'] ?? '';
@@ -240,11 +248,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		}
 	}
 
+	// Keep email in session for the next step.
 	if ($step !== 'success' && $email !== '') {
 		$_SESSION['forgot_password_email'] = $email;
 	}
 }
 
+// Map current step to the progress tracker.
 $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$step] ?? 1;
 ?>
 
@@ -404,6 +414,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 
 	<script>
 		(function () {
+			// Remove restart query param after reload.
 			var params = new URLSearchParams(window.location.search);
 			if (params.get('restart') === '1') {
 				window.history.replaceState({}, document.title, window.location.pathname);
@@ -412,6 +423,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 			var codeBoxes = Array.prototype.slice.call(document.querySelectorAll('.code-box'));
 			var hiddenCode = document.getElementById('verification_code');
 
+			// Handles 6-digit code input UX.
 			if (codeBoxes.length && hiddenCode) {
 				var syncCode = function () {
 					hiddenCode.value = codeBoxes.map(function (box) { return box.value; }).join('');
@@ -453,6 +465,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 				});
 			}
 
+			// Show/hide password fields.
 			document.querySelectorAll('.toggle-pass').forEach(function (button) {
 				button.addEventListener('click', function () {
 					var input = document.getElementById(button.getAttribute('data-target'));
@@ -467,6 +480,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 			var meterLabel = document.getElementById('password-meter-label');
 			var matchHint = document.getElementById('password-match-hint');
 
+			// Live strength + match feedback.
 			if (passwordInput && meterFill && meterLabel) {
 				var updateStrength = function () {
 					var value = passwordInput.value;
@@ -516,6 +530,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 				}
 			}
 
+			// Focus first visible field on load.
 			var firstInput = document.querySelector('input:not([type="hidden"])');
 			if (firstInput) {
 				firstInput.focus();
