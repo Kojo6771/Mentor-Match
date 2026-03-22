@@ -17,7 +17,10 @@ $email = trim($_SESSION['forgot_password_email'] ?? '');
 
 function clearForgotPasswordState(): void
 {
-	unset($_SESSION['forgot_password_email']);
+	unset(
+		$_SESSION['forgot_password_email'],
+		$_SESSION['forgot_password_verified']
+	);
 }
 
 function getForgotPasswordEmail(): string
@@ -75,8 +78,10 @@ if (isset($_GET['restart']) && $_GET['restart'] === '1') {
 	exit;
 }
 
-if ($email !== '') {
+if (!empty($_SESSION['forgot_password_verified']) && $email !== '') {
 	$step = 'reset';
+} elseif ($email !== '') {
+	$step = 'verify';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -102,7 +107,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 					$errors[] = 'We could not send the email right now. Please try again later.';
 				} else {
 					$_SESSION['forgot_password_email'] = $email;
-					$step = 'reset';
+					unset($_SESSION['forgot_password_verified']);
+					$step = 'verify';
 					$notice = 'A 6-digit verification code has been sent to your email address.';
 				}
 			} catch (PDOException $e) {
@@ -113,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 	if ($action === 'resend_code') {
 		$email = getForgotPasswordEmail();
-		$step = 'reset';
+		$step = 'verify';
 
 		if ($email === '') {
 			$step = 'email';
@@ -140,9 +146,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		}
 	}
 
-	if ($action === 'reset_password') {
+	if ($action === 'verify_code') {
 		$email = getForgotPasswordEmail();
 		$code = preg_replace('/\D/', '', $_POST['verification_code'] ?? '');
+		$step = 'verify';
+
+		if ($email === '') {
+			clearForgotPasswordState();
+			$step = 'email';
+			$errors[] = 'Please start again and enter your email address.';
+		} elseif (strlen($code) !== 6) {
+			$errors[] = 'Please enter the full 6-digit verification code.';
+		} else {
+			try {
+				$stmt = $pdo->prepare('SELECT id, user_id, code_hash, expires_at FROM password_resets WHERE email = ? AND used_at IS NULL ORDER BY id DESC LIMIT 1');
+				$stmt->execute([$email]);
+				$resetRow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+				if (!$resetRow) {
+					$errors[] = 'No active reset code was found. Please request a new code.';
+				} elseif (strtotime((string) $resetRow['expires_at']) < time()) {
+					$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE id = ?')->execute([(int) $resetRow['id']]);
+					$errors[] = 'That code has expired. Please request a new code.';
+				} elseif (!password_verify($code, (string) $resetRow['code_hash'])) {
+					$errors[] = 'The code you entered is incorrect.';
+				} else {
+					$pdo->prepare('UPDATE password_resets SET verified_at = NOW() WHERE id = ?')->execute([(int) $resetRow['id']]);
+					$_SESSION['forgot_password_verified'] = true;
+					$step = 'reset';
+					$notice = 'Code verified. You can now choose a new password.';
+				}
+			} catch (PDOException $e) {
+				$errors[] = 'Something went wrong while verifying your code.';
+			}
+		}
+	}
+
+	if ($action === 'reset_password') {
+		$email = getForgotPasswordEmail();
 		$password = $_POST['password'] ?? '';
 		$confirmPassword = $_POST['confirm_password'] ?? '';
 		$step = 'reset';
@@ -151,10 +192,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			clearForgotPasswordState();
 			$step = 'email';
 			$errors[] = 'Please start again and enter your email address.';
-		}
-
-		if (strlen($code) !== 6) {
-			$errors[] = 'Please enter the full 6-digit verification code.';
 		}
 
 		if (strlen($password) < 8) {
@@ -167,23 +204,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 		if (empty($errors)) {
 			try {
-				$stmt = $pdo->prepare('SELECT id, user_id, email, code_hash, expires_at FROM password_resets WHERE email = ? AND used_at IS NULL ORDER BY id DESC LIMIT 1');
+				$stmt = $pdo->prepare('SELECT id, user_id, email, expires_at FROM password_resets WHERE email = ? AND verified_at IS NOT NULL AND used_at IS NULL ORDER BY id DESC LIMIT 1');
 				$stmt->execute([$email]);
 				$resetRow = $stmt->fetch(PDO::FETCH_ASSOC);
 
 				if (!$resetRow) {
-					$errors[] = 'No active reset code was found. Please request a new code.';
+					clearForgotPasswordState();
+					$step = 'email';
+					$errors[] = 'Your reset session is no longer valid. Please start again.';
 				} elseif (strtotime((string) $resetRow['expires_at']) < time()) {
 					$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE email = ? AND used_at IS NULL')->execute([$email]);
-					$errors[] = 'That code has expired. Please request a new code.';
-				} elseif (!password_verify($code, (string) $resetRow['code_hash'])) {
-					$errors[] = 'The code you entered is incorrect.';
+					clearForgotPasswordState();
+					$step = 'email';
+					$errors[] = 'That code has expired. Please request a new one.';
 				} else {
 					$passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
 					$pdo->beginTransaction();
 					$pdo->prepare('UPDATE users SET password = ? WHERE id = ?')->execute([$passwordHash, (int) $resetRow['user_id']]);
-					$pdo->prepare('UPDATE password_resets SET verified_at = NOW(), used_at = NOW() WHERE id = ?')->execute([(int) $resetRow['id']]);
+					$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE id = ?')->execute([(int) $resetRow['id']]);
 					$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE email = ? AND used_at IS NULL')->execute([$email]);
 					$pdo->commit();
 
@@ -206,8 +245,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	}
 }
 
-$progressStep = ['email' => 1, 'reset' => 2, 'success' => 3][$step] ?? 1;
+$progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$step] ?? 1;
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -232,15 +273,17 @@ $progressStep = ['email' => 1, 'reset' => 2, 'success' => 3][$step] ?? 1;
 			</div>
 
 			<div class="forgot-steps" aria-hidden="true">
-				<div class="forgot-step-dot <?php echo $progressStep > 1 ? 'done' : 'active'; ?>"><?php echo $progressStep > 1 ? '✓' : '1'; ?></div>
+				<div class="forgot-step-dot <?php echo $progressStep > 1 ? 'done' : 'active'; ?>"><?php echo $progressStep > 1 ? 'âœ“' : '1'; ?></div>
 				<div class="forgot-step-line <?php echo $progressStep > 1 ? 'done' : ''; ?>"></div>
-				<div class="forgot-step-dot <?php echo $progressStep === 2 ? 'active' : ($progressStep > 2 ? 'done' : ''); ?>"><?php echo $progressStep > 2 ? '✓' : '2'; ?></div>
+				<div class="forgot-step-dot <?php echo $progressStep === 2 ? 'active' : ($progressStep > 2 ? 'done' : ''); ?>"><?php echo $progressStep > 2 ? 'âœ“' : '2'; ?></div>
 				<div class="forgot-step-line <?php echo $progressStep > 2 ? 'done' : ''; ?>"></div>
-				<div class="forgot-step-dot <?php echo $progressStep >= 3 ? 'active' : ''; ?>"><?php echo $step === 'success' ? '✓' : '3'; ?></div>
+				<div class="forgot-step-dot <?php echo $progressStep >= 3 ? 'active' : ''; ?>"><?php echo $step === 'success' ? 'âœ“' : '3'; ?></div>
 			</div>
 
 			<div class="forgot-hero <?php echo $step === 'success' ? 'success' : ''; ?>" aria-hidden="true">
-				<?php if ($step === 'reset' || $step === 'success'): ?>
+				<?php if ($step === 'verify'): ?>
+					<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="2"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+				<?php elseif ($step === 'reset' || $step === 'success'): ?>
 					<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 17a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" stroke-width="2"/><path d="M6 10V8a6 6 0 1112 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="2"/></svg>
 				<?php else: ?>
 					<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="2"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -250,12 +293,17 @@ $progressStep = ['email' => 1, 'reset' => 2, 'success' => 3][$step] ?? 1;
 			<?php if ($step === 'email'): ?>
 				<div class="forgot-center">
 					<h1 id="forgot-heading">Forgot your password?</h1>
-					<p class="forgot-lead">Enter the email address linked to your account and we’ll send you a secure 6-digit code to reset your password.</p>
+					<p class="forgot-lead">Enter the email address linked to your account and weâ€™ll send you a secure 6-digit code to reset your password.</p>
+				</div>
+			<?php elseif ($step === 'verify'): ?>
+				<div class="forgot-center">
+					<h1 id="forgot-heading">Check your email</h1>
+					<p class="forgot-lead">We sent a 6-digit verification code to <strong><?php echo htmlspecialchars($email); ?></strong>. Enter it below to continue.</p>
 				</div>
 			<?php elseif ($step === 'reset'): ?>
 				<div class="forgot-center">
-					<h1 id="forgot-heading">Enter your code and new password</h1>
-					<p class="forgot-lead">We sent a 6-digit verification code to <strong><?php echo htmlspecialchars($email); ?></strong>. Enter the code and your new password below.</p>
+					<h1 id="forgot-heading">Create a new password</h1>
+					<p class="forgot-lead">Your identity has been verified. Choose a strong password and confirm it to finish resetting your account.</p>
 				</div>
 			<?php else: ?>
 				<div class="forgot-center">
@@ -286,61 +334,65 @@ $progressStep = ['email' => 1, 'reset' => 2, 'success' => 3][$step] ?? 1;
 					<button class="btn" type="submit">Send 6-digit code</button>
 					<p class="small">Remembered it? <a class="link" href="./login.php">Sign in</a></p>
 				</form>
-			<?php elseif ($step === 'reset'): ?>
-				<form method="POST" id="reset-form" novalidate>
-					<input type="hidden" name="action" value="reset_password">
-					<input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
+		<?php elseif ($step === 'verify'): ?>
+			<form method="POST" id="verify-form" novalidate>
+				<input type="hidden" name="action" value="verify_code">
+				<input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
+				<input type="hidden" name="verification_code" id="verification_code" value="">
+				<div>
+					<label for="code-1">Verification code</label>
+					<div class="code-grid" id="code-grid">
+						<input class="code-box" id="code-1" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1">
+						<input class="code-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2">
+						<input class="code-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3">
+						<input class="code-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4">
+						<input class="code-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5">
+						<input class="code-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6">
+					</div>
+					<div class="code-help">
+						<span class="meta-note">Code expires in <?php echo RESET_CODE_EXPIRY_MINUTES; ?> minutes.</span>
+						<span class="meta-note">Didn't get it? Use resend below.</span>
+					</div>
+				</div>
+				<button class="btn" type="submit">Verify code</button>
+			</form>
+			<form method="POST" novalidate>
+				<input type="hidden" name="action" value="resend_code">
+				<input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
+				<button class="resend-btn" type="submit">Resend code</button>
+			</form>
+			<p class="small">Entered the wrong email? <a class="link" href="./forgot_password.php?restart=1">Start again</a></p>
+		<?php elseif ($step === 'reset'): ?>
+			<form method="POST" id="reset-form" novalidate>
+				<input type="hidden" name="action" value="reset_password">
+				<input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
+				<div class="password-shell">
 					<div>
-						<label for="code-1">Verification code</label>
-						<input type="hidden" name="verification_code" id="verification_code" value="">
-						<div class="code-grid" id="code-grid">
-							<input class="code-box" id="code-1" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1">
-							<input class="code-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2">
-							<input class="code-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 3">
-							<input class="code-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 4">
-							<input class="code-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 5">
-							<input class="code-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6">
+						<label for="password">New password</label>
+						<div class="password-wrap">
+							<input class="input" id="password" name="password" type="password" required placeholder="At least 8 characters" autocomplete="new-password">
+							<button class="toggle-pass" type="button" data-target="password" aria-label="Show password">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+							</button>
 						</div>
-						<div class="code-help">
-							<span class="meta-note">Code expires in <?php echo RESET_CODE_EXPIRY_MINUTES; ?> minutes.</span>
-							<span class="meta-note">Didn’t get it? Use resend below.</span>
+						<div class="password-meter" aria-hidden="true">
+							<div class="password-meter-track"><div class="password-meter-fill" id="password-meter-fill"></div></div>
+							<div class="password-meter-label" id="password-meter-label">Use 8+ characters with a mix of letters and numbers.</div>
 						</div>
 					</div>
-
-					<div class="password-shell">
-						<div>
-							<label for="password">New password</label>
-							<div class="password-wrap">
-								<input class="input" id="password" name="password" type="password" required placeholder="At least 8 characters" autocomplete="new-password">
-								<button class="toggle-pass" type="button" data-target="password" aria-label="Show password">
-									<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
-								</button>
-							</div>
-							<div class="password-meter" aria-hidden="true">
-								<div class="password-meter-track"><div class="password-meter-fill" id="password-meter-fill"></div></div>
-								<div class="password-meter-label" id="password-meter-label">Use 8+ characters with a mix of letters and numbers.</div>
-							</div>
+					<div>
+						<label for="confirm_password">Confirm password</label>
+						<div class="password-wrap">
+							<input class="input" id="confirm_password" name="confirm_password" type="password" required placeholder="Re-enter your password" autocomplete="new-password">
+							<button class="toggle-pass" type="button" data-target="confirm_password" aria-label="Show password">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+							</button>
 						</div>
-						<div>
-							<label for="confirm_password">Confirm password</label>
-							<div class="password-wrap">
-								<input class="input" id="confirm_password" name="confirm_password" type="password" required placeholder="Re-enter your password" autocomplete="new-password">
-								<button class="toggle-pass" type="button" data-target="confirm_password" aria-label="Show password">
-									<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
-								</button>
-							</div>
-							<span class="help-text" id="password-match-hint">Re-enter the same password to confirm.</span>
-						</div>
+						<span class="help-text" id="password-match-hint">Re-enter the same password to confirm.</span>
 					</div>
-
-					<button class="btn" type="submit">Save new password</button>
-				</form>
-				<form method="POST" novalidate>
-					<input type="hidden" name="action" value="resend_code">
-					<input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
-					<button class="resend-btn" type="submit">Resend code</button>
-				</form>
-				<p class="small">Entered the wrong email? <a class="link" href="./forgot_password.php?restart=1">Start again</a></p>
+				</div>
+				<button class="btn" type="submit">Save new password</button>
+			</form>
 			<?php else: ?>
 				<div class="success-actions">
 					<a class="btn linkish" href="./login.php">Go to sign in</a>
