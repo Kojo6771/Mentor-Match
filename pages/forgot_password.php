@@ -4,6 +4,7 @@ require_once '..\includes\db.php';
 
 const RESET_MAIL_FROM = 'kwadwo1092@gmail.com';
 const RESET_MAIL_REPLY_TO = 'kwadwo1092@gmail.com';
+const RESET_CODE_EXPIRY_MINUTES = 15;
 
 ini_set('SMTP', 'smtp.gmail.com');
 ini_set('smtp_port', '587');
@@ -16,11 +17,17 @@ $email = trim($_SESSION['forgot_password_email'] ?? '');
 
 function clearForgotPasswordState(): void
 {
-	unset(
-		$_SESSION['forgot_password_email'],
-		$_SESSION['forgot_password_reset_id'],
-		$_SESSION['forgot_password_user_id']
-	);
+	unset($_SESSION['forgot_password_email']);
+}
+
+function getForgotPasswordEmail(): string
+{
+	$postEmail = trim($_POST['email'] ?? '');
+	if ($postEmail !== '') {
+		return $postEmail;
+	}
+
+	return trim($_SESSION['forgot_password_email'] ?? '');
 }
 
 function sendResetCodeEmail(string $email, string $firstName, string $code): bool
@@ -29,9 +36,9 @@ function sendResetCodeEmail(string $email, string $firstName, string $code): boo
 	$message = "Hello {$firstName},\r\n\r\n";
 	$message .= "We received a request to reset your Mentor Match password.\r\n\r\n";
 	$message .= "Your 6-digit verification code is: {$code}\r\n\r\n";
-	$message .= "This code expires in 15 minutes.\r\n\r\n";
+	$message .= 'This code expires in ' . RESET_CODE_EXPIRY_MINUTES . " minutes.\r\n\r\n";
 	$message .= "If you did not request this, you can safely ignore this email.\r\n\r\n";
-	$message .= "- Mentor Match";
+	$message .= '- Mentor Match';
 
 	$headers = [];
 	$headers[] = 'MIME-Version: 1.0';
@@ -43,23 +50,41 @@ function sendResetCodeEmail(string $email, string $firstName, string $code): boo
 	return @mail($email, $subject, $message, implode("\r\n", $headers));
 }
 
+function createPasswordResetCode(PDO $pdo, array $user, string $email): bool
+{
+	$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE email = ? AND used_at IS NULL')->execute([$email]);
+
+	$code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+	$codeHash = password_hash($code, PASSWORD_DEFAULT);
+	$expiresAt = date('Y-m-d H:i:s', strtotime('+' . RESET_CODE_EXPIRY_MINUTES . ' minutes'));
+
+	$insert = $pdo->prepare('INSERT INTO password_resets (user_id, email, code_hash, expires_at) VALUES (?, ?, ?, ?)');
+	$insert->execute([(int) $user['id'], $email, $codeHash, $expiresAt]);
+
+	if (!sendResetCodeEmail($email, (string) $user['first_name'], $code)) {
+		$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE email = ? AND used_at IS NULL')->execute([$email]);
+		return false;
+	}
+
+	return true;
+}
+
 if (isset($_GET['restart']) && $_GET['restart'] === '1') {
 	clearForgotPasswordState();
 	header('Location: forgot_password.php');
 	exit;
 }
 
-if (!empty($_SESSION['forgot_password_reset_id']) && !empty($_SESSION['forgot_password_user_id']) && !empty($_SESSION['forgot_password_email'])) {
+if ($email !== '') {
 	$step = 'reset';
-} elseif (!empty($_SESSION['forgot_password_email'])) {
-	$step = 'verify';
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$action = $_POST['action'] ?? '';
 
 	if ($action === 'request_code') {
 		$email = trim($_POST['email'] ?? '');
+		$step = 'email';
 
 		if ($email === '') {
 			$errors[] = 'Please enter your email address.';
@@ -73,25 +98,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
 
 				if (!$user) {
 					$errors[] = 'No account was found with that email address.';
+				} elseif (!createPasswordResetCode($pdo, $user, $email)) {
+					$errors[] = 'We could not send the email right now. Please try again later.';
 				} else {
-					$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE email = ? AND used_at IS NULL')->execute([$email]);
-
-					$code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-					$codeHash = password_hash($code, PASSWORD_DEFAULT);
-					$expiresAt = date('Y-m-d H:i:s', strtotime('+15 minutes'));
-
-					$insert = $pdo->prepare('INSERT INTO password_resets (user_id, email, code_hash, expires_at) VALUES (?, ?, ?, ?)');
-					$insert->execute([(int) $user['id'], $email, $codeHash, $expiresAt]);
-
-					if (!sendResetCodeEmail($email, $user['first_name'], $code)) {
-						$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE email = ? AND used_at IS NULL')->execute([$email]);
-						$errors[] = 'We could not send the email right now. Please try again later.';
-					} else {
-						clearForgotPasswordState();
-						$_SESSION['forgot_password_email'] = $email;
-						$step = 'verify';
-						$notice = 'A 6-digit verification code has been sent to your email address.';
-					}
+					$_SESSION['forgot_password_email'] = $email;
+					$step = 'reset';
+					$notice = 'A 6-digit verification code has been sent to your email address.';
 				}
 			} catch (PDOException $e) {
 				$errors[] = 'Something went wrong while preparing your password reset.';
@@ -100,7 +112,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
 	}
 
 	if ($action === 'resend_code') {
-		$email = trim($_SESSION['forgot_password_email'] ?? '');
+		$email = getForgotPasswordEmail();
+		$step = 'reset';
 
 		if ($email === '') {
 			$step = 'email';
@@ -115,22 +128,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
 					clearForgotPasswordState();
 					$step = 'email';
 					$errors[] = 'No account was found with that email address.';
+				} elseif (!createPasswordResetCode($pdo, $user, $email)) {
+					$errors[] = 'We could not resend the email right now. Please try again later.';
 				} else {
-					$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE email = ? AND used_at IS NULL')->execute([$email]);
-
-					$code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-					$codeHash = password_hash($code, PASSWORD_DEFAULT);
-					$expiresAt = date('Y-m-d H:i:s', strtotime('+15 minutes'));
-
-					$insert = $pdo->prepare('INSERT INTO password_resets (user_id, email, code_hash, expires_at) VALUES (?, ?, ?, ?)');
-					$insert->execute([(int) $user['id'], $email, $codeHash, $expiresAt]);
-
-					if (!sendResetCodeEmail($email, $user['first_name'], $code)) {
-						$errors[] = 'We could not resend the email right now. Please try again later.';
-					} else {
-						$step = 'verify';
-						$notice = 'A new code has been sent to your email.';
-					}
+					$_SESSION['forgot_password_email'] = $email;
+					$notice = 'A new code has been sent to your email.';
 				}
 			} catch (PDOException $e) {
 				$errors[] = 'Something went wrong while resending your code.';
@@ -138,90 +140,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && empty($errors)) {
 		}
 	}
 
-	if ($action === 'verify_code') {
-		$email = trim($_SESSION['forgot_password_email'] ?? '');
+	if ($action === 'reset_password') {
+		$email = getForgotPasswordEmail();
 		$code = preg_replace('/\D/', '', $_POST['verification_code'] ?? '');
-		$step = 'verify';
+		$password = $_POST['password'] ?? '';
+		$confirmPassword = $_POST['confirm_password'] ?? '';
+		$step = 'reset';
 
 		if ($email === '') {
+			clearForgotPasswordState();
 			$step = 'email';
 			$errors[] = 'Please start again and enter your email address.';
-		} elseif (strlen($code) !== 6) {
+		}
+
+		if (strlen($code) !== 6) {
 			$errors[] = 'Please enter the full 6-digit verification code.';
-		} else {
+		}
+
+		if (strlen($password) < 8) {
+			$errors[] = 'Your new password must be at least 8 characters long.';
+		}
+
+		if ($password !== $confirmPassword) {
+			$errors[] = 'The passwords do not match.';
+		}
+
+		if (empty($errors)) {
 			try {
-				$stmt = $pdo->prepare('SELECT id, user_id, code_hash, expires_at FROM password_resets WHERE email = ? AND used_at IS NULL ORDER BY id DESC LIMIT 1');
+				$stmt = $pdo->prepare('SELECT id, user_id, email, code_hash, expires_at FROM password_resets WHERE email = ? AND used_at IS NULL ORDER BY id DESC LIMIT 1');
 				$stmt->execute([$email]);
 				$resetRow = $stmt->fetch(PDO::FETCH_ASSOC);
 
 				if (!$resetRow) {
 					$errors[] = 'No active reset code was found. Please request a new code.';
 				} elseif (strtotime((string) $resetRow['expires_at']) < time()) {
-					$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE id = ?')->execute([(int) $resetRow['id']]);
+					$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE email = ? AND used_at IS NULL')->execute([$email]);
 					$errors[] = 'That code has expired. Please request a new code.';
-				} elseif (!password_verify($code, $resetRow['code_hash'])) {
+				} elseif (!password_verify($code, (string) $resetRow['code_hash'])) {
 					$errors[] = 'The code you entered is incorrect.';
 				} else {
-					$pdo->prepare('UPDATE password_resets SET verified_at = NOW() WHERE id = ?')->execute([(int) $resetRow['id']]);
-					$_SESSION['forgot_password_reset_id'] = (int) $resetRow['id'];
-					$_SESSION['forgot_password_user_id'] = (int) $resetRow['user_id'];
-					$step = 'reset';
-					$notice = 'Code verified. You can now choose a new password.';
+					$passwordHash = password_hash($password, PASSWORD_DEFAULT);
+
+					$pdo->beginTransaction();
+					$pdo->prepare('UPDATE users SET password = ? WHERE id = ?')->execute([$passwordHash, (int) $resetRow['user_id']]);
+					$pdo->prepare('UPDATE password_resets SET verified_at = NOW(), used_at = NOW() WHERE id = ?')->execute([(int) $resetRow['id']]);
+					$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE email = ? AND used_at IS NULL')->execute([$email]);
+					$pdo->commit();
+
+					clearForgotPasswordState();
+					$email = '';
+					$step = 'success';
+					$notice = 'Your password has been updated successfully. You can now sign in.';
 				}
 			} catch (PDOException $e) {
-				$errors[] = 'Something went wrong while verifying your code.';
+				if ($pdo->inTransaction()) {
+					$pdo->rollBack();
+				}
+				$errors[] = 'Something went wrong while saving your new password.';
 			}
 		}
 	}
 
-	if ($action === 'reset_password') {
-		$email = trim($_SESSION['forgot_password_email'] ?? '');
-		$resetId = (int) ($_SESSION['forgot_password_reset_id'] ?? 0);
-		$userId = (int) ($_SESSION['forgot_password_user_id'] ?? 0);
-		$password = $_POST['password'] ?? '';
-		$confirmPassword = $_POST['confirm_password'] ?? '';
-		$step = 'reset';
-
-		if ($email === '' || $resetId <= 0 || $userId <= 0) {
-			clearForgotPasswordState();
-			$step = 'email';
-			$errors[] = 'Your reset session has expired. Please start again.';
-		} else {
-			if (strlen($password) < 8) {
-				$errors[] = 'Your new password must be at least 8 characters long.';
-			}
-			if ($password !== $confirmPassword) {
-				$errors[] = 'The passwords do not match.';
-			}
-
-			if (empty($errors)) {
-				try {
-					$stmt = $pdo->prepare('SELECT id, expires_at, verified_at, used_at FROM password_resets WHERE id = ? AND user_id = ? AND email = ? LIMIT 1');
-					$stmt->execute([$resetId, $userId, $email]);
-					$resetRow = $stmt->fetch(PDO::FETCH_ASSOC);
-
-					if (!$resetRow || !empty($resetRow['used_at']) || empty($resetRow['verified_at']) || strtotime((string) $resetRow['expires_at']) < time()) {
-						clearForgotPasswordState();
-						$step = 'email';
-						$errors[] = 'Your reset session is no longer valid. Please request a new code.';
-					} else {
-						$passwordHash = password_hash($password, PASSWORD_DEFAULT);
-						$pdo->prepare('UPDATE users SET password = ? WHERE id = ?')->execute([$passwordHash, $userId]);
-						$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE id = ?')->execute([$resetId]);
-						$pdo->prepare('UPDATE password_resets SET used_at = NOW() WHERE email = ? AND used_at IS NULL')->execute([$email]);
-						clearForgotPasswordState();
-						$step = 'success';
-						$notice = 'Your password has been updated successfully.';
-					}
-				} catch (PDOException $e) {
-					$errors[] = 'Something went wrong while saving your new password.';
-				}
-			}
-		}
+	if ($step !== 'success' && $email !== '') {
+		$_SESSION['forgot_password_email'] = $email;
 	}
 }
 
-$progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$step] ?? 1;
+$progressStep = ['email' => 1, 'reset' => 2, 'success' => 3][$step] ?? 1;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -255,9 +240,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 			</div>
 
 			<div class="forgot-hero <?php echo $step === 'success' ? 'success' : ''; ?>" aria-hidden="true">
-				<?php if ($step === 'verify'): ?>
-					<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="2"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-				<?php elseif ($step === 'reset' || $step === 'success'): ?>
+				<?php if ($step === 'reset' || $step === 'success'): ?>
 					<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 17a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" stroke-width="2"/><path d="M6 10V8a6 6 0 1112 0v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="2"/></svg>
 				<?php else: ?>
 					<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="2"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -267,17 +250,12 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 			<?php if ($step === 'email'): ?>
 				<div class="forgot-center">
 					<h1 id="forgot-heading">Forgot your password?</h1>
-					<p class="forgot-lead">Enter the email address linked to your account and we’ll send you a secure 6-digit code to get back in.</p>
-				</div>
-			<?php elseif ($step === 'verify'): ?>
-				<div class="forgot-center">
-					<h1 id="forgot-heading">Check your email</h1>
-					<p class="forgot-lead">We sent a 6-digit verification code to <strong><?php echo htmlspecialchars($email); ?></strong>. Enter it below to continue.</p>
+					<p class="forgot-lead">Enter the email address linked to your account and we’ll send you a secure 6-digit code to reset your password.</p>
 				</div>
 			<?php elseif ($step === 'reset'): ?>
 				<div class="forgot-center">
-					<h1 id="forgot-heading">Create a new password</h1>
-					<p class="forgot-lead">Your identity has been verified. Choose a strong password and confirm it to finish resetting your account.</p>
+					<h1 id="forgot-heading">Enter your code and new password</h1>
+					<p class="forgot-lead">We sent a 6-digit verification code to <strong><?php echo htmlspecialchars($email); ?></strong>. Enter the code and your new password below.</p>
 				</div>
 			<?php else: ?>
 				<div class="forgot-center">
@@ -308,12 +286,13 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 					<button class="btn" type="submit">Send 6-digit code</button>
 					<p class="small">Remembered it? <a class="link" href="./login.php">Sign in</a></p>
 				</form>
-			<?php elseif ($step === 'verify'): ?>
-				<form method="POST" id="verify-form" novalidate>
-					<input type="hidden" name="action" value="verify_code">
-					<input type="hidden" name="verification_code" id="verification_code" value="">
+			<?php elseif ($step === 'reset'): ?>
+				<form method="POST" id="reset-form" novalidate>
+					<input type="hidden" name="action" value="reset_password">
+					<input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
 					<div>
 						<label for="code-1">Verification code</label>
+						<input type="hidden" name="verification_code" id="verification_code" value="">
 						<div class="code-grid" id="code-grid">
 							<input class="code-box" id="code-1" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1">
 							<input class="code-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 2">
@@ -323,20 +302,11 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 							<input class="code-box" type="text" inputmode="numeric" maxlength="1" aria-label="Digit 6">
 						</div>
 						<div class="code-help">
-							<span class="meta-note">Code expires in 15 minutes.</span>
+							<span class="meta-note">Code expires in <?php echo RESET_CODE_EXPIRY_MINUTES; ?> minutes.</span>
 							<span class="meta-note">Didn’t get it? Use resend below.</span>
 						</div>
 					</div>
-					<button class="btn" type="submit">Verify code</button>
-				</form>
-				<form method="POST" novalidate>
-					<input type="hidden" name="action" value="resend_code">
-					<button class="resend-btn" type="submit">Resend code</button>
-				</form>
-				<p class="small">Entered the wrong email? <a class="link" href="./forgot_password.php?restart=1">Start again</a></p>
-			<?php elseif ($step === 'reset'): ?>
-				<form method="POST" id="reset-form" novalidate>
-					<input type="hidden" name="action" value="reset_password">
+
 					<div class="password-shell">
 						<div>
 							<label for="password">New password</label>
@@ -362,8 +332,15 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 							<span class="help-text" id="password-match-hint">Re-enter the same password to confirm.</span>
 						</div>
 					</div>
+
 					<button class="btn" type="submit">Save new password</button>
 				</form>
+				<form method="POST" novalidate>
+					<input type="hidden" name="action" value="resend_code">
+					<input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
+					<button class="resend-btn" type="submit">Resend code</button>
+				</form>
+				<p class="small">Entered the wrong email? <a class="link" href="./forgot_password.php?restart=1">Start again</a></p>
 			<?php else: ?>
 				<div class="success-actions">
 					<a class="btn linkish" href="./login.php">Go to sign in</a>
@@ -419,8 +396,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 							}
 						});
 						syncCode();
-						var nextIndex = Math.min(pasted.length, codeBoxes.length - 1);
-						codeBoxes[nextIndex].focus();
+						codeBoxes[Math.min(pasted.length, codeBoxes.length - 1)].focus();
 					});
 				});
 			}
@@ -448,7 +424,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 					if (/\d/.test(value)) score++;
 					if (/[^A-Za-z0-9]/.test(value)) score++;
 
-					var width = ['0%','25%','50%','75%','100%'][score] || '0%';
+					var width = ['0%', '25%', '50%', '75%', '100%'][score] || '0%';
 					var label = 'Use 8+ characters with a mix of letters and numbers.';
 					var color = '#e5e7eb';
 
