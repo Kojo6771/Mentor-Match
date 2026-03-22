@@ -4,7 +4,6 @@ require_once '..\includes\db.php';
 
 // Configuration for the forgot password flow. 
 const RESET_MAIL_FROM = 'kwadwo1092@gmail.com';
-const RESET_MAIL_REPLY_TO = 'kwadwo1092@gmail.com';
 const RESET_CODE_EXPIRY_MINUTES = 15;
 
 ini_set('SMTP', 'smtp.gmail.com');
@@ -26,6 +25,7 @@ function clearForgotPasswordState(): void
 	);
 }
 
+
 function getForgotPasswordEmail(): string
 {
 	$postEmail = trim($_POST['email'] ?? '');
@@ -44,13 +44,13 @@ function sendResetCodeEmail(string $email, string $firstName, string $code): boo
 	$message .= "Your 6-digit verification code is: {$code}\r\n\r\n";
 	$message .= 'This code expires in ' . RESET_CODE_EXPIRY_MINUTES . " minutes.\r\n\r\n";
 	$message .= "If you did not request this, you can safely ignore this email.\r\n\r\n";
+	$message .= "Please do not reply to this message.\r\n\r\n";
 	$message .= '- Mentor Match';
 
 	$headers = [];
 	$headers[] = 'MIME-Version: 1.0';
 	$headers[] = 'Content-type: text/plain; charset=UTF-8';
-	$headers[] = 'From: Mentor Match <' . RESET_MAIL_FROM . '>';
-	$headers[] = 'Reply-To: ' . RESET_MAIL_REPLY_TO;
+	$headers[] = 'From: Mentor Match (No Reply) <' . RESET_MAIL_FROM . '>';
 	$headers[] = 'X-Mailer: PHP/' . phpversion();
 
 	return @mail($email, $subject, $message, implode("\r\n", $headers));
