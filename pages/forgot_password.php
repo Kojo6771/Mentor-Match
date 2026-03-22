@@ -272,17 +272,21 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 </head>
 <body>
 	<main class="container">
+		<!-- Main reset card -->
 		<section class="card forgot-card" aria-labelledby="forgot-heading">
+			<!-- Quick way back to login -->
 			<a class="back-link" href="./login.php" aria-label="Back to sign in">
 				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
 				Back to sign in
 			</a>
 
+			<!-- Brand block -->
 			<div class="logo">
 				<svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" fill="var(--accent)"/><path d="M3 20c0-3.866 3.582-7 9-7s9 3.134 9 7" stroke="#111827" stroke-opacity=".06" stroke-width="1.5"/></svg>
 				<div class="brand">Mentor Match</div>
 			</div>
 
+			<!-- Visual step tracker -->
 			<div class="forgot-steps" aria-hidden="true">
 				<div class="forgot-step-dot <?php echo $progressStep > 1 ? 'done' : 'active'; ?>"><?php echo $progressStep > 1 ? '✓' : '1'; ?></div>
 				<div class="forgot-step-line <?php echo $progressStep > 1 ? 'done' : ''; ?>"></div>
@@ -291,6 +295,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 				<div class="forgot-step-dot <?php echo $progressStep >= 3 ? 'active' : ''; ?>"><?php echo $step === 'success' ? '✓' : '3'; ?></div>
 			</div>
 
+			<!-- Icon changes by current step -->
 			<div class="forgot-hero <?php echo $step === 'success' ? 'success' : ''; ?>" aria-hidden="true">
 				<?php if ($step === 'verify'): ?>
 					<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="currentColor" stroke-width="2"/><path d="M4 7l8 6 8-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -301,6 +306,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 				<?php endif; ?>
 			</div>
 
+			<!-- Step heading + helper text -->
 			<?php if ($step === 'email'): ?>
 				<div class="forgot-center">
 					<h1 id="forgot-heading">Forgot your password?</h1>
@@ -323,10 +329,12 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 				</div>
 			<?php endif; ?>
 
+			<!-- Success/info notices -->
 			<?php if (!empty($notice)): ?>
 				<div class="notice" role="status"><?php echo htmlspecialchars($notice); ?></div>
 			<?php endif; ?>
 
+			<!-- Validation or action errors -->
 			<?php if (!empty($errors)): ?>
 				<div class="errors" role="alert">
 					<?php foreach ($errors as $error): ?>
@@ -335,6 +343,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 				</div>
 			<?php endif; ?>
 
+			<!-- request a code -->
 			<?php if ($step === 'email'): ?>
 				<form method="POST" novalidate>
 					<input type="hidden" name="action" value="request_code">
@@ -345,6 +354,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 					<button class="btn send-code-btn" type="submit">Send 6-digit code</button>
 					<p class="small">Remembered it? <a class="link" href="./login.php">Sign in</a></p>
 				</form>
+		<!-- verify code -->
 		<?php elseif ($step === 'verify'): ?>
 			<form method="POST" id="verify-form" novalidate>
 				<input type="hidden" name="action" value="verify_code">
@@ -373,6 +383,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 				<button class="resend-btn" type="submit">Resend code</button>
 			</form>
 			<p class="small">Entered the wrong email? <a class="link" href="./forgot_password.php?restart=1">Start again</a></p>
+		<!-- set a new password -->
 		<?php elseif ($step === 'reset'): ?>
 			<form method="POST" id="reset-form" novalidate>
 				<input type="hidden" name="action" value="reset_password">
@@ -405,6 +416,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 				<button class="btn" type="submit">Save new password</button>
 			</form>
 			<?php else: ?>
+				<!-- Final success state -->
 				<div class="success-actions">
 					<a class="btn linkish" href="./login.php">Go to sign in</a>
 					<p class="small">Your password has been changed and your account is ready to use.</p>
@@ -413,6 +425,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 		</section>
 	</main>
 
+	<!-- Page-specific form interactions -->
 	<script>
 		(function () {
 			// Remove restart query param after reload.

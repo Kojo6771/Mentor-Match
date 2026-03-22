@@ -207,6 +207,8 @@ function fmt_time(string $time): string
     return date('g:i A', strtotime($time));
 }
 ?>
+
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>

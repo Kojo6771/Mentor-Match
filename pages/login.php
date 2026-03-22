@@ -1,37 +1,43 @@
 <?php 
 session_start();
 require_once '..\includes\db.php';
+
+// Collect friendly errors for the UI.
 $errors = []; 
 
+// Handle login form submit.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
 
+    // Basic required-field check.
     if (empty($email) || empty($password)) {
         $errors[] = "Please enter both email and password.";
     } else {
         try {
+            // Look up the user by email.
             $sql = "SELECT id, first_name, last_name, email, phone, password, role FROM users WHERE email = ? LIMIT 1";
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+            // Check password and start the user session.
             if ($user && password_verify($password, $user['password'])) {
-                // Successful login
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['first_name'] = $user['first_name'];
                 $_SESSION['last_name'] = $user['last_name'];
                 $_SESSION['email'] = $user['email'];
                 $_SESSION['phone'] = $user['phone'];
                 $_SESSION['role'] = $user['role'];
-               
 
+                // Send user to their main page.
                 header("Location: dashboard.php");
                 exit;
             } else {
                 $errors[] = "Invalid email or password.";
             }
         } catch (PDOException $e) {
+            // Keep database details hidden from users.
             $errors[] = "An error occurred, please try again later.";
         }
     }
