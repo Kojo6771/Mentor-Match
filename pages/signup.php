@@ -179,8 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="terms" class="small">I agree to the <a class="link" href="#">Terms</a> and <a class="link" href="#">Privacy Policy</a>.</label>
                 </div>
 
-                <button class="btn" type="submit">Get started</button>
-                <button type="button" class="btn secondary" onclick="location.href='/pages/login.php'">Sign in</button>
+                <button class="btn get-started-btn" type="submit">Get started</button>
 
                 <p class="small">Already have an account? <a class="link" href="./login.php">Sign in</a></p>
             </form>

@@ -18,6 +18,8 @@ label{font-size:0.85rem;color:var(--muted);display:block;margin-bottom:6px}
 .role input{display:none}
 .role.selected{border-color:var(--accent);box-shadow:0 4px 14px rgba(59,130,246,0.12);}
 .btn{width:100%;padding:12px;border-radius:10px;border:0;background:var(--accent);color:#fff;font-weight:700;font-size:1rem;cursor:pointer}
+.get-started-btn{transition:transform .18s ease, filter .18s ease, box-shadow .18s ease}
+.get-started-btn:hover{transform:translateY(-1px);filter:brightness(1.04);box-shadow:0 10px 18px rgba(59,130,246,0.22)}
 .signin-btn{transition:transform .18s ease, filter .18s ease, box-shadow .18s ease}
 .signin-btn:hover{transform:translateY(-1px);filter:brightness(1.04);box-shadow:0 10px 18px rgba(59,130,246,0.22)}
 .secondary{background:transparent;border:1px solid #e6e9ef;color:var(--muted)}
