@@ -273,11 +273,11 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 			</div>
 
 			<div class="forgot-steps" aria-hidden="true">
-				<div class="forgot-step-dot <?php echo $progressStep > 1 ? 'done' : 'active'; ?>"><?php echo $progressStep > 1 ? 'âœ“' : '1'; ?></div>
+				<div class="forgot-step-dot <?php echo $progressStep > 1 ? 'done' : 'active'; ?>"><?php echo $progressStep > 1 ? '✓' : '1'; ?></div>
 				<div class="forgot-step-line <?php echo $progressStep > 1 ? 'done' : ''; ?>"></div>
-				<div class="forgot-step-dot <?php echo $progressStep === 2 ? 'active' : ($progressStep > 2 ? 'done' : ''); ?>"><?php echo $progressStep > 2 ? 'âœ“' : '2'; ?></div>
+				<div class="forgot-step-dot <?php echo $progressStep === 2 ? 'active' : ($progressStep > 2 ? 'done' : ''); ?>"><?php echo $progressStep > 2 ? '✓' : '2'; ?></div>
 				<div class="forgot-step-line <?php echo $progressStep > 2 ? 'done' : ''; ?>"></div>
-				<div class="forgot-step-dot <?php echo $progressStep >= 3 ? 'active' : ''; ?>"><?php echo $step === 'success' ? 'âœ“' : '3'; ?></div>
+				<div class="forgot-step-dot <?php echo $progressStep >= 3 ? 'active' : ''; ?>"><?php echo $step === 'success' ? '✓' : '3'; ?></div>
 			</div>
 
 			<div class="forgot-hero <?php echo $step === 'success' ? 'success' : ''; ?>" aria-hidden="true">
