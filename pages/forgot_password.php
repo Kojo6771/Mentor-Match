@@ -2,32 +2,25 @@
 session_start();
 require_once '..\includes\db.php';
 
+const RESET_MAIL_FROM = 'kwadwo1092@gmail.com';
+const RESET_MAIL_REPLY_TO = 'kwadwo1092@gmail.com';
+
+ini_set('SMTP', 'smtp.gmail.com');
+ini_set('smtp_port', '587');
+ini_set('sendmail_from', RESET_MAIL_FROM);
+
 $errors = [];
 $notice = '';
 $step = 'email';
 $email = trim($_SESSION['forgot_password_email'] ?? '');
 
-function ensurePasswordResetTable(PDO $pdo): void
-{
-	$pdo->exec("CREATE TABLE IF NOT EXISTS password_resets (
-		id INT(11) NOT NULL AUTO_INCREMENT,
-		user_id INT(11) NOT NULL,
-		email VARCHAR(150) NOT NULL,
-		code_hash VARCHAR(255) NOT NULL,
-		expires_at DATETIME NOT NULL,
-		verified_at DATETIME DEFAULT NULL,
-		used_at DATETIME DEFAULT NULL,
-		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		PRIMARY KEY (id),
-		KEY user_id (user_id),
-		KEY email (email),
-		CONSTRAINT password_resets_ibfk_1 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-	) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci");
-}
-
 function clearForgotPasswordState(): void
 {
-	unset($_SESSION['forgot_password_email'], $_SESSION['forgot_password_reset_id'], $_SESSION['forgot_password_user_id']);
+	unset(
+		$_SESSION['forgot_password_email'],
+		$_SESSION['forgot_password_reset_id'],
+		$_SESSION['forgot_password_user_id']
+	);
 }
 
 function sendResetCodeEmail(string $email, string $firstName, string $code): bool
@@ -43,15 +36,11 @@ function sendResetCodeEmail(string $email, string $firstName, string $code): boo
 	$headers = [];
 	$headers[] = 'MIME-Version: 1.0';
 	$headers[] = 'Content-type: text/plain; charset=UTF-8';
-	$headers[] = 'From: Mentor Match <noreply@mentormatch.local>';
+	$headers[] = 'From: Mentor Match <' . RESET_MAIL_FROM . '>';
+	$headers[] = 'Reply-To: ' . RESET_MAIL_REPLY_TO;
+	$headers[] = 'X-Mailer: PHP/' . phpversion();
 
 	return @mail($email, $subject, $message, implode("\r\n", $headers));
-}
-
-try {
-	ensurePasswordResetTable($pdo);
-} catch (PDOException $e) {
-	$errors[] = 'Password reset is temporarily unavailable. Please try again later.';
 }
 
 if (isset($_GET['restart']) && $_GET['restart'] === '1') {
