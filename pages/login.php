@@ -46,13 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sign In — Mentor Match</title>
+    <title>Sign In | Mentor Match</title>
     <meta name="description" content="Sign in to Mentor Match — find mentors or Students.">
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body>
     <main class="container">
-        <section class="card" aria-labelledby="login-heading">
+        <section class="card login-card" aria-labelledby="login-heading">
             <div class="logo">
                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" fill="var(--accent)"/><path d="M3 20c0-3.866 3.582-7 9-7s9 3.134 9 7" stroke="#111827" stroke-opacity=".06" stroke-width="1.5"/></svg>
                 <div class="brand">Mentor Match</div>
