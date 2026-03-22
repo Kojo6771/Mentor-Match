@@ -23,6 +23,7 @@ function clearForgotPasswordState(): void
 }
 
 
+
 function getForgotPasswordEmail(): string
 {
 	$postEmail = trim($_POST['email'] ?? '');
@@ -33,6 +34,8 @@ function getForgotPasswordEmail(): string
 	return trim($_SESSION['forgot_password_email'] ?? '');
 }
 
+
+// Sends the reset code email. Returns false if mail() fails.
 function sendResetCodeEmail(string $email, string $firstName, string $code): bool
 {
 	$subject = 'Mentor Match - Password Reset Code';
@@ -119,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		}
 	}
 
-	// Optional: Resend a fresh code.
+	//  Resend a fresh code.
 	if ($action === 'resend_code') {
 		$email = getForgotPasswordEmail();
 		$step = 'verify';
@@ -149,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		}
 	}
 
-	// Step 2: Verify code.
+	// Verify code.
 	if ($action === 'verify_code') {
 		$email = getForgotPasswordEmail();
 		$code = preg_replace('/\D/', '', $_POST['verification_code'] ?? '');
@@ -186,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		}
 	}
 
-	// Step 3: Save the new password.
+	// Save the new password.
 	if ($action === 'reset_password') {
 		$email = getForgotPasswordEmail();
 		$password = $_POST['password'] ?? '';
@@ -256,12 +259,13 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 ?>
 
 
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Forgot Password - Mentor Match</title>
+	<title>Forgot Password | Mentor Match</title>
 	<meta name="description" content="Reset your Mentor Match password with a 6-digit email verification code.">
 	<link rel="stylesheet" href="../assets/css/styles.css">
 	<link rel="stylesheet" href="../assets/css/forgot_password.css">
@@ -300,7 +304,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 			<?php if ($step === 'email'): ?>
 				<div class="forgot-center">
 					<h1 id="forgot-heading">Forgot your password?</h1>
-					<p class="forgot-lead">Enter the email address linked to your account and weâ€™ll send you a secure 6-digit code to reset your password.</p>
+					<p class="forgot-lead">Enter the email address linked to your account and we'll send you a secure 6-digit code to reset your password.</p>
 				</div>
 			<?php elseif ($step === 'verify'): ?>
 				<div class="forgot-center">
@@ -338,7 +342,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 						<label for="email">Email address</label>
 						<input class="input" id="email" name="email" type="email" required value="<?php echo htmlspecialchars($email); ?>" placeholder="you@example.com" autocomplete="email">
 					</div>
-					<button class="btn" type="submit">Send 6-digit code</button>
+					<button class="btn send-code-btn" type="submit">Send 6-digit code</button>
 					<p class="small">Remembered it? <a class="link" href="./login.php">Sign in</a></p>
 				</form>
 		<?php elseif ($step === 'verify'): ?>
