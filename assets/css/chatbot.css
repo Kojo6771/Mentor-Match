@@ -227,6 +227,7 @@
     border: 1px solid #e2e8f0;
     border-top-left-radius: 4px;
     color: #1e293b;
+    font-size: 0.9rem;
 }
 
 .cb-bubble--user {
@@ -404,7 +405,7 @@
     border: 1px solid #e2e8f0;
     border-radius: 5px;
     padding: 1px 6px;
-    font-size: 0.88em;
+    font-size: 0.8em;
     font-family: 'Fira Code', 'Consolas', monospace;
     color: #0f172a;
 }
@@ -412,7 +413,7 @@
 .cb-bubble--bot pre {
     background: #0f172a;
     border-radius: 10px;
-    padding: 14px 16px;
+    padding: 12px 14px;
     margin: 8px 0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -423,8 +424,8 @@
     border: none;
     padding: 0;
     color: #e2e8f0;
-    font-size: 0.85rem;
-    line-height: 1.5;
+    font-size: 0.76rem;
+    line-height: 1.4;
     white-space: pre;
 }
 
@@ -446,8 +447,8 @@
     color: #0f172a;
 }
 
-.cb-bubble--bot h3 { font-size: 1.05rem; }
-.cb-bubble--bot h4 { font-size: 0.95rem; }
+.cb-bubble--bot h3 { font-size: 0.98rem; }
+.cb-bubble--bot h4 { font-size: 0.9rem; }
 
 .cb-bubble--bot blockquote {
     border-left: 3px solid var(--accent);
@@ -590,6 +591,11 @@
 
 /* Phones up to 520px */
 @media (max-width: 520px) {
+    .cb-page,
+    .cb-messages {
+        overflow-x: hidden;
+    }
+
     .cb-header {
         padding: 12px 14px;
     }
@@ -631,10 +637,12 @@
     .cb-chip {
         padding: 8px 14px;
         font-size: 0.82rem;
+        white-space: normal;
     }
     .cb-row {
         max-width: 92%;
         gap: 8px;
+        min-width: 0;
     }
     .cb-row--user {
         max-width: 88%;
@@ -650,6 +658,10 @@
     .cb-bubble {
         padding: 10px 14px;
         font-size: 0.92rem;
+        max-width: 100%;
+    }
+    .cb-bubble--bot {
+        font-size: 0.84rem;
     }
     .cb-composer {
         padding: 10px 12px 12px;
@@ -666,9 +678,13 @@
     .cb-bubble--bot pre {
         padding: 12px 14px;
         border-radius: 8px;
+        overflow-x: hidden;
     }
     .cb-bubble--bot pre code {
-        font-size: 0.8rem;
+        font-size: 0.7rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-wrap: anywhere;
     }
 }
 
@@ -709,6 +725,7 @@
     .cb-row {
         max-width: 95%;
         gap: 6px;
+        min-width: 0;
     }
     .cb-row--user {
         max-width: 92%;
@@ -725,6 +742,10 @@
         padding: 9px 12px;
         font-size: 0.88rem;
         border-radius: 14px;
+        max-width: 100%;
+    }
+    .cb-bubble--bot {
+        font-size: 0.8rem;
     }
     .cb-composer {
         padding: 8px 10px 10px;
@@ -737,6 +758,12 @@
     .cb-send {
         width: 40px;
         height: 40px;
+    }
+
+    .cb-bubble--bot pre code {
+        white-space: pre-wrap;
+        word-break: break-word;
+        overflow-wrap: anywhere;
     }
 }
 
