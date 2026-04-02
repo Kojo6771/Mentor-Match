@@ -653,30 +653,37 @@ if ($user_role === 'mentor') {
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Profile - Mentor Match</title>
 	<meta name="description" content="Manage your profile on Mentor Match.">
-	<link rel="stylesheet" href="../assets/css/styles.css">
 	<link rel="stylesheet" href="../assets/css/student_profile.css">
 	<?php if ($user_role === 'mentor'): ?>
 		<link rel="stylesheet" href="../assets/css/mentor_profile.css">
 	<?php endif; ?>
 </head>
 <body>
-	<main class="container">
-		<div class="profile-page">
-			<?php if (!empty($errors)): ?>
-				<div class="errors" role="alert">
-					<?php foreach ($errors as $error): ?>
-						<div><?php echo htmlspecialchars($error); ?></div>
-					<?php endforeach; ?>
-				</div>
-			<?php endif; ?>
 
-			<?php if (!empty($successes)): ?>
-				<div class="success" role="status">
-					<?php foreach ($successes as $success): ?>
-						<div><?php echo htmlspecialchars($success); ?></div>
-					<?php endforeach; ?>
-				</div>
-			<?php endif; ?>
+<!-- Sticky Header -->
+<header class="profile-header">
+	<div class="profile-header-inner">
+		<h1>Your Profile</h1>
+	</div>
+</header>
+
+<main>
+	<div class="profile-page">
+		<?php if (!empty($errors)): ?>
+			<div class="errors" role="alert">
+				<?php foreach ($errors as $error): ?>
+					<div><?php echo htmlspecialchars($error); ?></div>
+				<?php endforeach; ?>
+			</div>
+		<?php endif; ?>
+
+		<?php if (!empty($successes)): ?>
+			<div class="success" role="status">
+				<?php foreach ($successes as $success): ?>
+					<div><?php echo htmlspecialchars($success); ?></div>
+				<?php endforeach; ?>
+			</div>
+		<?php endif; ?>
 
 			<?php if ($user_role === 'student'): ?>
 				<section class="card profile-card" aria-labelledby="profile-heading">
@@ -964,7 +971,7 @@ if ($user_role === 'mentor') {
 				</div>
 			<?php endif; ?>
 		</div>
-	</main>
+</main>
 
 	<?php include '../includes/nav.php'; ?>
 

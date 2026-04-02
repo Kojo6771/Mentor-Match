@@ -45,8 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 ?>
 
-  
-<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,14 +55,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body>
-    <main class="container">
-        <section class="card login-card" aria-labelledby="login-heading">
-            <div class="logo">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" fill="var(--accent)"/><path d="M3 20c0-3.866 3.582-7 9-7s9 3.134 9 7" stroke="#111827" stroke-opacity=".06" stroke-width="1.5"/></svg>
-                <div class="brand">Mentor Match</div>
-            </div>
+    <main class="auth-page">
+        <a href="../index.php" class="auth-brand">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="8" r="3" fill="#3b82f6"/>
+                <path d="M3 20c0-3.866 3.582-7 9-7s9 3.134 9 7" stroke="#111827" stroke-opacity=".06" stroke-width="1.5"/>
+            </svg>
+            <span class="auth-brand-text">Mentor Match</span>
+        </a>
+
+        <section class="auth-card login-card" aria-labelledby="login-heading">
             <h1 id="login-heading">Sign in to your account</h1>
-            <p class="lead">Welcome back — sign in to continue to Mentor Match.</p>
+            <p class="auth-lead">Welcome back — sign in to continue to Mentor Match.</p>
 
             <?php if (!empty($errors)): ?>
                 <div class="errors" role="alert">
@@ -85,21 +87,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input class="input" id="password" name="password" type="password" required placeholder="Your password" autocomplete="current-password">
                 </div>
 
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:4px">
-                    <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="remember"> <span class="small">Remember me</span></label>
+                <div class="auth-options-row">
+                    <label class="auth-remember"><input type="checkbox" name="remember"> <span class="small">Remember me</span></label>
                     <a class="link small" href="./forgot_password.php">Forgot password?</a>
                 </div>
 
-                <button class="btn signin-btn" type="submit">Sign in</button>
-                
+                <button class="btn" type="submit">Sign in</button>
 
-                <p class="small">Don't have an account? <a class="link" href="./signup.php">Create one</a></p>
+                <p class="auth-footer-text small">Don't have an account? <a class="link" href="./signup.php">Create one</a></p>
             </form>
         </section>
     </main>
 
     <script>
-        // Basic client-side convenience: focus first field
         document.getElementById('email')?.focus();
     </script>
 </body>

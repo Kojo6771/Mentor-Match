@@ -154,54 +154,61 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Find a Mentor — Mentor Match</title>
     <meta name="description" content="Swipe to find your perfect mentor match.">
-    <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/mentor_swipe.css">
-
 </head>
 <body>
-    <main class="container">
-        <div class="swipe-wrapper">
-            <div class="page-header">
-                <h1>Find Your Mentor</h1>
-                <p>Swipe right to connect, left to pass</p>
-            </div>
 
-            <?php render_swipe_card_styles(); ?>
+<!-- Sticky header -->
+<header class="swipe-page-header">
+    <div class="swipe-page-header-inner">
+        <h1>Find Your Mentor</h1>
+        <p>Swipe right to connect, left to pass</p>
+    </div>
+</header>
 
-            <div class="swipe-container">
-                <?php if (empty($mentors)): ?>
-                    <div class="swipe-empty visible">
-                        <div class="swipe-empty-icon">🎓</div>
-                        <h3>No more mentors</h3>
-                        <p>Check back later for new mentors!</p>
+<main>
+    <div class="swipe-wrapper">
+
+        <?php render_swipe_card_styles(); ?>
+
+        <div class="swipe-container">
+            <?php if (empty($mentors)): ?>
+                <div class="swipe-empty visible">
+                    <div class="swipe-empty-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                     </div>
-                <?php else: ?>
-                    <?php foreach (array_reverse($mentors) as $index => $mentor): ?>
-                        <?php render_swipe_card($mentor, $index); ?>
-                    <?php endforeach; ?>
-                    
-                    <div class="swipe-empty">
-                        <div class="swipe-empty-icon">🎓</div>
-                        <h3>You've seen all mentors!</h3>
-                        <p>Check back later for new matches.</p>
-                    </div>
-                <?php endif; ?>
-            </div>
+                    <h3>No more mentors</h3>
+                    <p>Check back later for new mentors!</p>
+                </div>
+            <?php else: ?>
+                <?php foreach (array_reverse($mentors) as $index => $mentor): ?>
+                    <?php render_swipe_card($mentor, $index); ?>
+                <?php endforeach; ?>
 
-            <?php if (!empty($mentors)): ?>
-                <div class="swipe-actions">
-                    <button class="swipe-btn swipe-btn-pass" onclick="swipePass()" title="Pass">
-                        ✕
-                    </button>
-                    <button class="swipe-btn swipe-btn-like" onclick="swipeLike()" title="Like">
-                        ♥
-                    </button>
+                <div class="swipe-empty">
+                    <div class="swipe-empty-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                    </div>
+                    <h3>You've seen all mentors!</h3>
+                    <p>Check back later for new matches.</p>
                 </div>
             <?php endif; ?>
         </div>
-        
-        <?php include '../includes/nav.php'; ?>
-    </main>
+
+        <?php if (!empty($mentors)): ?>
+            <div class="swipe-actions">
+                <button class="swipe-btn swipe-btn-pass" onclick="swipePass()" title="Pass">
+                    ✕
+                </button>
+                <button class="swipe-btn swipe-btn-like" onclick="swipeLike()" title="Like">
+                    ♥
+                </button>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <?php include '../includes/nav.php'; ?>
+</main>
 
     <?php render_swipe_card_scripts(); ?>
 

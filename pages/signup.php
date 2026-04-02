@@ -104,14 +104,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
 <body>
-    <main class="container">
-        <section class="card" aria-labelledby="signup-heading">
-            <div class="logo">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" fill="var(--accent)"/><path d="M3 20c0-3.866 3.582-7 9-7s9 3.134 9 7" stroke="#111827" stroke-opacity=".06" stroke-width="1.5"/></svg>
-                <div class="brand">Mentor Match</div>
-            </div>
+    <main class="auth-page">
+        <a href="../index.php" class="auth-brand">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="8" r="3" fill="#3b82f6"/>
+                <path d="M3 20c0-3.866 3.582-7 9-7s9 3.134 9 7" stroke="#111827" stroke-opacity=".06" stroke-width="1.5"/>
+            </svg>
+            <span class="auth-brand-text">Mentor Match</span>
+        </a>
+
+        <section class="auth-card" aria-labelledby="signup-heading">
             <h1 id="signup-heading">Create your account</h1>
-            <p class="lead">Quick and easy sign up to find mentors or Studentss. Designed for mobile devices.</p>
+            <p class="auth-lead">Quick and easy sign up to find mentors or students.</p>
 
             <?php if (!empty($errors)): ?>
                 <div class="errors" role="alert">
@@ -174,20 +178,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 </fieldset>
 
-                <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+                <div class="auth-terms">
                     <input id="terms" name="terms" type="checkbox" required>
-                    <label for="terms" class="small">I agree to the <a class="link" href="#">Terms</a> and <a class="link" href="#">Privacy Policy</a>.</label>
+                    <label for="terms" class="small" style="margin-bottom:0">I agree to the <a class="link" href="#">Terms</a> and <a class="link" href="#">Privacy Policy</a>.</label>
                 </div>
 
-                <button class="btn get-started-btn" type="submit">Get started</button>
+                <button class="btn" type="submit">Get started</button>
 
-                <p class="small">Already have an account? <a class="link" href="./login.php">Sign in</a></p>
+                <p class="auth-footer-text small">Already have an account? <a class="link" href="./login.php">Sign in</a></p>
             </form>
         </section>
     </main>
 
     <script>
-        // Simple UI: role selection styling + basic client-side validation hint
         document.querySelectorAll('.role').forEach(label => {
             const input = label.querySelector('input');
             label.addEventListener('click', ()=>{
@@ -195,7 +198,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 label.classList.add('selected');
                 input.checked = true;
             });
-            // initialize selected from checked state (useful if server-side preserved it)
             if (label.querySelector('input').checked) label.classList.add('selected');
         });
     </script>
