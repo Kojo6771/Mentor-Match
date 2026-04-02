@@ -225,7 +225,6 @@ if ($user_role === 'admin') {
 
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -233,283 +232,327 @@ if ($user_role === 'admin') {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Dashboard | Mentor Match</title>
     <meta name="description" content="Your dashboard for Mentor Match.">
-    <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/dashboard.css">
-    <style>
-
-    </style>
 </head>
 <body>
-    <main class="container">
-        <section class="card">
-            <div class="header-row">
-                <div class="logo">
-                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" fill="var(--accent)"/><path d="M3 20c0-3.866 3.582-7 9-7s9 3.134 9 7" stroke="#111827" stroke-opacity=".06" stroke-width="1.5"/></svg>
-                    <div class="brand">Mentor Match</div>
-                </div>
-                <img src="<?php echo $avatar_url; ?>" alt="Profile" class="avatar" data-fallback="<?php echo $fallback_avatar; ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;" />
-            </div>
-            <h1>Welcome back, <?php echo $first_name; ?>!</h1>
 
-            <?php if ($user_role === 'student'): ?>
-                <!-- ============ STUDENT VIEW ============ -->
-                <p class="lead">Discover amazing mentors</p>
+<!-- ── Sticky Header ── -->
+<header class="dash-header">
+    <div class="dash-header-inner">
+        <a href="dashboard.php" class="dash-brand">
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="12" cy="8" r="3" fill="#3b82f6"/>
+                <path d="M3 20c0-3.866 3.582-7 9-7s9 3.134 9 7" stroke="#111827" stroke-opacity=".06" stroke-width="1.5"/>
+            </svg>
+            <span class="dash-brand-text">Mentor Match</span>
+        </a>
+        <img src="<?php echo $avatar_url; ?>" alt="Profile" class="dash-avatar" data-fallback="<?php echo $fallback_avatar; ?>" onerror="this.onerror=null;this.src=this.dataset.fallback;" />
+    </div>
+</header>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value"><?php echo $connections; ?></div>
-                        <div class="stat-label">Active Mentors</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value"><?php echo $pending; ?></div>
-                        <div class="stat-label">Pending</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="recent-messages-count"><?php echo $messages; ?></div>
-                        <?php if ($messages === 1): ?>
-                            <div class="stat-label" id="recent-messages-label">Message</div>
-                        <?php else: ?>
-                            <div class="stat-label" id="recent-messages-label">Messages</div>
-                        <?php endif; ?>
-                    </div>
-                </div>
+<!-- ── Main Content ── -->
+<main class="dash-main">
 
-                <h2 class="section-title">Quick Actions</h2>
-                <div class="actions-grid">
-                    <a href="mentor_swipe.php" class="action-card">
-                        <div class="action-icon">✨</div>
-                        <div>
-                            <div class="action-title">Find Mentors</div>
-                            <div class="action-desc">Swipe and connect with mentors</div>
-                        </div>
-                    </a>
-                    <a href="chat.php" class="action-card white">
-                        <div class="action-icon">💬</div>
-                        <div>
-                            <div class="action-title">My Chats</div>
-                            <div class="action-desc">Message your connected mentors</div>
-                        </div>
-                    </a>
-                    <a href="chatbot.php" class="action-card white">
-                        <div class="action-icon">🤖</div>
-                        <div>
-                            <div class="action-title">University Assistant</div>
-                            <div class="action-desc">Get help with university questions</div>
-                        </div>
-                    </a>
-                    <a href="profile.php" class="action-card white">
-                        <div class="action-icon">👤</div>
-                        <div>
-                            <div class="action-title">My Profile</div>
-                            <div class="action-desc">Update your info and preferences</div>
-                        </div>
-                    </a>
-                </div>
+    <!-- Welcome -->
+    <div class="welcome-section">
+        <h1 class="welcome-greeting">Welcome back, <?php echo $first_name; ?>!</h1>
 
-            <?php elseif($user_role === 'admin'): ?>
-                <!-- ============ ADMIN VIEW ============ -->
-                <p class="lead">Platform administration</p>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value"><?php echo $pending_applications; ?></div>
-                        <?php if ($pending_applications === 1): ?>
-                            <div class="stat-label">Pending App</div>
-                        <?php else: ?>
-                            <div class="stat-label">Pending Apps</div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value"><?php echo $total_mentors; ?></div>
-                        <?php if ($total_mentors === 1): ?>
-                            <div class="stat-label">Mentor</div>
-    
-                        <?php else: ?>
-                            <div class="stat-label">Mentors</div>
-                        <?php endif; ?>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value"><?php echo $total_students; ?></div>
-                        <?php if ($total_students === 1): ?>
-                            <div class="stat-label">Student</div>
-                        <?php else: ?>
-                            <div class="stat-label">Students</div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <h2 class="section-title">Quick Actions</h2>
-                <div class="actions-grid">
-                    <a href="../users/admin/manage_applications.php" class="action-card">
-                        <div class="action-icon">📋</div>
-                        <div>
-                            <div class="action-title">Mentor Applications</div>
-                            <div class="action-desc">Review pending mentor applications</div>
-                        </div>
-                    </a>
-                    <a href="platform_report.php" class="action-card white">
-                        <div class="action-icon">📊</div>
-                        <div>
-                            <div class="action-title">Reports</div>
-                            <div class="action-desc">View platform analytics</div>
-                        </div>
-                    </a>
-                    <a href="manage_users.php" class="action-card white">
-                        <div class="action-icon">👥</div>
-                        <div>
-                            <div class="action-title">Manage Users</div>
-                            <div class="action-desc">View and manage all users</div>
-                        </div>
-                    </a>
-                    <a href="session_monitor.php" class="action-card white">
-                        <div class="action-icon">📅</div>
-                        <div>
-                            <div class="action-title">Sessions</div>
-                            <div class="action-desc">Monitor mentoring sessions</div>
-                        </div>
-                    </a>
-                </div>
-
+        <?php if ($user_role === 'student'): ?>
+            <p class="welcome-lead">Discover amazing mentors</p>
+        <?php elseif ($user_role === 'admin'): ?>
+            <p class="welcome-lead">Platform administration</p>
+        <?php else: ?>
+            <?php if ($application_status === 'pending'): ?>
+                <p class="welcome-lead pending-status">Your mentor application is under review</p>
+            <?php elseif ($application_status === 'rejected'): ?>
+                <p class="welcome-lead rejected-status">Your application needs attention</p>
             <?php else: ?>
-                <!-- ============ MENTOR VIEW ============ -->
-                <?php if ($application_status === 'pending'): ?>
-                    <p class="lead" style="color:#f59e0b;">Your mentor application is under review</p>
-                <?php elseif ($application_status === 'rejected'): ?>
-                    <p class="lead" style="color:#ef4444;">Your application needs attention</p>
-                <?php else: ?>
-                    <p class="lead">Help students reach their potential</p>
-                <?php endif; ?>
-
-                <?php if ($application_status === 'approved' || $mentor_profile): ?>
-                    <!-- Approved Mentor Stats -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-value"><?php echo $active_students; ?></div>
-                            <?php if ($active_students === 1): ?>
-                                <div class="stat-label">Active Student</div>
-                            <?php else: ?>
-                                <div class="stat-label">Active Students</div>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="stat-card">
-                            <div class="stat-value"><?php echo $pending_requests; ?></div>
-                            <?php if ($pending_requests === 1): ?>
-                                <div class="stat-label">Pending Request</div>
-                            <?php else: ?>
-                                <div class="stat-label">Pending Requests</div>
-                            <?php endif; ?>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-value"><?php echo $avg_rating; ?></div>
-                            <div class="stat-label">Rating</div>
-                        </div>
-                    </div>
-
-                    <h2 class="section-title">Quick Actions</h2>
-                    <div class="actions-grid">
-                        <a href="requests.php" class="action-card">
-                            <div class="action-icon">📥</div>
-                            <div>
-                                <div class="action-title">View Requests</div>
-                                <div class="action-desc">Review student connection requests</div>
-                            </div>
-                        </a>
-                        <a href="chat.php" class="action-card white">
-                            <div class="action-icon">💬</div>
-                            <div>
-                                <div class="action-title">My Chats</div>
-                                <div class="action-desc">Message your connected students</div>
-                            </div>
-                        </a>
-                        <a href="availability.php" class="action-card white">
-                            <div class="action-icon">📅</div>
-                            <div>
-                                <div class="action-title">Set Availability</div>
-                                <div class="action-desc">Manage your available time slots</div>
-                            </div>
-                        </a>
-                        <a href="profile.php" class="action-card white">
-                            <div class="action-icon">👤</div>
-                            <div>
-                                <div class="action-title">My Profile</div>
-                                <div class="action-desc">Update your mentor profile</div>
-                            </div>
-                        </a>
-                    </div>
-
-                <?php elseif ($application_status === 'pending'): ?>
-                    <!-- Pending Application -->
-                    <div class="status-card pending">
-                        <div class="status-icon">⏳</div>
-                        <h2>Application Under Review</h2>
-                        <p>Thank you for applying to be a mentor! Our team is reviewing your application. You'll receive an email within 24-48 hours.</p>
-                    </div>
-
-                <?php elseif ($application_status === 'rejected'): ?>
-                    <!-- Rejected Application -->
-                    <div class="status-card rejected">
-                        <div class="status-icon">❌</div>
-                        <h2>Application Not Approved</h2>
-                        <p>Unfortunately, your mentor application was not approved at this time.</p>
-                        <a href="mailto:support@mentormatch.com" class="btn" style="margin-top:12px;">Contact Support</a>
-                    </div>
-
-                <?php else: ?>
-                    <!-- No Application Yet -->
-                    <div class="status-card">
-                        <div class="status-icon">📝</div>
-                        <h2>Become a Mentor</h2>
-                        <p>Complete your mentor application to start helping students succeed.</p>
-                        <a href="../users/mentor/mentor_application.php" class="btn" style="margin-top:12px;">Apply Now</a>
-                    </div>
-                <?php endif; ?>
-
+                <p class="welcome-lead">Help students reach their potential</p>
             <?php endif; ?>
-        </section>
-    </main>
-
-    <?php include '../includes/nav.php'; ?>
+        <?php endif; ?>
+    </div>
 
     <?php if ($user_role === 'student'): ?>
-    <script>
-        (function () {
-            const countEl = document.getElementById('recent-messages-count');
-            const labelEl = document.getElementById('recent-messages-label');
+        <!-- ============ STUDENT VIEW ============ -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $connections; ?></div>
+                <div class="stat-label">Active Mentors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $pending; ?></div>
+                <div class="stat-label">Pending</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="recent-messages-count"><?php echo $messages; ?></div>
+                <?php if ($messages === 1): ?>
+                    <div class="stat-label" id="recent-messages-label">Message</div>
+                <?php else: ?>
+                    <div class="stat-label" id="recent-messages-label">Messages</div>
+                <?php endif; ?>
+            </div>
+        </div>
 
-            if (!countEl || !labelEl) {
-                return;
-            }
+        <h2 class="section-title">Quick Actions</h2>
+        <div class="actions-grid">
+            <a href="mentor_swipe.php" class="action-card primary">
+                <div class="action-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </div>
+                <div class="action-body">
+                    <div class="action-title">Find Mentors</div>
+                    <div class="action-desc">Swipe and connect with mentors</div>
+                </div>
+                <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="chat.php" class="action-card secondary">
+                <div class="action-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                </div>
+                <div class="action-body">
+                    <div class="action-title">My Chats</div>
+                    <div class="action-desc">Message your connected mentors</div>
+                </div>
+                <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="chatbot.php" class="action-card secondary">
+                <div class="action-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>
+                </div>
+                <div class="action-body">
+                    <div class="action-title">University Assistant</div>
+                    <div class="action-desc">Get help with university questions</div>
+                </div>
+                <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="profile.php" class="action-card secondary">
+                <div class="action-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+                </div>
+                <div class="action-body">
+                    <div class="action-title">My Profile</div>
+                    <div class="action-desc">Update your info and preferences</div>
+                </div>
+                <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+        </div>
 
-            const updateRecentMessagesCount = async function () {
-                try {
-                    const response = await fetch('dashboard.php?live_recent_messages=1&_=' + Date.now(), {
-                        method: 'GET',
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-                        cache: 'no-store'
-                    });
+    <?php elseif ($user_role === 'admin'): ?>
+        <!-- ============ ADMIN VIEW ============ -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $pending_applications; ?></div>
+                <?php if ($pending_applications === 1): ?>
+                    <div class="stat-label">Pending App</div>
+                <?php else: ?>
+                    <div class="stat-label">Pending Apps</div>
+                <?php endif; ?>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $total_mentors; ?></div>
+                <?php if ($total_mentors === 1): ?>
+                    <div class="stat-label">Mentor</div>
+                <?php else: ?>
+                    <div class="stat-label">Mentors</div>
+                <?php endif; ?>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo $total_students; ?></div>
+                <?php if ($total_students === 1): ?>
+                    <div class="stat-label">Student</div>
+                <?php else: ?>
+                    <div class="stat-label">Students</div>
+                <?php endif; ?>
+            </div>
+        </div>
 
-                    if (!response.ok) {
-                        return;
-                    }
+        <h2 class="section-title">Quick Actions</h2>
+        <div class="actions-grid">
+            <a href="../users/admin/manage_applications.php" class="action-card primary">
+                <div class="action-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <div class="action-body">
+                    <div class="action-title">Mentor Applications</div>
+                    <div class="action-desc">Review pending mentor applications</div>
+                </div>
+                <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="platform_report.php" class="action-card secondary">
+                <div class="action-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                </div>
+                <div class="action-body">
+                    <div class="action-title">Reports</div>
+                    <div class="action-desc">View platform analytics</div>
+                </div>
+                <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="manage_users.php" class="action-card secondary">
+                <div class="action-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div class="action-body">
+                    <div class="action-title">Manage Users</div>
+                    <div class="action-desc">View and manage all users</div>
+                </div>
+                <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+            <a href="session_monitor.php" class="action-card secondary">
+                <div class="action-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </div>
+                <div class="action-body">
+                    <div class="action-title">Sessions</div>
+                    <div class="action-desc">Monitor mentoring sessions</div>
+                </div>
+                <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+        </div>
 
-                    const payload = await response.json();
-                    const nextCount = Number(payload.count);
+    <?php else: ?>
+        <!-- ============ MENTOR VIEW ============ -->
+        <?php if ($application_status === 'approved' || $mentor_profile): ?>
+            <!-- Approved Mentor Stats -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-value"><?php echo $active_students; ?></div>
+                    <?php if ($active_students === 1): ?>
+                        <div class="stat-label">Active Student</div>
+                    <?php else: ?>
+                        <div class="stat-label">Active Students</div>
+                    <?php endif; ?>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"><?php echo $pending_requests; ?></div>
+                    <?php if ($pending_requests === 1): ?>
+                        <div class="stat-label">Pending Request</div>
+                    <?php else: ?>
+                        <div class="stat-label">Pending Requests</div>
+                    <?php endif; ?>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value"><?php echo $avg_rating; ?></div>
+                    <div class="stat-label">Rating</div>
+                </div>
+            </div>
 
-                    if (!Number.isFinite(nextCount) || nextCount < 0) {
-                        return;
-                    }
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="actions-grid">
+                <a href="requests.php" class="action-card primary">
+                    <div class="action-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    </div>
+                    <div class="action-body">
+                        <div class="action-title">View Requests</div>
+                        <div class="action-desc">Review student connection requests</div>
+                    </div>
+                    <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+                <a href="chat.php" class="action-card secondary">
+                    <div class="action-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                    </div>
+                    <div class="action-body">
+                        <div class="action-title">My Chats</div>
+                        <div class="action-desc">Message your connected students</div>
+                    </div>
+                    <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+                <a href="availability.php" class="action-card secondary">
+                    <div class="action-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <div class="action-body">
+                        <div class="action-title">Set Availability</div>
+                        <div class="action-desc">Manage your available time slots</div>
+                    </div>
+                    <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+                <a href="profile.php" class="action-card secondary">
+                    <div class="action-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+                    </div>
+                    <div class="action-body">
+                        <div class="action-title">My Profile</div>
+                        <div class="action-desc">Update your mentor profile</div>
+                    </div>
+                    <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+            </div>
 
-                    countEl.textContent = String(nextCount);
-                    labelEl.textContent = nextCount === 1 ? 'Message' : 'Messages';
-                } catch (error) {
+        <?php elseif ($application_status === 'pending'): ?>
+            <!-- Pending Application -->
+            <div class="status-card pending">
+                <div class="status-icon">&#9203;</div>
+                <h2>Application Under Review</h2>
+                <p>Thank you for applying to be a mentor! Our team is reviewing your application. You'll receive an email within 24-48 hours.</p>
+            </div>
+
+        <?php elseif ($application_status === 'rejected'): ?>
+            <!-- Rejected Application -->
+            <div class="status-card rejected">
+                <div class="status-icon">&#10060;</div>
+                <h2>Application Not Approved</h2>
+                <p>Unfortunately, your mentor application was not approved at this time.</p>
+                <a href="mailto:support@mentormatch.com" class="btn-status">Contact Support</a>
+            </div>
+
+        <?php else: ?>
+            <!-- No Application Yet -->
+            <div class="status-card">
+                <div class="status-icon">&#128221;</div>
+                <h2>Become a Mentor</h2>
+                <p>Complete your mentor application to start helping students succeed.</p>
+                <a href="../users/mentor/mentor_application.php" class="btn-status">Apply Now</a>
+            </div>
+        <?php endif; ?>
+
+    <?php endif; ?>
+
+</main>
+
+<?php include '../includes/nav.php'; ?>
+
+<?php if ($user_role === 'student'): ?>
+<script>
+    (function () {
+        const countEl = document.getElementById('recent-messages-count');
+        const labelEl = document.getElementById('recent-messages-label');
+
+        if (!countEl || !labelEl) {
+            return;
+        }
+
+        const updateRecentMessagesCount = async function () {
+            try {
+                const response = await fetch('dashboard.php?live_recent_messages=1&_=' + Date.now(), {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    cache: 'no-store'
+                });
+
+                if (!response.ok) {
                     return;
                 }
-            };
 
-            setInterval(updateRecentMessagesCount, 15000);
-        })();
-    </script>
-    <?php endif; ?>
+                const payload = await response.json();
+                const nextCount = Number(payload.count);
+
+                if (!Number.isFinite(nextCount) || nextCount < 0) {
+                    return;
+                }
+
+                countEl.textContent = String(nextCount);
+                labelEl.textContent = nextCount === 1 ? 'Message' : 'Messages';
+            } catch (error) {
+                return;
+            }
+        };
+
+        setInterval(updateRecentMessagesCount, 15000);
+    })();
+</script>
+<?php endif; ?>
 </body>
 </html>
