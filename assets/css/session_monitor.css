@@ -28,6 +28,9 @@
 
 /* ── Layout ── */
 .sm-container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
     padding: 20px 16px 100px;
     min-height: 100vh;
     display: flex;
@@ -40,8 +43,15 @@
 .sm-wrapper {
     width: 100%;
     max-width: 520px;
+    margin: 0 auto;
     display: grid;
     gap: 18px;
+}
+
+/* Keep page content visually centered even when fixed elements are present. */
+html,
+body {
+    overflow-x: hidden;
 }
 
 /* ── Header ── */

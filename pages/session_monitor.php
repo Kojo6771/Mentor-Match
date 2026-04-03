@@ -188,7 +188,7 @@ $warningMessages = [
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Session Monitor – Mentor Match</title>
+    <title>Session Monitor | Mentor Match</title>
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/session_monitor.css">
 </head>
