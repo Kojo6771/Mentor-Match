@@ -130,7 +130,7 @@ $pending_count = count($pending_applications);
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#06b6d4">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Admin Panel — Mentor Match</title>
+    <title>Admin Panel | Mentor Match</title>
     <meta name="description" content="Admin panel for managing mentor applications.">
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/admin_dashboard.css">
