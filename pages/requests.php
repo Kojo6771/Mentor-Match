@@ -152,7 +152,10 @@ try {
         <!-- Header -->
         <div class="page-header">
             <div class="header-row">
-                <a href="dashboard.php" class="back-btn">← Back</a>
+                <a href="dashboard.php" class="back-btn">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    Back
+                </a>
                 <h1 class="page-title">Connection Requests</h1>
                 <div class="filter-toggle-wrapper">
                     <label class="filter-label">Filter</label>
@@ -212,20 +215,20 @@ try {
                                 </div>
                             </div>
 
-                            <div class="action-buttons">
-                                <button class="btn btn-accept" onclick="handleRequest(<?php echo $request['id']; ?>, 'accept', this)">
-                                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    Accept
-                                </button>
-                                <button class="btn btn-decline" onclick="handleRequest(<?php echo $request['id']; ?>, 'decline', this)">
-                                    <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                    Decline
-                                </button>
-                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-accept" onclick="handleRequest(<?php echo $request['id']; ?>, 'accept', this)">
+                                <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Accept
+                            </button>
+                            <button class="btn btn-decline" onclick="handleRequest(<?php echo $request['id']; ?>, 'decline', this)">
+                                <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Decline
+                            </button>
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -234,11 +237,11 @@ try {
             <div class="empty-state">
                 <div class="empty-icon-wrapper">
                     <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                     </svg>
                 </div>
                 <h2 class="empty-title">No pending requests</h2>
-                <p class="empty-description">You're all caught up! New requests will appear here.</p>
+                <p class="empty-description">You're all caught up! New connection requests from students will appear here.</p>
                 <a href="dashboard.php" class="btn-primary">Back to Dashboard</a>
             </div>
         <?php endif; ?>

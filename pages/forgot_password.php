@@ -270,7 +270,7 @@ $progressStep = ['email' => 1, 'verify' => 2, 'reset' => 3, 'success' => 3][$ste
 	<link rel="stylesheet" href="../assets/css/styles.css">
 	<link rel="stylesheet" href="../assets/css/forgot_password.css">
 </head>
-<body>
+<body class="forgot-password-page">
 	<main class="container">
 		<!-- Main reset card -->
 		<section class="card forgot-card" aria-labelledby="forgot-heading">

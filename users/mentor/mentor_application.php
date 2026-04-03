@@ -109,58 +109,86 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Apply as Mentor — Mentor Match</title>
     <meta name="description" content="Apply to become a mentor on Mentor Match — share your expertise and help students grow.">
-    <link rel="stylesheet" href="../../assets/css/mentor_application.css">
     <link rel="stylesheet" href="../../assets/css/styles.css">
+    <link rel="stylesheet" href="../../assets/css/mentor_application.css">
 </head>
-<body>
-    <main class="container">
-        <section class="card" aria-labelledby="application-heading">
-            <div class="logo">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3" fill="var(--accent)"/><path d="M3 20c0-3.866 3.582-7 9-7s9 3.134 9 7" stroke="#111827" stroke-opacity=".06" stroke-width="1.5"/></svg>
-                <div class="brand">Mentor Match</div>
+<body class="mentor-app-page">
+    <main class="mentor-app-container">
+        <section class="mentor-app-card" aria-labelledby="application-heading">
+            <!-- Decorative gradient bar rendered via CSS ::before -->
+
+            <div class="mentor-app-header">
+                <div class="mentor-app-icon-wrap">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="url(#starGrad)" stroke="none"/>
+                        <defs><linearGradient id="starGrad" x1="2" y1="2" x2="22" y2="21"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+                    </svg>
+                </div>
+                <div class="mentor-app-brand">Mentor Match</div>
+                <h1 id="application-heading">Become a Mentor</h1>
+                <p class="mentor-app-lead">Share your expertise and help students achieve their goals.</p>
             </div>
-            <h1 id="application-heading">Become a Mentor</h1>
-            <p class="lead">Share your expertise and help students achieve their goals.</p>
 
             <?php if ($success): ?>
-                <div class="success" role="alert">
-                    <strong>Application submitted successfully!</strong> We'll review your application and get back to you soon.
+                <div class="mentor-app-success" role="alert">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#dcfce7"/><path d="M8 12l3 3 5-5" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <div><strong>Application submitted successfully!</strong> We'll review your application and get back to you soon.</div>
                 </div>
             <?php endif; ?>
 
             <?php if (!empty($errors)): ?>
-                <div class="errors" role="alert">
-                    <?php foreach ($errors as $error): ?>
-                        <div><?php echo htmlspecialchars($error); ?></div>
-                    <?php endforeach; ?>
+                <div class="mentor-app-errors" role="alert">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#fee2e2"/><path d="M12 8v4m0 4h.01" stroke="#dc2626" stroke-width="2" stroke-linecap="round"/></svg>
+                    <div>
+                        <?php foreach ($errors as $error): ?>
+                            <div><?php echo htmlspecialchars($error); ?></div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
             <?php endif; ?>
 
             <form method="POST" novalidate>
-                <div>
-                    <label for="motivation">Why do you want to become a mentor?</label>
+                <div class="form-group">
+                    <label for="motivation">
+                        <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Why do you want to become a mentor?
+                    </label>
                     <textarea class="input textarea" id="motivation" name="motivation" required placeholder="Tell us about your passion for mentoring and teaching others..." maxlength="2000"><?php echo htmlspecialchars($_POST['motivation'] ?? ''); ?></textarea>
                     <small class="char-count"><span id="char-count">0</span>/2000</small>
                 </div>
 
-                <div>
-                    <label for="subject_id">Subject</label>
-                    <select class="input" id="subject_id" name="subject_id" required>
-                        <option value="">Select a subject</option>
-                        <?php foreach ($subjects as $s): ?>
-                            <option value="<?php echo $s['id']; ?>" <?php echo (isset($_POST['subject_id']) && $_POST['subject_id'] == $s['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($s['name']); ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                <div class="form-group">
+                    <label for="subject_id">
+                        <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Subject
+                    </label>
+                    <div class="select-wrap">
+                        <select class="input" id="subject_id" name="subject_id" required>
+                            <option value="">Select a subject</option>
+                            <?php foreach ($subjects as $s): ?>
+                                <option value="<?php echo $s['id']; ?>" <?php echo (isset($_POST['subject_id']) && $_POST['subject_id'] == $s['id']) ? 'selected' : ''; ?>><?php echo htmlspecialchars($s['name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
                 </div>
 
-                <div>
-                    <label for="experience_years">Years of experience</label>
+                <div class="form-group">
+                    <label for="experience_years">
+                        <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Years of experience
+                    </label>
                     <input class="input" id="experience_years" name="experience_years" type="number" inputmode="numeric" min="0" max="70" step="1" required placeholder="5" value="<?php echo htmlspecialchars($_POST['experience_years'] ?? ''); ?>">
                     <small class="help-text">How many years of professional or practical experience do you have?</small>
                 </div>
 
-                <button type="submit" class="btn">Submit Application</button>
-                <a href="../index.php" class="btn secondary">Cancel</a>
+                <div class="form-actions">
+                    <button type="submit" class="btn mentor-app-submit">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Submit Application
+                    </button>
+                    <a href="../index.php" class="btn mentor-app-cancel">Cancel</a>
+                </div>
             </form>
         </section>
     </main>

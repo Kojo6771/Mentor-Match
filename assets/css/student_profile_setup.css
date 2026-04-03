@@ -1,2 +1,579 @@
-        .textarea{min-height:120px;resize:vertical}
-        .success{background:#dcfce7;color:#166534;padding:10px;border-radius:8px;margin-bottom:12px}
+/* ══════════════════════════════════════════
+   Student Profile Setup — Premium Styles
+   ══════════════════════════════════════════ */
+
+/* ── Page Background ── */
+.setup-page {
+    min-height: 100vh;
+    background: var(--bg);
+    background-image:
+        radial-gradient(ellipse 600px 400px at 50% 0%, rgba(59,130,246,0.06) 0%, transparent 70%),
+        radial-gradient(ellipse 400px 300px at 80% 100%, rgba(6,182,212,0.04) 0%, transparent 70%);
+}
+
+/* ── Centered Container ── */
+.setup-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px 100px;
+}
+
+/* ── Main Card ── */
+.setup-card {
+    width: 100%;
+    max-width: 500px;
+    background: var(--card);
+    border-radius: 20px;
+    padding: 0;
+    box-shadow:
+        0 8px 30px rgba(15,23,42,0.07),
+        0 1px 3px rgba(15,23,42,0.04);
+    border: 1px solid rgba(0,0,0,0.04);
+    overflow: hidden;
+    position: relative;
+    animation: cardFadeIn 0.5s ease-out;
+}
+
+/* remove the generic .card::before gradient since we have our own header */
+.setup-card::before {
+    display: none !important;
+}
+
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Decorative Header ── */
+.setup-header {
+    background: linear-gradient(135deg, var(--accent) 0%, #1d4ed8 60%, var(--cyan) 100%);
+    padding: 32px 28px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Decorative circles in header */
+.setup-header::before {
+    content: '';
+    position: absolute;
+    top: -40px;
+    right: -30px;
+    width: 140px;
+    height: 140px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.setup-header::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: -20px;
+    width: 100px;
+    height: 100px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+/* Icon circle in header */
+.setup-icon-wrap {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    position: relative;
+    z-index: 1;
+}
+
+.setup-header h1 {
+    color: #fff;
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.setup-lead {
+    color: rgba(255,255,255,0.82);
+    font-size: 0.9rem;
+    line-height: 1.55;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+}
+
+/* ── Progress Indicator ── */
+.setup-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 20px 28px 4px;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.progress-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    transition: all 0.3s ease;
+}
+
+.progress-step.active .progress-dot {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 2px 8px rgba(59,130,246,0.18);
+}
+
+.progress-step span {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.progress-step.active span {
+    color: var(--accent);
+}
+
+.progress-line {
+    width: 40px;
+    height: 2px;
+    background: #e2e8f0;
+    margin: 0 6px;
+    margin-bottom: 22px;
+    border-radius: 2px;
+}
+
+/* ── Form Container ── */
+.setup-form {
+    display: grid;
+    gap: 18px;
+    padding: 20px 28px 32px;
+}
+
+/* ── Form Groups ── */
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    font-weight: 600;
+    margin-bottom: 7px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.form-group label svg {
+    color: var(--accent);
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.label-optional {
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.82rem;
+}
+
+/* ── Input & Select Styling ── */
+.setup-form .input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1.5px solid #e2e8f0;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: #fff;
+    font-family: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+.setup-form .input:hover {
+    border-color: #cbd5e1;
+    background-color: #fafbfc;
+}
+
+.setup-form .input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3.5px rgba(59,130,246,0.1);
+    background-color: #fff;
+}
+
+.setup-form .input::placeholder {
+    color: #9ca3af;
+}
+
+/* ── Select Dropdown Wrapper ── */
+.select-wrap {
+    position: relative;
+}
+
+.select-wrap select {
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+.select-chevron {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.select-wrap:hover .select-chevron {
+    color: var(--text-light);
+}
+
+/* ── Textarea ── */
+.setup-form .textarea {
+    min-height: 110px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+/* ── Form Hint ── */
+.form-hint {
+    display: block;
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin-top: 5px;
+    padding-left: 2px;
+}
+
+/* ── Number Input — remove spinner in webkit ── */
+.setup-form input[type="number"]::-webkit-outer-spin-button,
+.setup-form input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.setup-form input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+/* ── Form Actions (buttons) ── */
+.form-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+/* ── Primary Button ── */
+.setup-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 24px;
+    border-radius: 12px;
+    border: 0;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-family: inherit;
+    box-shadow: 0 4px 14px rgba(59,130,246,0.2);
+    text-decoration: none;
+    text-align: center;
+}
+
+.setup-btn-primary:hover {
+    background: linear-gradient(135deg, var(--accent-dark) 0%, #1d4ed8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(59,130,246,0.3);
+}
+
+.setup-btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(59,130,246,0.2);
+}
+
+.setup-btn-primary svg {
+    flex-shrink: 0;
+}
+
+/* ── Secondary Button ── */
+.setup-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: 1.5px solid #e2e8f0;
+    background: transparent;
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 0.92rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+    text-decoration: none;
+    text-align: center;
+}
+
+.setup-btn-secondary:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    color: var(--text);
+    transform: none;
+    box-shadow: none;
+}
+
+.setup-btn-secondary:active {
+    background: #f1f5f9;
+}
+
+/* ── Success Message ── */
+.setup-success {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    color: #15803d;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 1px solid #bbf7d0;
+    margin: 20px 28px 0;
+    line-height: 1.5;
+}
+
+.setup-success svg {
+    flex-shrink: 0;
+}
+
+/* success state: adjust button below success msg */
+.setup-success + p {
+    padding: 0 28px 28px;
+    margin: 12px 0 0;
+}
+
+.setup-success + p .setup-btn-primary {
+    width: 100%;
+}
+
+/* ── Error Messages ── */
+.setup-errors {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+    color: #991b1b;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    border: 1px solid #fecaca;
+    margin: 20px 28px 0;
+    line-height: 1.55;
+}
+
+.setup-errors svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.setup-errors div div + div {
+    margin-top: 4px;
+}
+
+/* ══════════════════════
+   RESPONSIVE DESIGN
+   ══════════════════════ */
+
+/* Desktop / wider screens */
+@media (min-width: 520px) {
+    .setup-header {
+        padding: 36px 32px 30px;
+    }
+
+    .setup-header h1 {
+        font-size: 1.45rem;
+    }
+
+    .setup-form {
+        padding: 24px 32px 36px;
+    }
+
+    .progress-line {
+        width: 52px;
+    }
+}
+
+/* Standard mobile */
+@media (max-width: 480px) {
+    .setup-container {
+        padding: 20px 16px 96px;
+        align-items: flex-start;
+        padding-top: 28px;
+    }
+
+    .setup-card {
+        border-radius: 16px;
+    }
+
+    .setup-header {
+        padding: 26px 20px 22px;
+    }
+
+    .setup-header h1 {
+        font-size: 1.22rem;
+    }
+
+    .setup-lead {
+        font-size: 0.85rem;
+    }
+
+    .setup-icon-wrap {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 12px;
+    }
+
+    .setup-progress {
+        padding: 16px 16px 2px;
+    }
+
+    .progress-dot {
+        width: 32px;
+        height: 32px;
+    }
+
+    .progress-line {
+        width: 28px;
+        margin: 0 4px;
+    }
+
+    .progress-step span {
+        font-size: 0.68rem;
+    }
+
+    .setup-form {
+        padding: 18px 20px 28px;
+        gap: 16px;
+    }
+
+    .setup-form .input {
+        padding: 11px 12px;
+        font-size: 0.93rem;
+        border-radius: 10px;
+    }
+
+    .setup-errors,
+    .setup-success {
+        margin: 16px 20px 0;
+        padding: 12px 14px;
+        font-size: 0.85rem;
+    }
+
+    .setup-success + p {
+        padding: 0 20px 24px;
+    }
+
+    .setup-btn-primary {
+        padding: 12px 20px;
+        border-radius: 10px;
+    }
+
+    .setup-btn-secondary {
+        padding: 11px 20px;
+        border-radius: 10px;
+    }
+}
+
+/* Very small screens */
+@media (max-width: 360px) {
+    .setup-container {
+        padding: 16px 12px 96px;
+    }
+
+    .setup-header {
+        padding: 22px 16px 20px;
+    }
+
+    .setup-header h1 {
+        font-size: 1.12rem;
+    }
+
+    .setup-form {
+        padding: 16px 16px 24px;
+    }
+
+    .progress-line {
+        width: 20px;
+    }
+
+    .progress-dot {
+        width: 28px;
+        height: 28px;
+    }
+
+    .progress-dot svg {
+        width: 12px;
+        height: 12px;
+    }
+}
+
+/* ── Smooth focus transition for accessibility ── */
+@media (prefers-reduced-motion: reduce) {
+    .setup-card,
+    .setup-form .input,
+    .setup-btn-primary,
+    .setup-btn-secondary,
+    .progress-dot {
+        animation: none;
+        transition: none;
+    }
+}
