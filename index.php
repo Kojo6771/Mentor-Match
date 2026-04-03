@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Mentor Match — Find Your Perfect Mentor</title>
+    <title>Mentor Match | Find Your Perfect Mentor</title>
     <meta name="description" content="Connect with experienced mentors who can guide your academic and career journey. Mentor Match pairs students with the right mentors.">
     <link rel="stylesheet" href="assets/css/landing.css">
 </head>

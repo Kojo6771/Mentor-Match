@@ -430,7 +430,7 @@ $warningMessages = [
     </div>
 
     <!-- Logout link -->
-    <a href="login.php?logout=1" class="sm-logout-btn">Log Out</a>
+    <a href="logout.php" class="sm-logout-btn">Log Out</a>
 
 </div>
 </main>
