@@ -327,5 +327,6 @@ $pending_count = count($pending_applications);
             document.getElementById('actions-' + id).style.display = 'block';
         }
     </script>
+    <?php $currentPage = 'admin_dashboard'; include '../../includes/nav.php'; ?>
 </body>
 </html>
