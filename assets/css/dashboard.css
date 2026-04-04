@@ -160,7 +160,7 @@ body {
 /* ── Action Cards ── */
 .actions-grid {
     display: grid;
-    gap: 10px;
+    gap: 16px;
 }
 
 .action-card {
@@ -361,6 +361,10 @@ body {
 
     .action-card {
         padding: 14px;
+    }
+
+    .actions-grid {
+        gap: 12px;
     }
 
     .action-icon {
