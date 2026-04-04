@@ -593,7 +593,7 @@ function cal_url(array $params): string
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Calendar — Mentor Match</title>
+    <title>Calendar | Mentor Match</title>
     <meta name="description" content="Schedule mentoring sessions on Mentor Match.">
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/calendar.css">
