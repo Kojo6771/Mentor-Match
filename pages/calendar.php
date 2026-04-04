@@ -507,6 +507,32 @@ function render_session_card(array $s, int $user_id, string $user_role): string
         </div>';
     }
 
+    // "Add to Calendar" dropdown for confirmed or completed sessions.
+    $export_btn = '';
+    if (in_array($s['status'], ['confirmed', 'completed'], true)) {
+        $export_btn = '
+        <div class="cal-export-wrap">
+            <button type="button" class="btn-sm btn-export" onclick="toggleCalExport(this)" title="Add to external calendar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Add to Calendar
+            </button>
+            <div class="cal-export-menu" style="display:none">
+                <button type="button" onclick="exportToGoogle(this)">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Google Calendar
+                </button>
+                <button type="button" onclick="exportToOutlook(this)">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Outlook / Office 365
+                </button>
+                <button type="button" onclick="downloadICS(this)">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download .ics
+                </button>
+            </div>
+        </div>';
+    }
+
     $avatar_html = '<img src="' . htmlspecialchars($avatar) . '" alt="' . $with . '" class="session-avatar" onerror="this.onerror=null;this.src=\'' . htmlspecialchars($fallback) . '\'">';
 
     $meta_items = '<span class="session-meta-item">
@@ -529,7 +555,14 @@ function render_session_card(array $s, int $user_id, string $user_role): string
     }
 
     return '
-    <div class="session-card">
+    <div class="session-card"
+         data-cal-title="' . $title . '"
+         data-cal-date="' . htmlspecialchars($s['session_date']) . '"
+         data-cal-start="' . htmlspecialchars($s['start_time']) . '"
+         data-cal-end="' . htmlspecialchars($s['end_time'] ?? '') . '"
+         data-cal-desc="' . htmlspecialchars(($s['description'] ?? '') . ' — with ' . $name) . '"
+         data-cal-location="' . $location . '"
+         data-cal-subject="' . $subject . '">
         ' . $avatar_html . '
         <div class="session-body">
             <div class="session-top">
@@ -542,6 +575,7 @@ function render_session_card(array $s, int $user_id, string $user_role): string
             ' . $desc . '
             <div class="session-meta">' . $meta_items . '</div>
             ' . $actions . '
+            ' . $export_btn . '
         </div>
     </div>';
 }
@@ -552,6 +586,8 @@ function cal_url(array $params): string
     return 'calendar.php?' . http_build_query($params);
 }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -773,6 +809,105 @@ function cal_url(array $params): string
     <?php include '../includes/nav.php'; ?>
 
     <script>
+    /* ── Add to External Calendar helpers ── */
+    function getCardData(btn) {
+        var card = btn.closest('.session-card');
+        return {
+            title:    card.getAttribute('data-cal-title') || 'Mentor Match Session',
+            date:     card.getAttribute('data-cal-date')  || '',
+            start:    card.getAttribute('data-cal-start') || '',
+            end:      card.getAttribute('data-cal-end')   || '',
+            desc:     card.getAttribute('data-cal-desc')  || '',
+            location: card.getAttribute('data-cal-location') || '',
+            subject:  card.getAttribute('data-cal-subject')  || ''
+        };
+    }
+
+    // Convert "2026-04-10" + "14:00" to "20260410T140000" (local time, no Z)
+    function toCalDT(date, time) {
+        return date.replace(/-/g, '') + 'T' + (time || '000000').replace(/:/g, '') + '00';
+    }
+
+    // Google Calendar uses UTC-style stamps but we keep local for simplicity
+    function exportToGoogle(btn) {
+        var d = getCardData(btn);
+        var start = toCalDT(d.date, d.start);
+        var end   = toCalDT(d.date, d.end || d.start);
+        var desc  = d.desc + (d.subject ? '\nSubject: ' + d.subject : '');
+        var url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+            + '&text='    + encodeURIComponent(d.title)
+            + '&dates='   + encodeURIComponent(start + '/' + end)
+            + '&details=' + encodeURIComponent(desc)
+            + '&location='+ encodeURIComponent(d.location);
+        window.open(url, '_blank', 'noopener');
+        closeAllExportMenus();
+    }
+
+    function exportToOutlook(btn) {
+        var d = getCardData(btn);
+        var iso = function(date, time) {
+            return date + 'T' + (time || '00:00') + ':00';
+        };
+        var desc = d.desc + (d.subject ? '\nSubject: ' + d.subject : '');
+        var url = 'https://outlook.live.com/calendar/0/action/compose?rru=addevent'
+            + '&subject='  + encodeURIComponent(d.title)
+            + '&startdt='  + encodeURIComponent(iso(d.date, d.start))
+            + '&enddt='    + encodeURIComponent(iso(d.date, d.end || d.start))
+            + '&body='     + encodeURIComponent(desc)
+            + '&location=' + encodeURIComponent(d.location);
+        window.open(url, '_blank', 'noopener');
+        closeAllExportMenus();
+    }
+
+    function downloadICS(btn) {
+        var d = getCardData(btn);
+        var start = toCalDT(d.date, d.start);
+        var end   = toCalDT(d.date, d.end || d.start);
+        var desc  = d.desc + (d.subject ? '\\nSubject: ' + d.subject : '');
+        var uid   = d.date + '-' + (d.start||'').replace(/:/g,'') + '@mentormatch';
+        var ics = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//MentorMatch//Calendar//EN',
+            'BEGIN:VEVENT',
+            'UID:' + uid,
+            'DTSTART:' + start,
+            'DTEND:' + end,
+            'SUMMARY:' + d.title,
+            'DESCRIPTION:' + desc.replace(/\n/g, '\\n'),
+            'LOCATION:' + d.location,
+            'STATUS:CONFIRMED',
+            'END:VEVENT',
+            'END:VCALENDAR'
+        ].join('\r\n');
+
+        var blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = (d.title || 'session').replace(/[^a-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '_') + '.ics';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+        closeAllExportMenus();
+    }
+
+    function toggleCalExport(btn) {
+        var menu = btn.nextElementSibling;
+        var isOpen = menu.style.display !== 'none';
+        closeAllExportMenus();
+        if (!isOpen) menu.style.display = 'block';
+    }
+
+    function closeAllExportMenus() {
+        document.querySelectorAll('.cal-export-menu').forEach(function(m) { m.style.display = 'none'; });
+    }
+
+    // Close menus when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.cal-export-wrap')) closeAllExportMenus();
+    });
+
     (function () {
         // Open and close the new-session modal.
         const modal     = document.getElementById('sessionModal');

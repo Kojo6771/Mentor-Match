@@ -982,3 +982,75 @@
 .session-modal::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 0, 0, 0.2);
 }
+
+/* ── Add to Calendar Export ── */
+.cal-export-wrap {
+    position: relative;
+    margin-top: 10px;
+}
+
+.btn-export {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-light, #dbeafe);
+    border: 1px solid rgba(59, 130, 246, 0.15);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+}
+
+.btn-export:hover {
+    background: #bfdbfe;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.cal-export-menu {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 0;
+    z-index: 30;
+    min-width: 210px;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
+    padding: 6px;
+    animation: calExportFadeIn 0.15s ease;
+}
+
+@keyframes calExportFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.cal-export-menu button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-weight: 500;
+    color: #1e293b;
+    cursor: pointer;
+    transition: background 0.15s;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.cal-export-menu button:hover {
+    background: #f1f5f9;
+}
+
+.cal-export-menu button svg {
+    flex-shrink: 0;
+    color: var(--accent, #3b82f6);
+}
