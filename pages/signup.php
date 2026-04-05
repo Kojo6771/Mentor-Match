@@ -88,18 +88,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "An error occurred, please try again later.";
     }
 }
-
-
-
-
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sign Up — Mentor Match</title>
+    <title>Sign Up | Mentor Match</title>
     <meta name="description" content="Sign up for Mentor Match — mobile friendly mentor/Students matching.">
     <link rel="stylesheet" href="../assets/css/styles.css">
 </head>
