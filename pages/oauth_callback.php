@@ -16,9 +16,16 @@ require_once '../includes/db.php';
 require_once '../includes/oauth_config.php';
 
 // ── Validate the incoming request ──────────────────────────────────────────────
-$provider = $_GET['provider'] ?? ($_SESSION['oauth_provider'] ?? '');
 $code     = $_GET['code']     ?? '';
 $state    = $_GET['state']    ?? '';
+
+// The state is formatted as "provider-token" (e.g. "google-abc123def456").
+$provider = '';
+$state_token = '';
+if (strpos($state, '-') !== false) {
+    $provider    = substr($state, 0, strpos($state, '-'));
+    $state_token = substr($state, strpos($state, '-') + 1);
+}
 
 if (!in_array($provider, ['google', 'microsoft'], true)) {
     header('Location: login.php?error=invalid_provider');
@@ -26,7 +33,7 @@ if (!in_array($provider, ['google', 'microsoft'], true)) {
 }
 
 // Verify state parameter to prevent CSRF attacks.
-if (empty($state) || !isset($_SESSION['oauth_state']) || !hash_equals($_SESSION['oauth_state'], $state)) {
+if (empty($state_token) || !isset($_SESSION['oauth_state']) || !hash_equals($_SESSION['oauth_state'], $state_token)) {
     header('Location: login.php?error=invalid_state');
     exit;
 }
@@ -42,7 +49,6 @@ if (empty($code)) {
 // Determine the intended role (only used if we create a new account).
 $intended_role = $_SESSION['oauth_role'] ?? 'student';
 unset($_SESSION['oauth_role']);
-unset($_SESSION['oauth_provider']);
 
 // ── Exchange authorization code for access token ───────────────────────────────
 if ($provider === 'google') {
@@ -51,7 +57,7 @@ if ($provider === 'google') {
         'code'          => $code,
         'client_id'     => GOOGLE_CLIENT_ID,
         'client_secret' => GOOGLE_CLIENT_SECRET,
-        'redirect_uri'  => OAUTH_REDIRECT_URI . '?provider=google',
+        'redirect_uri'  => OAUTH_REDIRECT_URI,
         'grant_type'    => 'authorization_code',
     ];
     $userinfo_url = GOOGLE_USERINFO_URL;
@@ -61,7 +67,7 @@ if ($provider === 'google') {
         'code'          => $code,
         'client_id'     => MICROSOFT_CLIENT_ID,
         'client_secret' => MICROSOFT_CLIENT_SECRET,
-        'redirect_uri'  => OAUTH_REDIRECT_URI . '?provider=microsoft',
+        'redirect_uri'  => OAUTH_REDIRECT_URI,
         'grant_type'    => 'authorization_code',
         'scope'         => 'openid profile email User.Read',
     ];

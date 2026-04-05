@@ -21,7 +21,7 @@ define('OAUTH_REDIRECT_URI', OAUTH_BASE_URL . '/pages/oauth_callback.php');
 
 // ── Google OAuth ──
 define('GOOGLE_CLIENT_ID',     '866439681331-2ggmepghcugj0ln10k40u47gnikvliib.apps.googleusercontent.com');
-define('GOOGLE_CLIENT_SECRET', 'YOUR_GOOGLE_CGOCSPX-rU1Fa7xA0evRRiOJz7HcZhM2CKVOLIENT_SECRET');
+define('GOOGLE_CLIENT_SECRET', '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');
 define('GOOGLE_AUTH_URL',      'https://accounts.google.com/o/oauth2/v2/auth');
 define('GOOGLE_TOKEN_URL',     'https://oauth2.googleapis.com/token');
 define('GOOGLE_USERINFO_URL',  'https://www.googleapis.com/oauth2/v3/userinfo');
