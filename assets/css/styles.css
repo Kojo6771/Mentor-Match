@@ -362,6 +362,84 @@ input[type="file"]::file-selector-button:hover {
     }
 }
 
+/* ── OAuth Buttons ── */
+.oauth-divider {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 20px 0 16px;
+}
+
+.oauth-divider::before,
+.oauth-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+.oauth-divider span {
+    font-size: 0.82rem;
+    color: var(--muted);
+    white-space: nowrap;
+    text-transform: lowercase;
+}
+
+.oauth-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-oauth {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    background: #fff;
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.btn-oauth:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15,23,42,0.08);
+}
+
+.btn-oauth:active {
+    transform: translateY(0);
+}
+
+.btn-google:hover {
+    border-color: #ea4335;
+    box-shadow: 0 4px 12px rgba(234,67,53,0.12);
+}
+
+.btn-microsoft:hover {
+    border-color: #00a4ef;
+    box-shadow: 0 4px 12px rgba(0,164,239,0.12);
+}
+
+.btn-oauth svg {
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .oauth-buttons {
+        flex-direction: column;
+    }
+}
+
 /* ── Legacy class aliases (used by forgot_password, etc.) ── */
 .container {
     min-height: 100vh;
