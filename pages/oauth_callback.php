@@ -49,8 +49,10 @@ if (empty($code)) {
 // Determine the intended role (only used if we create a new account).
 $intended_role = $_SESSION['oauth_role'] ?? 'student';
 unset($_SESSION['oauth_role']);
+$ms_code_verifier = $_SESSION['ms_oauth_code_verifier'] ?? '';
+unset($_SESSION['ms_oauth_code_verifier']);
 
-// ── Exchange authorization code for access token ───────────────────────────────
+// ── Exchange authorization code for access token ────
 if ($provider === 'google') {
     $token_url = GOOGLE_TOKEN_URL;
     $post_fields = [
@@ -69,15 +71,21 @@ if ($provider === 'google') {
         'client_secret' => MICROSOFT_CLIENT_SECRET,
         'redirect_uri'  => OAUTH_REDIRECT_URI,
         'grant_type'    => 'authorization_code',
-        'scope'         => 'openid profile email User.Read',
     ];
+
+    // Include PKCE code_verifier if available (works alongside client_secret).
+    if (!empty($ms_code_verifier)) {
+        $post_fields['code_verifier'] = $ms_code_verifier;
+    }
+
     $userinfo_url = MICROSOFT_USERINFO_URL;
 }
 
 $token_response = http_post($token_url, $post_fields);
 
 if (!$token_response || !isset($token_response['access_token'])) {
-    header('Location: login.php?error=token_failed');
+    $oauth_error = isset($token_response['error']) ? $token_response['error'] : 'unknown';
+    header('Location: login.php?error=token_failed&provider=' . urlencode($provider) . '&oauth_error=' . urlencode($oauth_error));
     exit;
 }
 

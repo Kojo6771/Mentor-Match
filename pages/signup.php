@@ -28,13 +28,20 @@ if (isset($_GET['oauth'])) {
     }
 
     if ($provider === 'microsoft') {
+        // PKCE avoids relying on client secrets during browser-based auth flows.
+        $code_verifier = rtrim(strtr(base64_encode(random_bytes(64)), '+/', '-_'), '=');
+        $code_challenge = rtrim(strtr(base64_encode(hash('sha256', $code_verifier, true)), '+/', '-_'), '=');
+        $_SESSION['ms_oauth_code_verifier'] = $code_verifier;
+
         $params = http_build_query([
             'client_id'     => MICROSOFT_CLIENT_ID,
             'redirect_uri'  => OAUTH_REDIRECT_URI,
             'response_type' => 'code',
-            'scope'         => 'openid email profile User.Read',
+            'scope'         => 'openid profile User.Read offline_access',
             'state'         => 'microsoft-' . $state,
             'prompt'        => 'select_account',
+            'code_challenge' => $code_challenge,
+            'code_challenge_method' => 'S256',
         ]);
         header('Location: ' . MICROSOFT_AUTH_URL . '?' . $params);
         exit;
