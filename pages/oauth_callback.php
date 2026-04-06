@@ -106,12 +106,14 @@ if ($provider === 'google') {
     $first_name  = $profile['given_name']     ?? '';
     $last_name   = $profile['family_name']    ?? '';
     $picture_url = $profile['picture']        ?? '';
+    $phone       = $profile['phoneNumber']    ?? '';
 } else {
     $oauth_id    = $profile['id']             ?? '';
     $email       = $profile['mail'] ?? ($profile['userPrincipalName'] ?? '');
     $first_name  = $profile['givenName']      ?? '';
     $last_name   = $profile['surname']        ?? '';
     $picture_url = '';  // MS Graph photo requires a separate call; skip for now.
+    $phone       = $profile['mobilePhone'] ?? (!empty($profile['businessPhones'][0]) ? $profile['businessPhones'][0] : '');
 }
 
 if (empty($email)) {
@@ -170,9 +172,9 @@ if (!empty($picture_url)) {
 
 try {
     $stmt = $pdo->prepare(
-        'INSERT INTO users (first_name, last_name, email, password, role, profile_picture, oauth_provider, oauth_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        'INSERT INTO users (first_name, last_name, email, phone, password, role, profile_picture, oauth_provider, oauth_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
     );
-    $stmt->execute([$first_name, $last_name, $email, $random_password, $role, $profile_picture_path, $provider, $oauth_id]);
+    $stmt->execute([$first_name, $last_name, $email, $phone, $random_password, $role, $profile_picture_path, $provider, $oauth_id]);
     $new_user_id = $pdo->lastInsertId();
 } catch (PDOException $e) {
     header('Location: login.php?error=create_failed');
@@ -183,7 +185,7 @@ $_SESSION['user_id']    = $new_user_id;
 $_SESSION['first_name'] = $first_name;
 $_SESSION['last_name']  = $last_name;
 $_SESSION['email']      = $email;
-$_SESSION['phone']      = '';
+$_SESSION['phone']      = $phone;
 $_SESSION['role']       = $role;
 
 // Redirect new users to role-specific onboarding.
