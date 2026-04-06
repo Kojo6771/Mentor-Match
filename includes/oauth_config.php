@@ -27,8 +27,8 @@ define('GOOGLE_TOKEN_URL',     'https://oauth2.googleapis.com/token');
 define('GOOGLE_USERINFO_URL',  'https://www.googleapis.com/oauth2/v3/userinfo');
 
 // ── Microsoft OAuth ──
-define('MICROSOFT_CLIENT_ID',     'YOUR_MICROSOFT_CLIENT_ID');
-define('MICROSOFT_CLIENT_SECRET', 'YOUR_MICROSOFT_CLIENT_SECRET');
+define('MICROSOFT_CLIENT_ID',     '32b8f163-0c4f-449d-a6a3-5760c6e3ba1c');
+define('MICROSOFT_CLIENT_SECRET', 'b4d60902-b115-48f5-89eb-1718170a8022');
 define('MICROSOFT_TENANT',        'common'); // 'common' supports personal + work accounts
 define('MICROSOFT_AUTH_URL',      'https://login.microsoftonline.com/' . MICROSOFT_TENANT . '/oauth2/v2.0/authorize');
 define('MICROSOFT_TOKEN_URL',     'https://login.microsoftonline.com/' . MICROSOFT_TENANT . '/oauth2/v2.0/token');
