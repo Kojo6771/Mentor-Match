@@ -67,6 +67,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "The passwords do not match, please try again.";
     }
 
+    if (strlen($password) < 8) {
+        $errors[] = "Password must be at least 8 characters long.";
+    } elseif (!preg_match('/[A-Z]/', $password)) {
+        $errors[] = "Password must include at least one uppercase letter.";
+    } elseif (!preg_match('/[0-9]/', $password)) {
+        $errors[] = "Password must include at least one number.";
+    }
+
     // Profile picture validation and upload
     if (!isset($_FILES['profile_picture']) || $_FILES['profile_picture']['error'] !== UPLOAD_ERR_OK) {
         $errors[] = "Please upload a profile picture.";
