@@ -62,7 +62,7 @@ $icons = [
     left: 0;
     right: 0;
     background: #fff;
-    border-top: 4px solid #06b6d4;
+    border-top: 4px solid #3b82f6;
     box-shadow: 0 -2px 10px rgba(0,0,0,0.08);
     z-index: 1000;
 }
