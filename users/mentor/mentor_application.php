@@ -187,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         Submit Application
                     </button>
-                    <a href="../index.php" class="btn mentor-app-cancel">Cancel</a>
+                    <a href="../../index.php" class="btn mentor-app-cancel">Cancel</a>
                 </div>
             </form>
         </section>
