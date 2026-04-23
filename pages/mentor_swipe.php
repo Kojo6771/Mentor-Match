@@ -152,7 +152,7 @@ try {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Find a Mentor — Mentor Match</title>
+    <title>Find a Mentor | Mentor Match</title>
     <meta name="description" content="Swipe to find your perfect mentor match.">
     <link rel="stylesheet" href="../assets/css/mentor_swipe.css">
 </head>

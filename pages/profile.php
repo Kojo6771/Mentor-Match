@@ -697,7 +697,7 @@ if ($user_role === 'mentor') {
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Profile - Mentor Match</title>
+	<title>Profile | Mentor Match</title>
 	<meta name="description" content="Manage your profile on Mentor Match.">
 	<link rel="stylesheet" href="../assets/css/student_profile.css">
 	<?php if ($user_role === 'mentor'): ?>

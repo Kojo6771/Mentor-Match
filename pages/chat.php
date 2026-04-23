@@ -323,7 +323,7 @@ if ($chat_partner) {
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Chatroom - Mentor Match</title>
+	<title>Chatroom | Mentor Match</title>
 	<meta name="description" content="Chat with your mentor or students on Mentor Match.">
 	<link rel="stylesheet" href="../assets/css/styles.css">
 	<link rel="stylesheet" href="../assets/css/chat.css">
