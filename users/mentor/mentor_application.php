@@ -30,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Please tell us about your motivation to become a mentor.";
     } elseif (strlen($motivation) < 20) {
         $errors[] = "Motivation should be at least 20 characters long.";
-    } elseif (strlen($motivation) > 2000) {
-        $errors[] = "Motivation should not exceed 2000 characters.";
+    } elseif (str_word_count(strip_tags($motivation)) > 100) {
+        $errors[] = "Bio should not exceed 100 words.";
     }
 
     if (empty($experience_years)) {
@@ -153,8 +153,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         Why do you want to become a mentor?
                     </label>
-                    <textarea class="input textarea" id="motivation" name="motivation" required placeholder="Tell us about your passion for mentoring and teaching others..." maxlength="2000"><?php echo htmlspecialchars($_POST['motivation'] ?? ''); ?></textarea>
-                    <small class="char-count"><span id="char-count">0</span>/2000</small>
+                    <textarea class="input textarea" id="motivation" name="motivation" required placeholder="Tell us about your passion for mentoring and teaching others..." maxlength="800"><?php echo htmlspecialchars($_POST['motivation'] ?? ''); ?></textarea>
+                    <small class="char-count"><span id="word-count">0</span>/100 words</small>
                 </div>
 
                 <div class="form-group">
@@ -196,14 +196,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script>
         const textarea = document.getElementById('motivation');
-        const charCount = document.getElementById('char-count');
+        const wordCountEl = document.getElementById('word-count');
+        const MAX_WORDS = 100;
+
+        function countWords(text) {
+            return text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+        }
 
         textarea.addEventListener('input', function() {
-            charCount.textContent = this.value.length;
+            const words = countWords(this.value);
+            if (words > MAX_WORDS) {
+                this.value = this.value.trim().split(/\s+/).slice(0, MAX_WORDS).join(' ');
+                wordCountEl.textContent = MAX_WORDS;
+            } else {
+                wordCountEl.textContent = words;
+            }
+            wordCountEl.parentElement.style.color = words >= MAX_WORDS ? '#dc2626' : '';
         });
 
-        // Update character count on page load
-        charCount.textContent = textarea.value.length;
+        // Update word count on page load
+        wordCountEl.textContent = countWords(textarea.value);
     </script>
 </body>
 </html>
