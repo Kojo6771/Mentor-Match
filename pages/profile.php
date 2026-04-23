@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // Start session and load database connection
 session_start();
 require_once '../includes/db.php';
@@ -22,6 +22,52 @@ if (!in_array($user_role, ['student', 'mentor'], true)) {
 // Arrays to store form validation errors and success messages
 $errors = [];
 $successes = [];
+
+// ==== CHANGE PASSWORD HANDLING (all roles) ====
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'change_password') {
+	$current_password = $_POST['current_password'] ?? '';
+	$new_password     = $_POST['new_password'] ?? '';
+	$confirm_password = $_POST['confirm_password'] ?? '';
+
+	if ($current_password === '') {
+		$errors[] = 'Please enter your current password.';
+	}
+
+	if ($new_password === '') {
+		$errors[] = 'Please enter a new password.';
+	} elseif (strlen($new_password) < 8) {
+		$errors[] = 'New password must be at least 8 characters.';
+	} elseif (!preg_match('/[A-Z]/', $new_password)) {
+		$errors[] = 'New password must contain at least one uppercase letter.';
+	} elseif (!preg_match('/[0-9]/', $new_password)) {
+		$errors[] = 'New password must contain at least one number.';
+	}
+
+	if ($new_password !== '' && $confirm_password !== $new_password) {
+		$errors[] = 'Passwords do not match.';
+	}
+
+	if (empty($errors)) {
+		try {
+			$pwStmt = $pdo->prepare('SELECT password FROM users WHERE id = ? LIMIT 1');
+			$pwStmt->execute([$user_id]);
+			$stored_hash = $pwStmt->fetchColumn();
+
+			if (empty($stored_hash)) {
+				$errors[] = 'No password is set on this account (you may be using OAuth sign-in).';
+			} elseif (!password_verify($current_password, $stored_hash)) {
+				$errors[] = 'Current password is incorrect.';
+			} else {
+				$new_hash = password_hash($new_password, PASSWORD_BCRYPT);
+				$updatePwStmt = $pdo->prepare('UPDATE users SET password = ? WHERE id = ?');
+				$updatePwStmt->execute([$new_hash, $user_id]);
+				$successes[] = 'Password changed successfully.';
+			}
+		} catch (PDOException $e) {
+			$errors[] = 'Failed to change password. Please try again.';
+		}
+	}
+}
 
 // ==== STUDENT PROFILE HANDLING ====
 if ($user_role === 'student') {
@@ -761,6 +807,7 @@ if ($user_role === 'mentor') {
 							<textarea class="input textarea" id="bio" name="bio" maxlength="1000" rows="4" placeholder="Tell mentors about your goals and what you want to learn."><?php echo htmlspecialchars($bio); ?></textarea>
 						</div>
 
+						<button type="button" class="btn change-password-btn" id="open-password-modal">Change Password</button>
 						<button class="btn" type="submit">Save Changes</button>
 						<a href="logout.php" class="btn danger-btn logout-btn">Log Out</a>
 					</form>
@@ -884,6 +931,7 @@ if ($user_role === 'mentor') {
 							</div>
 						</div>
 
+						<button type="button" class="btn change-password-btn" id="open-password-modal">Change Password</button>
 						<button class="btn" type="submit">Save Changes</button>
 						<a href="logout.php" class="btn danger-btn logout-btn">Log Out</a>
 					</form>
@@ -970,6 +1018,34 @@ if ($user_role === 'mentor') {
 					</section>
 				</div>
 			<?php endif; ?>
+
+		<!-- Change Password Modal -->
+		<div class="password-modal" id="password-modal" aria-hidden="true">
+			<div class="password-modal__backdrop" data-close-password></div>
+			<section class="card password-modal__panel" aria-labelledby="password-heading" role="dialog" aria-modal="true">
+				<div class="password-modal__top">
+					<h2 id="password-heading" class="section-title">Change Password</h2>
+					<button type="button" class="password-close-btn" id="close-password-modal" aria-label="Close">&times;</button>
+				</div>
+				<form method="POST" class="profile-form" novalidate>
+					<input type="hidden" name="action" value="change_password">
+					<div>
+						<label for="current_password">Current Password</label>
+						<input class="input" id="current_password" name="current_password" type="password" required autocomplete="current-password">
+					</div>
+					<div>
+						<label for="new_password">New Password</label>
+						<input class="input" id="new_password" name="new_password" type="password" required autocomplete="new-password">
+						<p class="input-hint">At least 8 characters, 1 uppercase letter, and 1 number.</p>
+					</div>
+					<div>
+						<label for="confirm_password">Confirm New Password</label>
+						<input class="input" id="confirm_password" name="confirm_password" type="password" required autocomplete="new-password">
+					</div>
+					<button class="btn" type="submit">Update Password</button>
+				</form>
+			</section>
+		</div>
 		</div>
 </main>
 
@@ -1104,6 +1180,35 @@ if ($user_role === 'mentor') {
 			}
 			<?php endif; ?>
 
+			// PASSWORD MODAL FUNCTIONALITY
+			const passwordModal = document.getElementById('password-modal');
+			const openPasswordBtn = document.getElementById('open-password-modal');
+			const closePasswordBtn = document.getElementById('close-password-modal');
+			const closePasswordBackdrop = passwordModal ? passwordModal.querySelector('[data-close-password]') : null;
+
+			function openPasswordModal() {
+				if (!passwordModal) { return; }
+				passwordModal.classList.add('is-open');
+				passwordModal.setAttribute('aria-hidden', 'false');
+				document.body.classList.add('password-modal-open');
+			}
+
+			function closePasswordModal() {
+				if (!passwordModal) { return; }
+				passwordModal.classList.remove('is-open');
+				passwordModal.setAttribute('aria-hidden', 'true');
+				document.body.classList.remove('password-modal-open');
+			}
+
+			if (openPasswordBtn) { openPasswordBtn.addEventListener('click', openPasswordModal); }
+			if (closePasswordBtn) { closePasswordBtn.addEventListener('click', closePasswordModal); }
+			if (closePasswordBackdrop) { closePasswordBackdrop.addEventListener('click', closePasswordModal); }
+
+			// Auto-open the modal if a password change error occurred
+<?php if (!empty($errors) && ($_POST['action'] ?? '') === 'change_password'): ?>
+			if (passwordModal) { openPasswordModal(); }
+<?php endif; ?>
+
 			// Global keyboard handler: allow Escape key to close any open modal
 			document.addEventListener('keydown', function (event) {
 				if (event.key === 'Escape') {
@@ -1122,6 +1227,14 @@ if ($user_role === 'mentor') {
 						studentsModal.setAttribute('aria-hidden', 'true');
 						document.body.classList.remove('students-modal-open');
 					}
+
+				// Close the password modal if open
+				const pwModal = document.getElementById('password-modal');
+				if (pwModal && pwModal.classList.contains('is-open')) {
+					pwModal.classList.remove('is-open');
+					pwModal.setAttribute('aria-hidden', 'true');
+					document.body.classList.remove('password-modal-open');
+				}
 				}
 			});
 		})();
