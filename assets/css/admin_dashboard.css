@@ -32,7 +32,7 @@
 /* ---- Base Container ---- */
 .admin-container {
     min-height: 100vh;
-    background: var(--bg);
+    background: transparent;
     font-family: var(--font);
     padding-bottom: 96px; /* fixed bottom nav clearance */
 }
