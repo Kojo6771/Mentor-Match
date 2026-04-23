@@ -1,18 +1,4 @@
 <?php
-/**
- * OAuth 2.0 Configuration for Google and Microsoft sign-in.
- *
- * Instructions:
- * 1. GOOGLE  – Create credentials at https://console.cloud.google.com/apis/credentials
- *              Set the redirect URI to: http://localhost/mentor-match/pages/oauth_callback.php
- *
- * 2. MICROSOFT – Register an app at https://portal.azure.com → App registrations
- *                Set the redirect URI to: http://localhost/mentor-match/pages/oauth_callback.php
- *                Under "Authentication" choose "Web" platform.
- *
- * Replace the placeholder values below with your own client IDs and secrets.
- */
-
 // Base URL of the application (no trailing slash).
 define('OAUTH_BASE_URL', 'http://localhost/mentor-match');
 
@@ -29,7 +15,7 @@ define('GOOGLE_USERINFO_URL',  'https://www.googleapis.com/oauth2/v3/userinfo');
 // ── Microsoft OAuth ──
 define('MICROSOFT_CLIENT_ID',     '32b8f163-0c4f-449d-a6a3-5760c6e3ba1c');
 define('MICROSOFT_CLIENT_SECRET', 'Ldz8Q~j1RexopXzsyKa7TryLr3x.1RDSTTNuBcs6');
-define('MICROSOFT_TENANT',        'common'); // 'common' supports personal + work accounts
+define('MICROSOFT_TENANT',        'common'); // 'common' so that it supports personal + work accounts
 define('MICROSOFT_AUTH_URL',      'https://login.microsoftonline.com/' . MICROSOFT_TENANT . '/oauth2/v2.0/authorize');
 define('MICROSOFT_TOKEN_URL',     'https://login.microsoftonline.com/' . MICROSOFT_TENANT . '/oauth2/v2.0/token');
 define('MICROSOFT_USERINFO_URL',  'https://graph.microsoft.com/v1.0/me');
