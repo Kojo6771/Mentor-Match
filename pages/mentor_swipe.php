@@ -94,6 +94,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     exit;
 }
 
+// Fetch student's course for subject filtering
+$studentCourse = '';
+try {
+    $courseStmt = $pdo->prepare('SELECT course FROM students WHERE student_id = ?');
+    $courseStmt->execute([$student_id]);
+    $courseRow = $courseStmt->fetch(PDO::FETCH_ASSOC);
+    if ($courseRow) {
+        $studentCourse = strtolower(trim($courseRow['course'] ?? ''));
+    }
+} catch (PDOException $e) {
+    $studentCourse = '';
+}
+
 // Include the swipe card component
 require_once '../components/swipe/swipe_card.php';
 
@@ -161,9 +174,21 @@ try {
 <!-- Sticky header -->
 <header class="swipe-page-header">
     <div class="swipe-page-header-inner">
-        <h1>Find Your Mentor</h1>
-        <p>Swipe right to connect, left to pass</p>
+        <div class="swipe-header-top">
+            <div class="swipe-header-text">
+                <h1>Find Your Mentor</h1>
+                <p>Swipe right to connect, left to pass</p>
+            </div>
+            <div class="filter-toggle-wrapper">
+                <label class="filter-label">My Subject</label>
+                <button id="filterBtn" class="filter-toggle" title="Show only mentors who teach my subject">
+                    <span class="toggle-track"></span>
+                    <span class="toggle-thumb"></span>
+                </button>
+            </div>
+        </div>
     </div>
+    <div id="filterStatus" class="swipe-filter-status">Showing all mentors</div>
 </header>
 
 <main>
@@ -244,6 +269,55 @@ try {
             alert('Failed to save your choice. Please try again.');
         });
     };
+
+    // Filter functionality
+    const studentCourse = <?php echo json_encode($studentCourse); ?>;
+    const filterBtn = document.getElementById('filterBtn');
+    const filterStatus = document.getElementById('filterStatus');
+    let filterBySubject = false;
+
+    if (filterBtn) {
+        filterBtn.addEventListener('click', function() {
+            filterBySubject = !filterBySubject;
+            updateSwipeFilter();
+        });
+    }
+
+    function updateSwipeFilter() {
+        const cards = document.querySelectorAll('.swipe-card');
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const subjects = (card.dataset.subjects || '').split('|||').map(s => s.trim()).filter(Boolean);
+            const matches = studentCourse && subjects.some(s => s.includes(studentCourse) || studentCourse.includes(s));
+
+            if (filterBySubject) {
+                if (matches) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            } else {
+                card.style.display = '';
+                visibleCount++;
+            }
+        });
+
+        if (filterBtn) {
+            filterBtn.classList.toggle('filter-active', filterBySubject);
+        }
+
+        if (filterStatus) {
+            if (filterBySubject) {
+                filterStatus.textContent = visibleCount > 0
+                    ? `Showing ${visibleCount} mentor${visibleCount !== 1 ? 's' : ''} teaching your subject`
+                    : 'No mentors found for your subject';
+            } else {
+                filterStatus.textContent = `Showing all mentors (${cards.length})`;
+            }
+        }
+    }
     </script>
 </body>
 </html>

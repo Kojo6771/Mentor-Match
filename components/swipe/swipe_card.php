@@ -52,7 +52,8 @@ function render_swipe_card($mentor, $index = 0) {
     $z_index = 100 - $index;
     ?>
 
-    <div class="swipe-card" data-mentor-id="<?= $mentor_id ?>" data-index="<?= $index ?>" style="z-index: <?= $z_index ?>;">
+    <?php $subjects_lower = array_map(fn($s) => strtolower(trim($s)), $subjects); ?>
+    <div class="swipe-card" data-mentor-id="<?= $mentor_id ?>" data-index="<?= $index ?>" data-subjects="<?= htmlspecialchars(implode('|||', $subjects_lower)) ?>" style="z-index: <?= $z_index ?>;">
         <div class="swipe-card-accent"></div>
         <div class="swipe-card-inner">
             <!-- Header: Profile Picture + Info side by side -->
