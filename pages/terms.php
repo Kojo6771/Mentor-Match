@@ -10,6 +10,7 @@
 <body class="policy-page">
     <div class="policy-container">
 
+        <!-- Let users go back to sign-up without losing their flow -->
         <a href="signup.php" class="policy-back">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
             Back to Sign Up
@@ -17,6 +18,7 @@
 
         <div class="policy-card">
 
+            <!-- Brand link sits at the top so users can always return to the homepage -->
             <a href="../index.php" class="policy-brand">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <circle cx="12" cy="8" r="3" fill="#3b82f6"/>
@@ -28,6 +30,7 @@
             <h1 class="policy-title">Terms of Service</h1>
             <p class="policy-meta">Effective Date: April 22, 2026 &nbsp;·&nbsp; Last Updated: April 22, 2026</p>
 
+            <!-- Each numbered section maps directly to a legal clause — keep them in order -->
             <div class="policy-section">
                 <h2>1. Acceptance of Terms</h2>
                 <p>By accessing or using the Mentor Match platform, you agree to be bound by these Terms of Service. If you do not agree to these Terms, please do not create an account or use the Service. These Terms constitute a legally binding agreement between you and Mentor Match.</p>
@@ -49,6 +52,7 @@
 
             <hr class="policy-divider">
 
+            <!-- Students and Mentors have different permissions on the platform -->
             <div class="policy-section">
                 <h2>3. User Roles</h2>
                 <p><strong>Students</strong> may browse mentor profiles, send connection requests, schedule sessions, and communicate through the platform's messaging features.</p>
@@ -74,6 +78,7 @@
 
             <hr class="policy-divider">
 
+            <!-- Content users upload (profiles, messages) stays theirs; we just need a licence to display it -->
             <div class="policy-section">
                 <h2>5. Intellectual Property</h2>
                 <p>All content, branding, design elements, software, and underlying technology on the Mentor Match platform are the exclusive property of Kwadwo Antwi-Adarkwah and Aston University or its licensors. You may not reproduce, distribute, or create derivative works from any platform content without express written permission.</p>
@@ -119,6 +124,7 @@
                 </ul>
             </div>
 
+            <!-- Quick links so users can jump to the privacy policy or head back to registration -->
             <div class="policy-footer">
                 <p>Also read our <a href="privacy.php">Privacy Policy</a>. &nbsp;·&nbsp; <a href="signup.php">Back to Sign Up</a></p>
             </div>

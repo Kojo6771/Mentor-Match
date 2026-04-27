@@ -5,7 +5,7 @@ require_once '..\includes\oauth_config.php';
 $errors = [];
 $profile_picture_path = null;
 
-// ── OAuth initiation (preserves chosen role) ──
+// OAuth initiation (preserves chosen role) 
 if (isset($_GET['oauth'])) {
     $provider = $_GET['oauth'];
     $role = isset($_GET['role']) && $_GET['role'] === 'mentor' ? 'mentor' : 'student';
@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>

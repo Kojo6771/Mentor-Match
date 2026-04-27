@@ -222,9 +222,9 @@ if ($user_role === 'admin') {
         $active_sessions = 0;
     }
 }
-
 ?>
 
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>

@@ -14,8 +14,9 @@ try {
     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
         $roleCounts[$row['role']] = (int)$row['cnt'];
     }
-} catch (PDOException $e) { /* silent */ }
+} catch (PDOException $e) { }
 
+// Calculate total users and individual role counts.
 $totalUsers   = array_sum($roleCounts);
 $studentCount = $roleCounts['student'];
 $mentorCount  = $roleCounts['mentor'];
@@ -168,6 +169,8 @@ function timeAgo(string $datetime): string {
     return date('M j', strtotime($datetime));
 }
 ?>
+
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>

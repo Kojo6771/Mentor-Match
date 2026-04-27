@@ -318,6 +318,7 @@ if ($chat_partner) {
 ?>
 
 
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>

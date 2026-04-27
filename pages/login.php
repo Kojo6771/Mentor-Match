@@ -24,7 +24,7 @@ if (isset($_GET['logout']) && $_GET['logout'] === '1') {
     exit;
 }
 
-// ── OAuth initiation ──
+// OAuth initiation 
 if (isset($_GET['oauth'])) {
     $provider = $_GET['oauth'];
     $state = bin2hex(random_bytes(16));
@@ -108,6 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
