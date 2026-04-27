@@ -236,7 +236,7 @@ if ($user_role === 'admin') {
 </head>
 <body>
 
-<!-- ── Sticky Header ── -->
+<!--  Sticky Header -->
 <header class="dash-header">
     <div class="dash-header-inner">
         <a href="dashboard.php" class="dash-brand">
