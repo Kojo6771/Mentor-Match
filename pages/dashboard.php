@@ -250,7 +250,7 @@ if ($user_role === 'admin') {
     </div>
 </header>
 
-<!-- ── Main Content ── -->
+<!-- Main Content -->
 <main class="dash-main">
 
     <!-- Welcome -->
