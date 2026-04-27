@@ -866,7 +866,7 @@ if ($user_role === 'mentor') {
 				</div>
 			<?php endif; ?>
 
-			// Mentor profile view with student list and profile editing
+			<!-- Mentor profile view with student list and profile editing -->
 			<?php if ($user_role === 'mentor'): ?>
 				<section class="card profile-card" aria-labelledby="profile-heading">
 					<div class="profile-section-head">
