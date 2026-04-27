@@ -118,6 +118,8 @@ function joinedLabel(string $dt): string {
     return date('M j, Y', $ts);
 }
 ?>
+
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>

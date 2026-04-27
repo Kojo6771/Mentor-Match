@@ -1,3 +1,4 @@
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,6 +11,7 @@
 <body class="policy-page">
     <div class="policy-container">
 
+        <!-- Quick exit for users who came here during sign-up -->
         <a href="signup.php" class="policy-back">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
             Back to Sign Up
@@ -17,6 +19,7 @@
 
         <div class="policy-card">
 
+            <!-- Keep brand visible so users can jump back to the homepage -->
             <a href="../index.php" class="policy-brand">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <circle cx="12" cy="8" r="3" fill="#3b82f6"/>
@@ -28,6 +31,7 @@
             <h1 class="policy-title">Privacy Policy</h1>
             <p class="policy-meta">Effective Date: April 22, 2026 &nbsp;·&nbsp; Last Updated: April 22, 2026</p>
 
+            <!-- Policy content is split into numbered sections for easier legal updates -->
             <div class="policy-section">
                 <h2>1. Information We Collect</h2>
                 <p>When you register and use Mentor Match we may collect the following categories of information:</p>
@@ -150,6 +154,7 @@
             </div>
 
             <div class="policy-footer">
+                <!-- Keep related legal links close to the end of the page -->
                 <p>Also read our <a href="terms.php">Terms of Service</a>. &nbsp;·&nbsp; <a href="signup.php">Back to Sign Up</a></p>
             </div>
 

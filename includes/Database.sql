@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 23, 2026 at 04:51 PM
+-- Generation Time: Apr 27, 2026 at 02:58 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -78,8 +78,7 @@ CREATE TABLE `mentor_applications` (
 
 INSERT INTO `mentor_applications` (`id`, `user_id`, `motivation`, `linkedin`, `github`, `experience_years`, `status`, `admin_notes`, `submitted_at`, `reviewed_at`) VALUES
 (2, 13, 'I have worked in industry', NULL, NULL, 4, 'approved', NULL, '2026-02-11 01:36:10', '2026-02-15 03:16:22'),
-(3, 14, 'So that I can share my knowledge with more students', NULL, NULL, 2, 'approved', NULL, '2026-02-16 02:41:10', '2026-02-16 02:46:09'),
-(4, 24, 'I have a great love for the Law and want to share my knowledge with those who need additional help', NULL, NULL, 2, 'pending', NULL, '2026-04-21 15:20:55', NULL);
+(3, 14, 'So that I can share my knowledge with more students', NULL, NULL, 2, 'approved', NULL, '2026-02-16 02:41:10', '2026-02-16 02:46:09');
 
 -- --------------------------------------------------------
 
@@ -98,8 +97,7 @@ CREATE TABLE `mentor_application_subjects` (
 
 INSERT INTO `mentor_application_subjects` (`application_id`, `subject_id`) VALUES
 (2, 5),
-(3, 11),
-(4, 12);
+(3, 11);
 
 -- --------------------------------------------------------
 
@@ -123,7 +121,9 @@ CREATE TABLE `mentor_profiles` (
 
 INSERT INTO `mentor_profiles` (`mentor_id`, `bio`, `linkedin`, `github`, `experience_years`, `verified`, `user_id`) VALUES
 (13, 'I am a passionate Computer Science mentor with a strong background in software development and problem-solving. Whether it’s preparing for exams, debugging code, or exploring new technologies, I am committed to supporting his mentees every step of the way. Outside of mentoring, I enjoy contributing to open-source projects and staying up to date with the latest trends in tech', 'https://www.linkedin.com/in/kwadwo-antwi/', 'https://github.com/Kojo6771', 4, 1, 13),
-(14, NULL, NULL, NULL, 2, 1, 14);
+(14, NULL, NULL, NULL, 2, 1, 14),
+(25, 'Software engineering mentor focused on web development and clean architecture.', 'https://www.linkedin.com/in/ada-demo', 'https://github.com/ada-demo', 5, 1, 25),
+(26, 'Data and algorithms mentor with strong maths/statistics support for undergraduates.', 'https://www.linkedin.com/in/daniel-demo', 'https://github.com/daniel-demo', 4, 1, 26);
 
 -- --------------------------------------------------------
 
@@ -145,7 +145,11 @@ CREATE TABLE `mentor_ratings` (
 --
 
 INSERT INTO `mentor_ratings` (`id`, `student_id`, `mentor_id`, `rating`, `created_at`, `updated_at`) VALUES
-(1, 15, 13, 4, '2026-03-12 18:33:15', '2026-03-12 18:33:15');
+(1, 15, 13, 4, '2026-03-12 18:33:15', '2026-03-12 18:33:15'),
+(2, 27, 25, 5, '2026-03-11 16:20:00', '2026-03-11 16:20:00'),
+(3, 28, 25, 4, '2026-03-18 12:10:00', '2026-03-18 12:10:00'),
+(4, 29, 26, 5, '2026-03-22 15:30:00', '2026-03-22 15:30:00'),
+(5, 30, 26, 4, '2026-03-26 09:00:00', '2026-03-26 09:00:00');
 
 -- --------------------------------------------------------
 
@@ -171,7 +175,13 @@ INSERT INTO `mentor_requests` (`id`, `student_id`, `mentor_id`, `status`, `reque
 (11, 15, 14, 'cancelled', '2026-03-07 00:50:48', NULL),
 (12, 1, 13, 'accepted', '2026-03-07 01:19:14', '2026-03-12 18:23:07'),
 (13, 1, 14, 'cancelled', '2026-03-07 01:19:16', NULL),
-(16, 17, 13, 'pending', '2026-04-23 02:53:21', NULL);
+(16, 17, 13, 'pending', '2026-04-23 02:53:21', NULL),
+(17, 27, 25, 'accepted', '2026-03-01 10:15:00', '2026-03-01 13:00:00'),
+(18, 28, 25, 'accepted', '2026-03-02 11:20:00', '2026-03-02 14:10:00'),
+(19, 29, 26, 'accepted', '2026-03-04 09:45:00', '2026-03-04 12:30:00'),
+(20, 30, 26, 'accepted', '2026-03-06 16:00:00', '2026-03-06 17:40:00'),
+(21, 27, 26, 'pending', '2026-04-20 09:30:00', NULL),
+(22, 29, 25, 'pending', '2026-04-21 14:05:00', NULL);
 
 -- --------------------------------------------------------
 
@@ -193,7 +203,11 @@ CREATE TABLE `mentor_student_matches` (
 
 INSERT INTO `mentor_student_matches` (`id`, `mentor_id`, `student_id`, `matched_at`, `active`) VALUES
 (2, 13, 15, '2026-03-05 18:23:05', 1),
-(3, 13, 1, '2026-03-12 18:23:07', 1);
+(3, 13, 1, '2026-03-12 18:23:07', 1),
+(5, 25, 27, '2026-03-01 13:00:00', 1),
+(6, 25, 28, '2026-03-02 14:10:00', 1),
+(7, 26, 29, '2026-03-04 12:30:00', 1),
+(8, 26, 30, '2026-03-06 17:40:00', 1);
 
 -- --------------------------------------------------------
 
@@ -212,7 +226,11 @@ CREATE TABLE `mentor_subjects` (
 
 INSERT INTO `mentor_subjects` (`mentor_id`, `subject_id`) VALUES
 (13, 5),
-(14, 11);
+(14, 11),
+(25, 1),
+(25, 5),
+(26, 6),
+(26, 12);
 
 -- --------------------------------------------------------
 
@@ -239,7 +257,18 @@ INSERT INTO `messages` (`id`, `sender_id`, `receiver_id`, `message`, `sent_at`, 
 (3, 12, 13, '⚠️ Admin Warning: You currently have no upcoming sessions with Alistair Ridley. Please propose a session soon.', '2026-03-19 10:32:51', '2026-03-19 10:44:39'),
 (4, 12, 13, '⚠️ Admin Warning: You currently have no upcoming sessions with Alistair Ridley. Please propose a session soon.', '2026-03-19 10:39:08', '2026-03-19 10:44:39'),
 (5, 12, 13, '⚠️ Admin Warning: Your session with Alistair Ridley has passed and hasn\'t been marked as completed. Please update its status.', '2026-03-20 02:16:22', '2026-03-20 02:40:40'),
-(6, 12, 13, '⚠️ Admin Warning: Your session with Stacey Slater has passed and hasn\'t been marked as completed. Please update its status.', '2026-04-07 00:46:50', '2026-04-07 01:47:08');
+(6, 12, 13, '⚠️ Admin Warning: Your session with Stacey Slater has passed and hasn\'t been marked as completed. Please update its status.', '2026-04-07 00:46:50', '2026-04-07 01:47:08'),
+(7, 27, 25, 'Hi Ada, thanks again for the DS session. The tree traversal part finally clicked.', '2026-03-11 16:10:00', '2026-03-11 16:12:00'),
+(8, 25, 27, 'Great progress. Next week we can practice timed coding rounds.', '2026-03-11 16:14:00', '2026-03-11 16:15:00'),
+(9, 28, 25, 'Can we revisit integration by parts before the quiz?', '2026-03-17 20:30:00', '2026-03-17 20:33:00'),
+(10, 25, 28, 'Absolutely. I uploaded three practice questions in your notes.', '2026-03-17 20:35:00', '2026-03-17 20:37:00'),
+(11, 29, 26, 'Today\'s case workshop was useful. I\'ll rewrite my arguments tonight.', '2026-03-22 15:05:00', '2026-03-22 15:10:00'),
+(12, 26, 29, 'Nice work. Share draft 2 and I will annotate it before Friday.', '2026-03-22 15:12:00', '2026-03-22 15:18:00'),
+(13, 30, 26, 'Sorry I had to cancel. Can we book another stats session this week?', '2026-03-25 18:08:00', NULL),
+(14, 25, 27, 'I have shared extra API exercises. Ping me once you try them.', '2026-04-26 17:05:00', NULL),
+(15, 28, 25, 'Could we move Thursday by 30 minutes if possible?', '2026-04-26 18:20:00', NULL),
+(16, 26, 29, 'Please upload your updated case summary before tomorrow.', '2026-04-26 19:40:00', NULL),
+(17, 30, 26, 'I can do Sunday 4:30pm, just sent the booking request.', '2026-04-26 20:05:00', NULL);
 
 -- --------------------------------------------------------
 
@@ -352,7 +381,15 @@ CREATE TABLE `sessions` (
 INSERT INTO `sessions` (`id`, `student_id`, `mentor_id`, `subject_id`, `title`, `description`, `location`, `session_date`, `start_time`, `end_time`, `status`, `proposed_by`, `created_at`) VALUES
 (1, 15, 13, 5, 'OOP', 'to do oop labs', 'Aston University Libary', '2026-03-12', '13:00:00', '15:00:00', 'completed', 13, '2026-03-17 21:04:50'),
 (3, 1, 13, 5, 'IAD', NULL, 'Aston University Libary', '2026-03-19', '15:30:00', '17:00:00', 'completed', 13, '2026-03-19 10:45:09'),
-(4, 15, 13, 5, 'Web Developemnt', 'How to connect API\'s', 'Aston University Libary', '2026-04-06', '13:00:00', '15:00:00', 'completed', 15, '2026-04-04 17:58:10');
+(4, 15, 13, 5, 'Web Developemnt', 'How to connect API\'s', 'Aston University Libary', '2026-04-06', '13:00:00', '15:00:00', 'completed', 15, '2026-04-04 17:58:10'),
+(5, 27, 25, 5, 'Data Structures Revision', 'Linked lists, trees, and recursion drills.', 'Aston Library - Room 2', '2026-03-11', '14:00:00', '15:30:00', 'completed', 25, '2026-03-08 09:00:00'),
+(6, 28, 25, 1, 'Calculus Support Session', 'Differentiation and integration practice questions.', 'Aston Library - Room 1', '2026-03-18', '11:00:00', '12:00:00', 'completed', 28, '2026-03-15 18:20:00'),
+(7, 29, 26, 12, 'Contract Law Case Workshop', 'Reviewing case structure and argument clarity.', 'Business School - Seminar 4', '2026-03-22', '13:30:00', '14:30:00', 'completed', 26, '2026-03-20 10:40:00'),
+(8, 30, 26, 6, 'Intro to Hypothesis Testing', 'Hypothesis design and p-value interpretation.', 'Online (Teams)', '2026-03-25', '16:00:00', '17:00:00', 'cancelled', 30, '2026-03-24 09:15:00'),
+(9, 27, 25, 5, 'API Design Mock Interview', 'Practice system design and endpoint review.', 'Aston Library - Room 5', '2026-05-05', '10:00:00', '11:00:00', 'confirmed', 25, '2026-04-24 08:10:00'),
+(10, 28, 25, 1, 'Calculus Past Paper Walkthrough', 'Focused prep for derivatives and optimization.', 'Online (Teams)', '2026-05-07', '14:00:00', '15:00:00', 'pending', 28, '2026-04-24 10:30:00'),
+(11, 29, 26, 12, 'Essay Structure Clinic', 'Refine issue spotting and conclusion drafting.', 'Business School - Seminar 3', '2026-05-08', '12:30:00', '13:30:00', 'confirmed', 26, '2026-04-24 12:45:00'),
+(12, 30, 26, 6, 'Statistics Quiz Prep', 'Confidence pass on sampling distributions.', 'Online (Teams)', '2026-05-10', '16:30:00', '17:30:00', 'confirmed', 30, '2026-04-24 15:10:00');
 
 -- --------------------------------------------------------
 
@@ -379,7 +416,11 @@ INSERT INTO `students` (`student_id`, `course`, `year_of_study`, `learning_prefe
 (1, 'Engineering', 1, 'In person sessions', '', '2026-02-20 23:39:36', 1, 13),
 (12, 'Computer science', 3, 'In person sessions', 'I want to be a software developer', '2026-02-11 01:23:13', 12, NULL),
 (15, 'Computer Science', 1, 'In person sessions', 'I am in my first year doing Object oriented programming', '2026-03-07 00:50:39', 15, 13),
-(17, 'English', 1, 'In person sessions', 'I am studying english and need help with plays', '2026-03-19 11:19:16', 17, NULL);
+(17, 'English', 1, 'In person sessions', 'I am studying english and need help with plays', '2026-03-19 11:19:16', 17, NULL),
+(27, 'Computer Science', 2, 'In person sessions', 'Working on web modules and backend design.', '2026-04-27 12:15:17', 27, 25),
+(28, 'Computer Science', 1, 'Videos', 'Needs support with Python and problem decomposition.', '2026-04-27 12:15:17', 28, 25),
+(29, 'Law', 2, 'In person sessions', 'Preparing for contract law coursework and case analysis.', '2026-04-27 12:15:17', 29, 26),
+(30, 'Statistics', 1, 'Quizzes', 'Building confidence in probability and hypothesis testing.', '2026-04-27 12:15:17', 30, 26);
 
 -- --------------------------------------------------------
 
@@ -440,11 +481,16 @@ CREATE TABLE `users` (
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `phone`, `email`, `password`, `role`, `created_at`, `profile_picture`, `oauth_provider`, `oauth_id`) VALUES
 (1, 'Alistair', 'Ridley', '078456621323', 'mrdownbad@gmail.com', '$2y$10$.UTYGKQKYJRsJ4Wmz3rCfeI7hFz/ZEV4Ggfjwd.ZK4R31fWkJsq8q', 'student', '2026-01-29 22:09:09', NULL, NULL, NULL),
 (12, 'Kojo', 'Antwi', '07463885316', 'k_wad_wo@hotmail.co.uk', '$2y$10$BMMjfPfsCVpZpOcZbu04ce77rBcXeI408VjaiTBykIQaYK9t2cfk6', 'admin', '2026-02-11 01:22:41', 'uploads/profile_pictures/profile_698bd9e129821_1770772961.jpg', 'microsoft', '4935826a04a26654'),
-(13, 'Jacob', 'Harvey', '07463885316', 'nyashdying@gmail.com', '$2y$10$5C4xySz9am0eWBQWf/BIQuDJ5tMdidEqTBxX2m7lSLG/qpmRNKJpS', 'mentor', '2026-02-11 01:35:51', 'uploads/profile_pictures/profile_69e97dd30053e3.09613944_1776909779.jpg', NULL, NULL),
-(14, 'George', 'Burell', '07809639807', 'GJ@gmail.com', '$2y$10$mY9.9HyJju6ePXFPlwO/A.ykCpIHFusAqaqzfHK3njZkaoKDPCnv2', 'mentor', '2026-02-16 02:40:36', 'uploads/profile_pictures/profile_699283a3eb925_1771209635.JPG', NULL, NULL),
+(13, 'Jacob', 'Harvey', '07463885316', 'JHBlack@gmail.com', '$2y$10$5C4xySz9am0eWBQWf/BIQuDJ5tMdidEqTBxX2m7lSLG/qpmRNKJpS', 'mentor', '2026-02-11 01:35:51', 'uploads/profile_pictures/profile_69e97dd30053e3.09613944_1776909779.jpg', NULL, NULL),
+(14, 'George', 'Burell', '07809639807', 'GJ@gmail.com', '$2y$10$mY9.9HyJju6ePXFPlwO/A.ykCpIHFusAqaqzfHK3njZkaoKDPCnv2', 'mentor', '2026-02-16 02:40:36', 'uploads/profile_pictures/profile_69ef5ac1ba6455.48523413_1777294017.webp', NULL, NULL),
 (15, 'Stacey', 'Slater', '07463885316', 'ST@gmail.com', '$2y$10$OctrS1.jo8qRN2NB3ofIfeEMmgvz5xcPVOGOjMCf3VmtJFQlkGVqK', 'student', '2026-03-07 00:49:00', 'uploads/profile_pictures/profile_69ab75fcd2b29_1772844540.webp', NULL, NULL),
 (17, 'Phil', 'Mitchel', '07463885316', 'Phil123@gmail.com', '$2y$10$zzJVwvGZcjyCNCe1TgdeJ.N.uvnu.1OEWFFUQ6K4BOwPDt4zrLEze', 'student', '2026-03-19 11:18:34', 'uploads/profile_pictures/profile_69bbdb8a548d9_1773919114.jpg', NULL, NULL),
-(24, 'Kwadwo', 'Antwi-Adarkwah', '', 'kwadwo1092@googlemail.com', '$2y$10$HBx2CMj4zplnZf1W6twh.uZww7QuKi5.bvQ/X7k6I0PS6BrS4gStC', 'mentor', '2026-04-15 22:49:07', 'uploads/profile_pictures/profile_oauth_69e015e302d2a_1776293347.jpg', 'google', '110717680205832921453');
+(25, 'Ada', 'Mensah', '07400111222', 'AM@gmail.com', '$2y$10$uY1psfiGVQFicWMbAgQy3us3xc1SD6EaRXGG0H.VcEVBgkWbo6K/a', 'mentor', '2026-04-27 12:15:17', 'uploads/profile_pictures/profile_69ef5d6b028137.80224882_1777294699.webp', NULL, NULL),
+(26, 'Daniel', 'Okoro', '07400111333', 'daniel123@gmail.com', '$2y$10$uY1psfiGVQFicWMbAgQy3us3xc1SD6EaRXGG0H.VcEVBgkWbo6K/a', 'mentor', '2026-04-27 12:15:17', 'uploads/profile_pictures/profile_69ef5c9acba2e3.43270185_1777294490.jpg', NULL, NULL),
+(27, 'Ethan', 'Cole', '07400111444', 'Ethan.Cole@gmail.com', '$2y$10$uY1psfiGVQFicWMbAgQy3us3xc1SD6EaRXGG0H.VcEVBgkWbo6K/a', 'student', '2026-04-27 12:15:17', 'uploads/profile_pictures/profile_69ef5d2f7fe6e1.63156451_1777294639.webp', NULL, NULL),
+(28, 'Maya', 'Singh', '07400111555', 'maya_S_May@gmail.com', '$2y$10$uY1psfiGVQFicWMbAgQy3us3xc1SD6EaRXGG0H.VcEVBgkWbo6K/a', 'student', '2026-04-27 12:15:17', 'uploads/profile_pictures/profile_69ef5cc8c4f360.34183359_1777294536.webp', NULL, NULL),
+(29, 'Liam', 'Baker', '07400111666', 'liam.Baker@gmail.com', '$2y$10$uY1psfiGVQFicWMbAgQy3us3xc1SD6EaRXGG0H.VcEVBgkWbo6K/a', 'student', '2026-04-27 12:15:17', 'uploads/profile_pictures/profile_69ef5b0889bb97.08602931_1777294088.webp', NULL, NULL),
+(30, 'Zoe', 'Slater', '07400111777', 'Zoe.Slater@gmail.com', '$2y$10$uY1psfiGVQFicWMbAgQy3us3xc1SD6EaRXGG0H.VcEVBgkWbo6K/a', 'student', '2026-04-27 12:15:17', 'uploads/profile_pictures/profile_69ef5b5171d856.41678229_1777294161.webp', NULL, NULL);
 
 --
 -- Indexes for dumped tables
@@ -567,31 +613,31 @@ ALTER TABLE `mentor_applications`
 -- AUTO_INCREMENT for table `mentor_ratings`
 --
 ALTER TABLE `mentor_ratings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `mentor_requests`
 --
 ALTER TABLE `mentor_requests`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `mentor_student_matches`
 --
 ALTER TABLE `mentor_student_matches`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `sessions`
 --
 ALTER TABLE `sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `subjects`
@@ -603,7 +649,7 @@ ALTER TABLE `subjects`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- Constraints for dumped tables

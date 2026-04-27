@@ -1,10 +1,5 @@
 <?php
-/**
- * Swipe Card Component
- * Renders a swipeable card for a mentor profile with dynamic data and graceful fallbacks.
- * Includes styles and JavaScript for swipe interactions.
 
- */
 
 function render_swipe_card($mentor, $index = 0) {
     $mentor_id = htmlspecialchars($mentor['id'] ?? '');
@@ -144,9 +139,8 @@ function render_swipe_card($mentor, $index = 0) {
     <?php
 }
 
-/**
- * Render swipe card styles (include once per page)
- */
+// Render swipe card styles (include once per page)
+
 function render_swipe_card_styles() {
     ?>
     <style>
@@ -701,9 +695,8 @@ function render_swipe_card_styles() {
     <?php
 }
 
-/**
- * Render swipe card JavaScript (include once per page)
- */
+// Render swipe card JavaScript (include once per page)
+ 
 function render_swipe_card_scripts() {
     ?>
     <script>

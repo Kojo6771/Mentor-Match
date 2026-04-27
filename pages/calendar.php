@@ -587,7 +587,7 @@ function cal_url(array $params): string
 }
 ?>
 
-
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -809,7 +809,7 @@ function cal_url(array $params): string
     <?php include '../includes/nav.php'; ?>
 
     <script>
-    /* ── Add to External Calendar helpers ── */
+    // Add to External Calendar helpers 
     function getCardData(btn) {
         var card = btn.closest('.session-card');
         return {

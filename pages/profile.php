@@ -23,7 +23,7 @@ if (!in_array($user_role, ['student', 'mentor'], true)) {
 $errors = [];
 $successes = [];
 
-// ==== CHANGE PASSWORD HANDLING (all roles) ====
+// CHANGE PASSWORD HANDLING (all roles) 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'change_password') {
 	$current_password = $_POST['current_password'] ?? '';
 	$new_password     = $_POST['new_password'] ?? '';
@@ -692,6 +692,7 @@ if ($user_role === 'mentor') {
 // End of mentor profile handling
  ?>
 
+<!-- HTML -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -865,6 +866,7 @@ if ($user_role === 'mentor') {
 				</div>
 			<?php endif; ?>
 
+			<!-- Mentor profile view with student list and profile editing -->
 			<?php if ($user_role === 'mentor'): ?>
 				<section class="card profile-card" aria-labelledby="profile-heading">
 					<div class="profile-section-head">
@@ -950,6 +952,7 @@ if ($user_role === 'mentor') {
 							<button type="button" class="students-close-btn" id="close-students-modal" aria-label="Close student view">&times;</button>
 						</div>
 
+						// If no students are assigned, show a message. Otherwise, display student cards in a carousel format.
 						<?php if (empty($students)): ?>
 							<p class="empty-pairing">You do not have any assigned students yet.</p>
 						<?php else: ?>
