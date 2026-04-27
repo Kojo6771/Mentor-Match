@@ -52,7 +52,8 @@ function render_swipe_card($mentor, $index = 0) {
     $z_index = 100 - $index;
     ?>
 
-    <div class="swipe-card" data-mentor-id="<?= $mentor_id ?>" data-index="<?= $index ?>" style="z-index: <?= $z_index ?>;">
+    <?php $subjects_lower = array_map(fn($s) => strtolower(trim($s)), $subjects); ?>
+    <div class="swipe-card" data-mentor-id="<?= $mentor_id ?>" data-index="<?= $index ?>" data-subjects="<?= htmlspecialchars(implode('|||', $subjects_lower)) ?>" style="z-index: <?= $z_index ?>;">
         <div class="swipe-card-accent"></div>
         <div class="swipe-card-inner">
             <!-- Header: Profile Picture + Info side by side -->
@@ -156,8 +157,8 @@ function render_swipe_card_styles() {
         max-width: 480px;
         height: calc(100vh - 240px);
         height: calc(100dvh - 240px);
-        max-height: 500px;
-        min-height: 380px;
+        max-height: 640px;
+        min-height: 420px;
         margin: 0 auto;
     }
 
@@ -173,7 +174,9 @@ function render_swipe_card_styles() {
         user-select: none;
         touch-action: pan-y;
         transition: transform 0.25s ease-out, opacity 0.25s ease-out;
-        overflow: hidden;
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 100%;
         transform-origin: center top;
     }
 
@@ -455,7 +458,7 @@ function render_swipe_card_styles() {
         display: flex;
         justify-content: center;
         gap: 48px;
-        margin-top: 16px;
+        margin-top: 32px;
     }
 
     .swipe-btn {
@@ -550,8 +553,8 @@ function render_swipe_card_styles() {
         .swipe-container {
             height: calc(100vh - 200px);
             height: calc(100dvh - 200px);
-            max-height: 460px;
-            min-height: 340px;
+            max-height: 580px;
+            min-height: 380px;
         }
 
         .swipe-card-inner {

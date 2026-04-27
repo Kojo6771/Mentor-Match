@@ -1,25 +1,13 @@
 <?php
-/**
- * OAuth 2.0 Callback Handler for Google and Microsoft sign-in.
- *
- * Flow:
- *   1. User clicks "Sign in with Google/Microsoft" on login or signup page.
- *   2. Browser redirects to the provider's consent screen.
- *   3. Provider redirects back here with an authorization code.
- *   4. This script exchanges the code for an access token, fetches the user's
- *      profile, and either logs them in (existing account) or creates a new
- *      account and redirects to role-specific onboarding.
- */
-
 session_start();
 require_once '../includes/db.php';
 require_once '../includes/oauth_config.php';
 
-// ── Validate the incoming request ──────────────────────────────────────────────
+//Validate the incoming request 
 $code     = $_GET['code']     ?? '';
 $state    = $_GET['state']    ?? '';
 
-// The state is formatted as "provider-token" (e.g. "google-abc123def456").
+// The state is formatted as "provider-token" 
 $provider = '';
 $state_token = '';
 if (strpos($state, '-') !== false) {
@@ -52,7 +40,7 @@ unset($_SESSION['oauth_role']);
 $ms_code_verifier = $_SESSION['ms_oauth_code_verifier'] ?? '';
 unset($_SESSION['ms_oauth_code_verifier']);
 
-// ── Exchange authorization code for access token ────
+//Exchange authorization code for access token 
 if ($provider === 'google') {
     $token_url = GOOGLE_TOKEN_URL;
     $post_fields = [
@@ -91,7 +79,7 @@ if (!$token_response || !isset($token_response['access_token'])) {
 
 $access_token = $token_response['access_token'];
 
-// ── Fetch user profile from provider ───────────────────────────────────────────
+// Fetch user profile from provider
 $profile = http_get($userinfo_url, $access_token);
 
 if (!$profile) {
@@ -121,7 +109,7 @@ if (empty($email)) {
     exit;
 }
 
-// ── Check whether the user already exists ──────────────────────────────────────
+// Check whether the user already exists 
 try {
     $stmt = $pdo->prepare('SELECT id, first_name, last_name, email, phone, role, oauth_provider FROM users WHERE email = ? LIMIT 1');
     $stmt->execute([$email]);
@@ -150,7 +138,7 @@ if ($existing) {
     exit;
 }
 
-// ── Create a new account ─────
+// Create a new account
 $random_password = password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT);
 $role = in_array($intended_role, ['student', 'mentor'], true) ? $intended_role : 'student';
 
@@ -196,7 +184,7 @@ if ($role === 'mentor') {
 }
 exit;
 
-// ── HTTP helpers ───────────────────────────────────────────────────────────────
+// HTTP helpers
 function http_post(string $url, array $fields): ?array
 {
     $ch = curl_init($url);

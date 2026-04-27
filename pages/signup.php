@@ -229,7 +229,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <div class="auth-terms">
                     <input id="terms" name="terms" type="checkbox" required>
-                    <label for="terms" class="small" style="margin-bottom:0">I agree to the <a class="link" href="#">Terms</a> and <a class="link" href="#">Privacy Policy</a>.</label>
+                    <label for="terms" class="small" style="margin-bottom:0">I agree to the <a class="link" href="terms.php">Terms</a> and <a class="link" href="privacy.php">Privacy Policy</a>.</label>
                 </div>
 
                 <button class="btn" type="submit">Get started</button>

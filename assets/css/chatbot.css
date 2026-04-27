@@ -8,7 +8,7 @@
     max-width: 820px;
     margin: 0 auto;
     padding-bottom: 96px;
-    background: var(--bg);
+    background: transparent;
     overflow: hidden;
 }
 

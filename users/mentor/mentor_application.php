@@ -30,8 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Please tell us about your motivation to become a mentor.";
     } elseif (strlen($motivation) < 20) {
         $errors[] = "Motivation should be at least 20 characters long.";
-    } elseif (strlen($motivation) > 2000) {
-        $errors[] = "Motivation should not exceed 2000 characters.";
+    } elseif (str_word_count(strip_tags($motivation)) > 100) {
+        $errors[] = "Bio should not exceed 100 words.";
     }
 
     if (empty($experience_years)) {
@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Apply as Mentor — Mentor Match</title>
+    <title>Apply as Mentor | Mentor Match</title>
     <meta name="description" content="Apply to become a mentor on Mentor Match — share your expertise and help students grow.">
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/mentor_application.css">
@@ -153,8 +153,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <svg class="field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4L16.5 3.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         Why do you want to become a mentor?
                     </label>
-                    <textarea class="input textarea" id="motivation" name="motivation" required placeholder="Tell us about your passion for mentoring and teaching others..." maxlength="2000"><?php echo htmlspecialchars($_POST['motivation'] ?? ''); ?></textarea>
-                    <small class="char-count"><span id="char-count">0</span>/2000</small>
+                    <textarea class="input textarea" id="motivation" name="motivation" required placeholder="Tell us about your passion for mentoring and teaching others..." maxlength="800"><?php echo htmlspecialchars($_POST['motivation'] ?? ''); ?></textarea>
+                    <small class="char-count"><span id="word-count">0</span>/100 words</small>
                 </div>
 
                 <div class="form-group">
@@ -187,7 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         Submit Application
                     </button>
-                    <a href="../index.php" class="btn mentor-app-cancel">Cancel</a>
+                    <a href="../../index.php" class="btn mentor-app-cancel">Cancel</a>
                 </div>
             </form>
         </section>
@@ -196,14 +196,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <script>
         const textarea = document.getElementById('motivation');
-        const charCount = document.getElementById('char-count');
+        const wordCountEl = document.getElementById('word-count');
+        const MAX_WORDS = 100;
+
+        function countWords(text) {
+            return text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+        }
 
         textarea.addEventListener('input', function() {
-            charCount.textContent = this.value.length;
+            const words = countWords(this.value);
+            if (words > MAX_WORDS) {
+                this.value = this.value.trim().split(/\s+/).slice(0, MAX_WORDS).join(' ');
+                wordCountEl.textContent = MAX_WORDS;
+            } else {
+                wordCountEl.textContent = words;
+            }
+            wordCountEl.parentElement.style.color = words >= MAX_WORDS ? '#dc2626' : '';
         });
 
-        // Update character count on page load
-        charCount.textContent = textarea.value.length;
+        // Update word count on page load
+        wordCountEl.textContent = countWords(textarea.value);
     </script>
 </body>
 </html>

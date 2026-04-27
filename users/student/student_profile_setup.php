@@ -61,12 +61,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Student Profile Setup — Mentor Match</title>
+    <title>Student Profile Setup | Mentor Match</title>
     <link rel="stylesheet" href="../../assets/css/styles.css">
     <link rel="stylesheet" href="../../assets/css/student_profile_setup.css">
     <meta name="description" content="Set up your student profile.">

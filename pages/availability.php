@@ -214,7 +214,7 @@ function fmt_time(string $time): string
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>My Availability — Mentor Match</title>
+    <title>My Availability | Mentor Match</title>
     <meta name="description" content="Set your availability for mentoring sessions.">
     <link rel="stylesheet" href="../assets/css/styles.css">
     <link rel="stylesheet" href="../assets/css/availability.css">
