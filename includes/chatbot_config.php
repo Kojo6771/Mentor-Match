@@ -3,7 +3,7 @@
 // server-side only file.
 
 // My OpenAI Key
-define('OPENAI_API_KEY', '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');
+define('OPENAI_API_KEY', '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');
 
 // Chat model used for replies.
 define('OPENAI_MODEL', 'gpt-4o-mini');
