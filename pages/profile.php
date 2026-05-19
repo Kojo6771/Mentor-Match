@@ -952,7 +952,7 @@ if ($user_role === 'mentor') {
 							<button type="button" class="students-close-btn" id="close-students-modal" aria-label="Close student view">&times;</button>
 						</div>
 
-						// If no students are assigned, show a message. Otherwise, display student cards in a carousel format.
+						<!-- If no students are assigned, show a message. Otherwise, display student cards in a carousel format. -->
 						<?php if (empty($students)): ?>
 							<p class="empty-pairing">You do not have any assigned students yet.</p>
 						<?php else: ?>
