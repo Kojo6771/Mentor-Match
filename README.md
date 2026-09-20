@@ -56,25 +56,17 @@ A web-based mentor-student matching platform built as a final-year project at As
    ```
    Then import `includes/Database.sql` into the `mentormatch` database.
 
-3. **Configure the database connection** in `includes/db.php`:
-   ```php
-   $pdo = new PDO('mysql:host=localhost;port=3306;dbname=mentormatch', 'root', '');
-   ```
-   Update the host, port, username, and password if your setup differs from the XAMPP defaults.
+3. **Configure environment variables** in the root `.env` file. Update the database host, port, name, username, and password if your setup differs from the XAMPP defaults. Keep this file private; it is excluded from version control.
 
-4. **Configure OAuth** in `includes/oauth_config.php`:
-   - Replace `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` with your Google Cloud credentials.
-   - Replace `MICROSOFT_CLIENT_ID` and `MICROSOFT_CLIENT_SECRET` with your Azure app credentials.
+4. **Configure OAuth** in `.env`:
+   - Set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` to your Google Cloud credentials.
+   - Set `MICROSOFT_CLIENT_ID` and `MICROSOFT_CLIENT_SECRET` to your Azure app credentials.
    - Make sure the redirect URI registered with both providers matches:
      ```
      http://localhost/mentor-match/pages/oauth_callback.php
      ```
 
-5. **Configure the chatbot** in `includes/chatbot_config.php`:
-   ```php
-   define('OPENAI_API_KEY', 'sk-...');
-   ```
-   Replace the placeholder key with your own OpenAI API key.
+5. **Configure the chatbot** in `.env` by setting `OPENAI_API_KEY` to your own OpenAI API key.
 
 6. **Set upload permissions.** The `uploads/profile_pictures/` directory needs to be writable by the web server. On Windows with XAMPP this is usually handled automatically.
 
